@@ -224,8 +224,9 @@ final class PriceCalculator
     /** Единица количества из постфикса цены: «/ порц.» → «порц.», «за 10 человек» → «человек». */
     private function qtyUnit(string $postfix): string
     {
-        $unit = trim((string) preg_replace(['~/~u', '~\bза\b~u', '~\d+~u'], '', $postfix));
-        return $unit === '' ? 'шт' : $unit;
+        $unit = trim((string) preg_replace(['~/~u', '~\bза\b~u', '~\d+~u', '~\s+~u'], ['', '', '', ' '], $postfix));
+        // «/ до 40 чел» — вместимость комплекта, а не единица счёта: считаем штуками.
+        return $unit === '' || preg_match('~^до\b~u', $unit) === 1 ? 'шт' : $unit;
     }
 
     private function invalid(string $field, string $message): HttpError

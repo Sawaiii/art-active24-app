@@ -97,6 +97,14 @@ final class PriceCalculatorTest extends TestCase
         (new PriceCalculator())->price($complect, [], $item);
     }
 
+    public function testCapacityPostfixGivesPieces(): void
+    {
+        $complect = ['id' => 1, 'title' => 'К', 'rent' => ['amount' => 11000, 'label' => 'Аренда', 'postfix' => '/ до 40 чел']];
+        $item = CartItem::fromArray(['productId' => 1, 'complectId' => 1, 'qty' => 1]);
+
+        $this->assertSame('шт', (new PriceCalculator())->price($complect, [], $item)->qtyUnit);
+    }
+
     public function testQtyUnitComesFromPostfix(): void
     {
         $complect = ['id' => 1, 'title' => 'К', 'rent' => ['amount' => 340, 'label' => 'Аренда', 'postfix' => '/ порц.']];

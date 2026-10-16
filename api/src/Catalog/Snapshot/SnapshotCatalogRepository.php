@@ -187,7 +187,12 @@ final class SnapshotCatalogRepository implements CatalogRepository
                 return false;
             }
         }
-        return $query->colors === [] || array_intersect($query->colors, $product['colors'] ?? []) !== [];
+        if ($query->colors === []) {
+            return true;
+        }
+        $wanted = array_map(ColorPalette::canonical(...), $query->colors);
+        $has = array_map(ColorPalette::canonical(...), $product['colors'] ?? []);
+        return array_intersect($wanted, $has) !== [];
     }
 
     /** @return callable(array<string, mixed>, array<string, mixed>): int */
@@ -220,7 +225,8 @@ final class SnapshotCatalogRepository implements CatalogRepository
             if (is_int($product['price']['amount'] ?? null) && empty($product['price']['onRequest']) && $product['price']['amount'] > 0) {
                 $prices[] = $product['price']['amount'];
             }
-            foreach ($product['colors'] ?? [] as $color) {
+            // Варианты написания одного цвета («Чёрный»/«Черный») — один пункт фильтра, товар считается один раз.
+            foreach (array_unique(array_map(ColorPalette::canonical(...), $product['colors'] ?? [])) as $color) {
                 $colors[$color] = ($colors[$color] ?? 0) + 1;
             }
         }
