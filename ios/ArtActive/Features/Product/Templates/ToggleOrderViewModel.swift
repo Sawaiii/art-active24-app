@@ -83,7 +83,7 @@ final class ToggleOrderViewModel {
     /// «от 26 000 ₽ / 6 ч»
     func priceText(for complect: Complect) -> String {
         guard let side = complect.rent ?? complect.buy else { return "" }
-        var text = ComplectPrice.text(side)
+        var text = ComplectPrice.text(complect, priceType: complect.rent == nil ? .buy : .rent)
         if let rule = complect.time, side.postfix == nil, side.onRequest != true {
             text += " / " + (rule.unit == .hours ? String(localized: "\(rule.defaultValue) ч") : String(localized: "\(rule.defaultValue) д"))
         }

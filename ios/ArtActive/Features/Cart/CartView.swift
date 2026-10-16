@@ -152,9 +152,12 @@ struct CartView: View {
             }
 
             Section {
+                // Один текст: серверный cartNotice целиком либо локальная пара «заголовок + пояснение».
                 InfoNote(
                     title: info.info.cartNotice ?? String(localized: "Цены не окончательные — это список интересующих вас позиций."),
-                    message: String(localized: "Оставьте заявку, и менеджер свяжется с вами, подберёт условия и сформирует персональное предложение.")
+                    message: info.info.cartNotice == nil
+                        ? String(localized: "Оставьте заявку, и менеджер свяжется с вами, подберёт условия и сформирует персональное предложение.")
+                        : nil
                 )
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
@@ -239,8 +242,9 @@ private struct CartRow: View {
                         .font(.aaCaption)
                         .foregroundStyle(Palette.textSecondary)
                         .lineLimit(2)
-                    let mode = [line.priceLabel, line.timeLabel].compactMap { $0 }.joined(separator: ", ")
-                    if !mode.isEmpty {
+                    // Чип срока — только когда есть время аренды («Аренда, 3 д»).
+                    if let timeLabel = line.timeLabel, !timeLabel.isEmpty {
+                        let mode = [line.priceLabel, timeLabel].compactMap { $0 }.joined(separator: ", ")
                         Label(mode, systemImage: "clock")
                             .font(BrandFont.golos(12, .medium, relativeTo: .caption))
                             .foregroundStyle(Palette.accent)

@@ -77,6 +77,8 @@ struct TabStack: View {
                 }
         }
         .environment(\.zoomNamespace, zoomNamespace)
+        // Контент не просвечивает под статус-баром и плавающими кнопками навбара.
+        .softTopScrollEdge()
     }
 
     @ViewBuilder

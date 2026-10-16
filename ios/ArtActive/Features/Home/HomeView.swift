@@ -5,6 +5,7 @@ struct HomeView: View {
     @Environment(AppEnvironment.self) private var env
     @Environment(RecentlyViewedStore.self) private var recent
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
 
     init(viewModel: HomeViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -12,8 +13,11 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            content
-                .padding(.bottom, 24)
+            VStack(alignment: .leading, spacing: 0) {
+                logo
+                content
+            }
+            .padding(.bottom, 24)
         }
         .background(Palette.catalogPage)
         .refreshable {
@@ -22,13 +26,6 @@ struct HomeView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Image("LogoDark")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 30)
-                    .accessibilityLabel(Text("Арт-Актив"))
-            }
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
                     env.router.push(.search)
@@ -44,6 +41,18 @@ struct HomeView: View {
             }
         }
         .task { if viewModel.state.content == nil { await viewModel.load() } }
+    }
+
+    /// Вордмарк «Арт-Актив · всё для мероприятий» как в шапке сайта (140×44).
+    private var logo: some View {
+        Image(colorScheme == .dark ? "LogoWhite" : "LogoDark")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 140, height: 44, alignment: .leading)
+            .padding(.horizontal, Spacing.gutter)
+            .padding(.bottom, 8)
+            .accessibilityLabel(Text("Арт-Актив"))
+            .accessibilityAddTraits(.isHeader)
     }
 
     @ViewBuilder
@@ -135,7 +144,8 @@ struct HomeView: View {
         case let .category(id, title):
             env.router.push(.category(id: id, title: title))
         case let .siteLink(url):
-            env.deepLinks.handle(url)
+            // Плитка без раздела (например, «Кулинарное казино») — страница сайта внутри приложения.
+            env.router.openWeb(url)
         case let .web(url):
             env.router.openWeb(url)
         case .none:
@@ -213,14 +223,23 @@ struct MediaBackground: View {
     let video: String?
     let reduceMotion: Bool
 
+    /// Видео играет, только пока плитка на экране; при Reduce Motion — стоит на первом кадре.
+    @State private var isOnScreen = false
+
     var body: some View {
         ZStack {
-            RemoteImage(url: image?.resolvedURL, maxPixel: 1200)
-            if !reduceMotion, let url = video?.resolvedURL {
-                LoopingVideoView(url: url)
+            if let imageURL = image?.resolvedURL {
+                RemoteImage(url: imageURL, maxPixel: 1200)
+            } else {
+                Rectangle().fill(Palette.imagePlaceholder)
+            }
+            if let url = video?.resolvedURL {
+                LoopingVideoView(url: url, isPlaying: isOnScreen && !reduceMotion)
                     .allowsHitTesting(false)
             }
         }
+        .onAppear { isOnScreen = true }
+        .onDisappear { isOnScreen = false }
     }
 }
 
@@ -271,7 +290,7 @@ private struct DirectionsGrid: View {
             ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                 Button { action(item) } label: {
                     ZStack(alignment: .bottomLeading) {
-                        MediaBackground(image: item.image, video: nil, reduceMotion: reduceMotion)
+                        MediaBackground(image: item.image, video: item.video, reduceMotion: reduceMotion)
                         LinearGradient(colors: [.clear, .black.opacity(0.55)], startPoint: .center, endPoint: .bottom)
                         Text(item.title ?? "")
                             .font(BrandFont.golos(15, .semibold, relativeTo: .subheadline))

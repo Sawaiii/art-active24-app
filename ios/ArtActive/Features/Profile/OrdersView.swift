@@ -207,6 +207,7 @@ struct OrderDetailView: View {
         }
         .navigationTitle(Text(viewModel.state.content?.number ?? ""))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .refreshable { await viewModel.load() }
         .task { await viewModel.load() }
         .confirmationDialog(Text("Отменить заявку?"), isPresented: $isCancelConfirming, titleVisibility: .visible) {

@@ -29,8 +29,10 @@ struct StickyCartBar: View {
             }
         }
         .padding(.horizontal, Spacing.gutterProduct)
-        .padding(.top, 10)
+        // Сверху место под жёлтый бейдж срока — он целиком внутри плотной подложки.
+        .padding(.top, 20)
         .padding(.bottom, 8)
+        .stickyBottomBarBackground()
         .background(
             GeometryReader { proxy in
                 Color.clear
@@ -91,7 +93,7 @@ struct StickyCartBar: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 4)
             .frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
-            .brandGlass(in: RoundedRectangle(cornerRadius: Radius.md, style: .continuous), tint: Palette.surfaceMuted.opacity(0.5))
+            .background(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).fill(Palette.surfaceMuted))
             .overlay(alignment: .topLeading) {
                 if let badge = viewModel.badge {
                     DayBadge(text: badge)

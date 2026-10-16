@@ -173,7 +173,14 @@ struct CategoryIcon: View {
 
     var body: some View {
         Group {
-            if let url = rasterURL {
+            if let rootSymbol = CategorySymbols.root[node.id] {
+                // Корневые разделы: иконки меню сайта — SVG, которые iOS не рисует.
+                Image(systemName: rootSymbol)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(Palette.accent)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Palette.accentTint10)
+            } else if let url = rasterURL {
                 RemoteImage(url: url, maxPixel: 120, placeholder: Palette.accentTint10)
             } else {
                 Image(systemName: CategorySymbols.symbol(for: node.name))
@@ -198,6 +205,27 @@ struct CategoryIcon: View {
 
 /// SF Symbols, близкие к иконкам меню сайта.
 enum CategorySymbols {
+    /// 17 корневых разделов меню «Услуги» (id раздела → SF Symbol, все есть в iOS 17).
+    static let root: [Int: String] = [
+        81: "fork.knife",                       // Кейтеринг
+        128: "dice",                            // Фан казино
+        127: "camera",                          // Фотозоны
+        91: "paintbrush.pointed",               // Мастер-классы
+        612: "questionmark.bubble",             // Квизы
+        257: "chair.lounge",                    // Мебель
+        347: "sparkles",                        // Декор
+        234: "tent",                            // Шатры
+        92: "figure.play",                      // Аттракционы
+        676: "mappin.and.ellipse",              // Площадки
+        449: "music.mic",                       // Сцены и подиумы
+        498: "speaker.wave.2",                  // Оборудование
+        181: "person.3",                        // Тимбилдинг
+        313: "person.crop.rectangle.stack",     // Персонал
+        135: "party.popper",                    // Праздники
+        249: "cup.and.saucer",                  // Всё для кейтеринга
+        289: "hanger",                          // Выездной гардероб
+    ]
+
     private static let table: [(String, String)] = [
         ("кейтеринг", "fork.knife"), ("казино", "suit.spade"), ("фотозон", "camera"),
         ("мастер", "paintpalette"), ("квиз", "questionmark.bubble"), ("мебел", "sofa"),

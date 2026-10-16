@@ -205,6 +205,9 @@ struct Configurator: Sendable {
 
     static func unitWord(from raw: String?) -> String? {
         guard let raw else { return nil }
+        // Постфикс с числом — вместимость/объём комплекта («/ до 40 чел», «/ 40 л.»),
+        // а не единица количества: считаем в штуках (как сервер в quote).
+        guard !raw.contains(where: \.isNumber) else { return nil }
         var text = raw.replacingOccurrences(of: "/", with: " ")
         text = text.filter { !$0.isNumber }
         let words = text.split(separator: " ").filter { $0.lowercased() != "за" }

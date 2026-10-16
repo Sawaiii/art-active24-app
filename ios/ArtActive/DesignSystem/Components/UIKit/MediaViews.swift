@@ -56,8 +56,8 @@ struct VideoPlayerController: UIViewControllerRepresentable {
     }
 }
 
-/// Фоновое видео без звука и контролов, по кругу (hero главной, шапка раздела).
-/// При Reduce Motion не запускается — показывается постер.
+/// Фоновое видео без звука и контролов, по кругу (hero главной, шапка раздела, плитки).
+/// `isPlaying = false` (вне экрана, Reduce Motion) — пауза, AVPlayerLayer показывает первый кадр.
 struct LoopingVideoView: UIViewRepresentable {
     let url: URL
     var isPlaying = true

@@ -118,7 +118,8 @@ final class ConfiguratorTests: XCTestCase {
 
     func testUnitWord() {
         XCTAssertEqual(Configurator.unitWord(from: "/ порц."), "порц.")
-        XCTAssertEqual(Configurator.unitWord(from: "/ 40 л."), "л.")
+        XCTAssertNil(Configurator.unitWord(from: "/ 40 л."), "постфикс-вместимость — не единица")
+        XCTAssertNil(Configurator.unitWord(from: "/ до 40 чел"))
         XCTAssertEqual(Configurator.unitWord(from: "за участника"), "участника")
         XCTAssertNil(Configurator.unitWord(from: nil))
     }

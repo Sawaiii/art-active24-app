@@ -27,6 +27,7 @@ struct VenueDetailView: View {
         }
         .background(Palette.page)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             if let url = viewModel.state.content?.shareURL {
                 ToolbarItem(placement: .topBarTrailing) {

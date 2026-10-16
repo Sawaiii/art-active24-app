@@ -390,7 +390,8 @@ final class ScreenshotTests: XCTestCase {
             if pickup.waitForExistence(timeout: 3) { pickup.tap() }
             drag(app, times: 4)
             snap("64-checkout-bottom")
-            if tapId(app, "checkout.submit") {
+            // Кнопка — в закреплённой нижней панели (таб-бар на оформлении скрыт): без прокрутки.
+            if tapId(app, "checkout.submit", scroll: false) {
                 snap("65-checkout-success", settle: 4)
             }
         } else {
@@ -485,8 +486,22 @@ final class ScreenshotTests: XCTestCase {
         return app
     }
 
+    /// Карточка, площадка, оформление и детали заказа скрывают таб-бар — возвращаемся назад, пока он не появится.
+    @MainActor
+    private func revealTabBar(_ app: XCUIApplication) {
+        for _ in 0..<5 {
+            let bar = app.tabBars.firstMatch
+            if bar.exists, bar.isHittable { return }
+            let back = app.navigationBars.firstMatch.buttons.firstMatch
+            guard back.exists, back.isHittable else { return }
+            back.tap()
+            pause(1)
+        }
+    }
+
     @MainActor
     private func openTab(_ app: XCUIApplication, _ tab: Tab) {
+        revealTabBar(app)
         let bar = app.tabBars.firstMatch
         if bar.waitForExistence(timeout: 10) {
             let byLabel = bar.buttons[tab.label].firstMatch

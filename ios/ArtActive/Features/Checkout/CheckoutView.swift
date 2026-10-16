@@ -153,11 +153,24 @@ struct CheckoutView: View {
             } header: {
                 Text("Комментарий")
             }
-            summarySection
+            Section {
+                if viewModel.hasOnRequest {
+                    Text("Часть позиций — по запросу.").font(.aaCaption).foregroundStyle(Palette.textSecondary)
+                }
+                if let error = viewModel.generalError {
+                    FieldError(text: error, shake: viewModel.shake)
+                }
+            } footer: {
+                Text("Онлайн-оплаты нет: менеджер подтвердит наличие и итоговую стоимость.")
+            }
         }
         .scrollDismissesKeyboard(.interactively)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            submitBar
+        }
         .navigationTitle(Text("Оформление"))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
@@ -260,23 +273,20 @@ struct CheckoutView: View {
         }
     }
 
-    private var summarySection: some View {
-        Section {
-            HStack {
+    /// Нижняя панель: «Позиций N», итог и «Отправить заявку» — всегда видна (таб-бар скрыт).
+    private var submitBar: some View {
+        VStack(spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
                 Text("Позиций: \(viewModel.itemsCount)")
+                    .font(.aaBodySmall)
                     .foregroundStyle(Palette.textSecondary)
                 Spacer()
                 if let total = viewModel.total {
                     Text(Money.rub(total))
                         .font(.aaCartTotal)
                         .foregroundStyle(Palette.textStrong)
+                        .contentTransition(.numericText(value: Double(total)))
                 }
-            }
-            if viewModel.hasOnRequest {
-                Text("Часть позиций — по запросу.").font(.aaCaption).foregroundStyle(Palette.textSecondary)
-            }
-            if let error = viewModel.generalError {
-                FieldError(text: error, shake: viewModel.shake)
             }
             Button {
                 focused = nil
@@ -291,11 +301,11 @@ struct CheckoutView: View {
             .buttonStyle(PrimaryButtonStyle(height: 54, radius: Radius.md, font: .aaSubmit))
             .disabled(viewModel.isSending)
             .accessibilityIdentifier("checkout.submit")
-            .listRowInsets(EdgeInsets())
-            .listRowBackground(Color.clear)
-        } footer: {
-            Text("Онлайн-оплаты нет: менеджер подтвердит наличие и итоговую стоимость.")
         }
+        .padding(.horizontal, Spacing.gutterProduct)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
+        .stickyBottomBarBackground()
     }
 }
 

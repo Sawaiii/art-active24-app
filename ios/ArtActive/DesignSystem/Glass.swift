@@ -33,6 +33,43 @@ private enum GlassStyle {
 }
 #endif
 
+extension View {
+    /// Верхний край прокрутки: контент мягко растворяется под статус-баром и плавающими
+    /// кнопками навбара. iOS 26 — `scrollEdgeEffectStyle(.soft)`; на iOS 17–25 системный
+    /// навбар (без кастомного appearance) сам включает материал, когда под него заезжает контент.
+    @ViewBuilder
+    func softTopScrollEdge() -> some View {
+        #if compiler(>=6.2)
+        if #available(iOS 26.0, *) {
+            self.scrollEdgeEffectStyle(.soft, for: .top)
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
+    }
+
+    /// Плотная подложка нижней панели (липкий бар цены, «Отправить заявку»):
+    /// контент под ней не просвечивает. Тянется под home indicator.
+    func stickyBottomBarBackground() -> some View {
+        background {
+            UnevenRoundedRectangle(topLeadingRadius: Radius.card, topTrailingRadius: Radius.card, style: .continuous)
+                .fill(.regularMaterial)
+                .overlay(
+                    UnevenRoundedRectangle(topLeadingRadius: Radius.card, topTrailingRadius: Radius.card, style: .continuous)
+                        .fill(Palette.page.opacity(0.82))
+                )
+                .overlay(alignment: .top) {
+                    UnevenRoundedRectangle(topLeadingRadius: Radius.card, topTrailingRadius: Radius.card, style: .continuous)
+                        .stroke(Palette.stickyBarTop, lineWidth: 1)
+                }
+                .shadow(color: .black.opacity(0.08), radius: 12, y: -2)
+                .ignoresSafeArea(edges: .bottom)
+        }
+    }
+}
+
 /// Группа стеклянных элементов (на iOS 26 — общий `GlassEffectContainer`, стекло «сливается»).
 struct GlassGroup<Content: View>: View {
     var spacing: CGFloat = 12

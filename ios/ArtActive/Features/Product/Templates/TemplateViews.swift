@@ -396,13 +396,15 @@ private struct RequestTemplateBody<Header: View>: View {
                 }
                 .padding(.horizontal, 12)
                 .frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
-                .brandGlass(in: RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
+                .background(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).fill(Palette.surfaceMuted))
                 Button("Заказать") { order(title: product.name) }
                     .buttonStyle(PrimaryButtonStyle(height: 54, radius: Radius.md, font: .pCartButton))
                     .frame(width: 150)
             }
             .padding(.horizontal, Spacing.gutterProduct)
-            .padding(.vertical, 10)
+            .padding(.top, 12)
+            .padding(.bottom, 8)
+            .stickyBottomBarBackground()
         }
         .sheet(item: $request) { subject in
             RequestFormSheet(viewModel: RequestFormViewModel(subject: subject, orders: env.orders))

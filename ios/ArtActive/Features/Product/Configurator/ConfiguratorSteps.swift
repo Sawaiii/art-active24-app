@@ -34,13 +34,19 @@ struct ComplectsStep: View {
                         }
                     }
                     .scrollTargetLayout()
-                    .padding(.horizontal, Spacing.gutterProduct)
                 }
+                // Отступы — полями прокрутки: первая карточка не обрезается, снап по карточкам.
+                .contentMargins(.horizontal, Spacing.gutterProduct, for: .scrollContent)
                 .scrollTargetBehavior(.viewAligned)
                 .padding(.horizontal, -Spacing.gutterProduct)
+                .onAppear {
+                    // Выбранный комплект (например, из корзины) — целиком в зоне видимости.
+                    guard let id = viewModel.state?.complectId, id != complects.first?.id else { return }
+                    proxy.scrollTo(id)
+                }
                 .onChange(of: viewModel.state?.complectId) { _, id in
                     guard let id else { return }
-                    withAnimation(.snappy) { proxy.scrollTo(id, anchor: .center) }
+                    withAnimation(.snappy) { proxy.scrollTo(id) }
                 }
             }
             if complects.count > 2 {
@@ -94,8 +100,8 @@ struct ComplectCard: View {
                         .font(.pVariantTitle)
                         .foregroundStyle(Palette.textProduct)
                         .lineLimit(1)
-                    if let side = complect.side(priceType) {
-                        Text(ComplectPrice.text(side))
+                    if complect.side(priceType) != nil {
+                        Text(ComplectPrice.text(complect, priceType: priceType))
                             .font(.pVariantPrice)
                             .foregroundStyle(Palette.variantPrice)
                             .lineLimit(1)
@@ -142,6 +148,21 @@ struct ComplectCard: View {
 }
 
 enum ComplectPrice {
+    /// Цена комплекта для карточки. Комплект-формат с нулевой ценой и вариантами
+    /// (плов: «Привозим готовое») — «от {минимальная цена варианта} ₽ {постфикс}».
+    static func text(_ complect: Complect, priceType: PriceType) -> String {
+        guard let side = complect.side(priceType) else { return "" }
+        if side.amount == 0, side.onRequest != true,
+           let cheapest = complect.subList
+               .compactMap({ $0.side(priceType) })
+               .filter({ $0.amount > 0 })
+               .min(by: { $0.amount < $1.amount }) {
+            let tag = PriceTag(amount: cheapest.amount, from: true, unit: cheapest.postfix ?? side.postfix, onRequest: nil)
+            return Money.tag(tag)
+        }
+        return text(side)
+    }
+
     /// «от 340 ₽ / порц.», «по запросу», «770 ₽».
     static func text(_ side: PriceSide) -> String {
         if side.onRequest == true { return String(localized: "по запросу") }
@@ -171,8 +192,8 @@ private struct AllComplectsSheet: View {
                             Text(complect.title)
                                 .font(BrandFont.inter(15, .semibold))
                                 .foregroundStyle(Palette.textProduct)
-                            if let side = complect.side(viewModel.state?.priceType ?? .rent) {
-                                Text(ComplectPrice.text(side))
+                            if complect.side(viewModel.state?.priceType ?? .rent) != nil {
+                                Text(ComplectPrice.text(complect, priceType: viewModel.state?.priceType ?? .rent))
                                     .font(BrandFont.inter(14, .medium))
                                     .foregroundStyle(Palette.accent)
                             }
