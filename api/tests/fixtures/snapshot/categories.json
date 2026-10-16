@@ -64,5 +64,17 @@
   "heroVideo": null,
   "seoHtml": null,
   "scenarios": []
+ },
+ {
+  "id": 805,
+  "parentId": null,
+  "name": "Мини бургеры",
+  "slug": "mini-burgery",
+  "url": "https://www.art-active24.ru/mini-burgery/",
+  "kind": "catalog",
+  "sort": 99,
+  "inMenu": false,
+  "title": "Мини бургеры",
+  "scenarios": []
  }
 ]

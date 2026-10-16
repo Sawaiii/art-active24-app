@@ -15,6 +15,21 @@ final class CatalogApiTest extends ApiTestCase
         $this->assertSame('Столы', $res['body']['data'][0]['children'][0]['name']);
     }
 
+    public function testTreeShowsOnlyMenuCategoriesButOthersStayReachable(): void
+    {
+        $names = array_column($this->call('GET', '/v1/catalog/tree')['body']['data'], 'name');
+
+        $this->assertNotContains('Мини бургеры', $names);
+        $this->assertSame(200, $this->call('GET', '/v1/categories/805')['status'], 'раздел вне меню открывается по ссылке');
+    }
+
+    public function testResolveVariantStoredAsFullPath(): void
+    {
+        $res = $this->call('GET', '/v1/resolve?path=' . rawurlencode('/plov/kupit-plov/'))['body']['data'];
+
+        $this->assertSame(['type' => 'product', 'id' => 469, 'complectId' => 1590, 'priceType' => 'buy'], $res);
+    }
+
     public function testCategoryPageHasBreadcrumbsAndChildren(): void
     {
         $res = $this->call('GET', '/v1/categories/225');

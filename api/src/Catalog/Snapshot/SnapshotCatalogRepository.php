@@ -109,7 +109,9 @@ final class SnapshotCatalogRepository implements CatalogRepository
         $resolved = ['type' => 'product', 'id' => (int) $product['id']];
         if (isset($segments[1])) {
             foreach ($this->product((int) $product['id'])['variantLinks'] ?? [] as $link) {
-                if (($link['slug'] ?? null) === $segments[1]) {
+                // Слаг варианта хранится либо последним сегментом, либо полным путём «товар/вариант».
+                $linkSlug = trim((string) ($link['slug'] ?? ''), '/');
+                if ($linkSlug === $segments[1] || $linkSlug === $segments[0] . '/' . $segments[1]) {
                     $resolved += array_filter([
                         'complectId' => $link['complectId'] ?? null,
                         'subId' => $link['subId'] ?? null,
@@ -253,9 +255,10 @@ final class SnapshotCatalogRepository implements CatalogRepository
     /** @return list<array<string, mixed>> */
     private function childrenOf(?int $parentId, bool $deep): array
     {
+        // В меню — только разделы из меню сайта; остальные доступны по ссылке и поиску.
         $children = array_values(array_filter(
             $this->categories(),
-            static fn (array $c) => ($c['parentId'] ?? null) === $parentId,
+            static fn (array $c) => ($c['parentId'] ?? null) === $parentId && ($c['inMenu'] ?? true) !== false,
         ));
         usort($children, static fn (array $a, array $b) => ($a['sort'] ?? 0) <=> ($b['sort'] ?? 0));
         return array_map(function (array $c) use ($deep): array {

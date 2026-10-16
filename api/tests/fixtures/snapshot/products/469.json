@@ -48,6 +48,12 @@
    "priceType": "rent",
    "slug": "plov-s-kuricey",
    "title": "Плов с курицей"
+  },
+  {
+   "complectId": 1590,
+   "priceType": "buy",
+   "slug": "plov/kupit-plov",
+   "title": "Купить плов"
   }
  ]
 }
