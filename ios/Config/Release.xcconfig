@@ -1,0 +1,7 @@
+// Release-конфигурация. Боевой адрес API в репозиторий НЕ попадает:
+// CI создаёт Config/Secrets.xcconfig из секрета API_BASE_URL (файл в .gitignore).
+// Без секрета сборка идёт с плейсхолдером — приложение покажет ошибку сети.
+// «//» в xcconfig — комментарий, поэтому в URL пишется https:/$()/…
+API_BASE_URL = https:/$()/api.invalid/api/
+
+#include? "Secrets.xcconfig"

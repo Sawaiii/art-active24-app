@@ -1,0 +1,5 @@
+// Debug: локальный API (api/ в этом репозитории) — разрешён NSAllowsLocalNetworking.
+// Переопределить можно в Config/Secrets.xcconfig (в .gitignore).
+API_BASE_URL = http:/$()/127.0.0.1:8080
+
+#include? "Secrets.xcconfig"

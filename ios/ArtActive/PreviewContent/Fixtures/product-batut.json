@@ -1,0 +1,47 @@
+{
+  "id": 10500,
+  "slug": "batut-korabl-bolshoj",
+  "art": "10500",
+  "name": "Батут «Корабль» большой",
+  "template": "configurator",
+  "configuratorMode": "trampoline",
+  "orderMode": "cart",
+  "categoryId": 92,
+  "breadcrumbs": [ { "id": 92, "name": "Аттракционы" } ],
+  "badge": { "text": "Новинка!", "color": "#00CC00" },
+  "media": [
+    { "type": "image", "url": "https://www.art-active24.ru/images/upload/batut-korabl-1.jpg" },
+    { "type": "image", "url": "https://www.art-active24.ru/images/upload/batut-korabl-2.jpg" }
+  ],
+  "price": { "amount": 64000, "from": true },
+  "specs": [
+    { "name": "Размер", "value": "8 × 5 × 5 м" },
+    { "name": "Вместимость", "value": "до 12 детей" },
+    { "name": "Мощность", "value": "1,5 кВт" }
+  ],
+  "complectsLabel": "Формат",
+  "complects": [
+    {
+      "id": 5001,
+      "title": "Батут с горкой «Корабль»",
+      "rent": { "amount": 64000, "label": "Аренда" },
+      "buy": { "amount": 1260000, "label": "Купить", "from": true, "sale": true },
+      "time": { "unit": "hours", "default": 6, "percent": 11.719 },
+      "subsLabel": "Способ установки",
+      "subs": [
+        { "id": "tramp-grunt-0", "name": "На грунте", "rent": { "amount": 0, "label": "Аренда" }, "image": "https://www.art-active24.ru/images/upload/tramp-grunt.jpg", "text": "Крепим анкерами к газону или грунту." },
+        { "id": "tramp-asphalt-0", "name": "На асфальте", "rent": { "amount": 0, "label": "Аренда" }, "flatSurcharge": 10000, "image": "https://www.art-active24.ru/images/upload/tramp-asphalt.jpg", "text": "Утяжелители и маты — фиксированная надбавка, не зависит от времени." }
+      ]
+    }
+  ],
+  "extras": [
+    { "id": "bariery", "name": "Барьеры безопасности", "price": 12000, "required": true, "note": "Обязательно по ГОСТ Р 52167-2012" },
+    { "id": "animator", "name": "Аниматор", "price": 15000, "from": true },
+    { "id": "operator", "name": "Доп. оператор", "price": 6000 }
+  ],
+  "variantLinks": [
+    { "complectId": 5001, "subId": "tramp-grunt-0", "priceType": "rent", "slug": "arenda-batut-s-gorkoy-korabl", "title": "Аренда батута с горкой «Корабль»" },
+    { "complectId": 5001, "priceType": "buy", "slug": "kupit-batut-korabl", "title": "Купить батут «Корабль»" }
+  ],
+  "shareUrl": "https://www.art-active24.ru/batut-korabl-bolshoj/"
+}

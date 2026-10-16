@@ -1,0 +1,6 @@
+# Фронт-контроллер: файлы и папки (панель менеджера) отдаются как есть, остальное — в index.php
+DirectoryIndex index.html
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]

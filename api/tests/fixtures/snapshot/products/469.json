@@ -1,0 +1,53 @@
+{
+ "id": 469,
+ "slug": "plov",
+ "art": "0469",
+ "name": "Плов",
+ "template": "configurator",
+ "configuratorMode": "standard",
+ "orderMode": "cart",
+ "categoryId": 81,
+ "media": [],
+ "complects": [
+  {
+   "id": 1590,
+   "title": "Привозим готовое",
+   "rent": {
+    "amount": 0,
+    "label": "Аренда",
+    "from": true
+   },
+   "subs": [
+    {
+     "id": "1591",
+     "name": "С курицей",
+     "group": "Привозим готовое",
+     "rent": {
+      "amount": 340,
+      "label": "Аренда",
+      "postfix": "/ порц.",
+      "sale": true
+     }
+    }
+   ]
+  }
+ ],
+ "extras": [
+  {
+   "id": "x-povar",
+   "name": "Повар",
+   "price": 8500,
+   "group": "Персонал"
+  }
+ ],
+ "similar": [],
+ "variantLinks": [
+  {
+   "complectId": 1590,
+   "subId": "1591",
+   "priceType": "rent",
+   "slug": "plov-s-kuricey",
+   "title": "Плов с курицей"
+  }
+ ]
+}

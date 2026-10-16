@@ -1,0 +1,51 @@
+{
+  "id": 469,
+  "slug": "plov",
+  "art": "00469",
+  "name": "Плов в казане на мероприятие",
+  "template": "configurator",
+  "configuratorMode": "standard",
+  "orderMode": "cart",
+  "categoryId": 529,
+  "breadcrumbs": [ { "id": 81, "name": "Кейтеринг" }, { "id": 529, "name": "Гастро-станции" } ],
+  "media": [
+    { "type": "image", "url": "https://www.art-active24.ru/images/upload/plov-1.jpg" },
+    { "type": "video", "url": "https://cdn.example.invalid/video/plov.mp4", "poster": "https://www.art-active24.ru/images/upload/plov-poster.jpg" }
+  ],
+  "price": { "amount": 340, "from": true, "unit": "/ порц." },
+  "lead": "Готовим плов на открытом огне прямо на вашей площадке или привозим горячим.",
+  "complectsLabel": "Формат",
+  "complects": [
+    {
+      "id": 3101,
+      "title": "Плов",
+      "subtitle": "Порция 250 гр.",
+      "rent": { "amount": 0, "label": "Аренда", "from": true },
+      "subsLabel": "Варианты",
+      "comment": "Выход на чел: 250 гр",
+      "subs": [
+        { "id": "1591", "name": "С курицей", "group": "Привозим готовое", "rent": { "amount": 340, "label": "Аренда", "postfix": "/ порц.", "sale": true, "minQty": 10 } },
+        { "id": "1592", "name": "Со свининой", "group": "Привозим готовое", "rent": { "amount": 380, "label": "Аренда", "postfix": "/ порц.", "sale": true, "minQty": 10 } },
+        { "id": "1593", "name": "С говядиной", "group": "Привозим готовое", "rent": { "amount": 430, "label": "Аренда", "postfix": "/ порц.", "sale": true, "minQty": 10 } },
+        { "id": "1594", "name": "С бараниной", "group": "Привозим готовое", "rent": { "amount": 440, "label": "Аренда", "postfix": "/ порц.", "sale": true, "minQty": 10 } },
+        { "id": "1595", "name": "С курицей", "group": "Готовим на месте", "rent": { "amount": 425, "label": "Аренда", "postfix": "/ порц.", "sale": true, "minQty": 30 } },
+        { "id": "1596", "name": "Со свининой", "group": "Готовим на месте", "rent": { "amount": 475, "label": "Аренда", "postfix": "/ порц.", "sale": true, "minQty": 30 } },
+        { "id": "1597", "name": "С говядиной", "group": "Готовим на месте", "rent": { "amount": 535, "label": "Аренда", "postfix": "/ порц.", "sale": true, "minQty": 30 } },
+        { "id": "1598", "name": "С бараниной", "group": "Готовим на месте", "rent": { "amount": 545, "label": "Аренда", "postfix": "/ порц.", "sale": true, "minQty": 30 } },
+        { "id": "1599", "name": "Мастер-класс", "group": "Мастер класс", "rent": { "amount": 1600, "label": "Аренда", "postfix": "/ участник", "sale": true, "from": true, "minQty": 10 } }
+      ]
+    }
+  ],
+  "extras": [
+    { "id": "povar", "name": "Повар", "price": 8500 },
+    { "id": "pomoshnik", "name": "Помощник повара", "price": 7000 },
+    { "id": "shef", "name": "Шеф-повар", "price": 12500 },
+    { "id": "oficiant", "name": "Официант", "price": 7500, "group": "Персонал", "image": "https://www.art-active24.ru/images/upload/oficiant.jpg" },
+    { "id": "stol-furshet", "name": "Стол фуршетный", "price": 1100, "from": true, "group": "Мебель", "image": "https://www.art-active24.ru/images/upload/stol-furshet.jpg" },
+    { "id": "liniya", "name": "Фуршетная линия", "price": 4500, "group": "Фуршетная линия", "image": "https://www.art-active24.ru/images/upload/liniya.jpg" }
+  ],
+  "similar": [
+    { "id": 470, "slug": "shashlyk", "name": "Шашлык на мангале", "image": "https://www.art-active24.ru/images/upload/shashlyk.jpg", "price": { "amount": 520, "from": true, "unit": "/ порц." }, "template": "configurator" }
+  ],
+  "shareUrl": "https://www.art-active24.ru/plov/"
+}

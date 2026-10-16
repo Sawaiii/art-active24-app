@@ -1,0 +1,15 @@
+{
+  "name": "artactive-ios-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Генерация ресурсов iOS (иконки, шрифты, AppIcon) и String Catalog",
+  "type": "module",
+  "scripts": {
+    "assets": "node build-assets.mjs",
+    "strings": "node extract-strings.mjs",
+    "strings:check": "node extract-strings.mjs --check"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "2.6.2"
+  }
+}

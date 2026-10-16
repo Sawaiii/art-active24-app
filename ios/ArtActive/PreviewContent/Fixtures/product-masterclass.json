@@ -1,0 +1,51 @@
+{
+  "id": 721,
+  "slug": "master-klass-po-goncharnomu-delu",
+  "art": "00721",
+  "name": "Мастер-класс по гончарному делу",
+  "template": "configurator",
+  "configuratorMode": "masterclass",
+  "orderMode": "cart",
+  "categoryId": 91,
+  "breadcrumbs": [ { "id": 91, "name": "Мастер-классы" } ],
+  "media": [
+    { "type": "image", "url": "https://www.art-active24.ru/images/upload/mk-goncharnyj-1.jpg" },
+    { "type": "image", "url": "https://www.art-active24.ru/images/upload/mk-goncharnyj-2.jpg" }
+  ],
+  "price": { "amount": 9000, "from": true },
+  "specs": [
+    { "name": "Время на изделие", "value": "40 минут" },
+    { "name": "Возраст", "value": "от 7 лет" }
+  ],
+  "complects": [
+    { "id": 8801, "title": "Базовый", "subtitle": "Глина, гончарные круги", "rent": { "amount": 9000, "label": "Стоимость" } },
+    { "id": 8802, "title": "С обжигом", "subtitle": "Изделия заберёте через неделю", "rent": { "amount": 14000, "label": "Стоимость" } },
+    { "id": 8803, "title": "Премиум", "subtitle": "Роспись и упаковка", "rent": { "amount": 19500, "label": "Стоимость" } }
+  ],
+  "extras": [],
+  "masterclass": {
+    "variantsLabel": "Формат",
+    "priceBadge": "за 10 участников",
+    "venueTitle": "Где проходит",
+    "venueText": "Проводим у вас или в одном из наших залов.",
+    "venues": [
+      { "name": "Зал «Венеция» (до 30 чел.)", "text": "Светлый зал с панорамными окнами.", "images": ["https://www.art-active24.ru/images/upload/zal-veneciya.jpg"] },
+      { "name": "Зал «Лофт» (до 50 чел.)", "text": "Кирпичные стены и высокие потолки.", "images": ["https://www.art-active24.ru/images/upload/zal-loft.jpg"] },
+      { "name": "Терраса (до 20 чел.)", "text": "Летняя площадка.", "images": ["https://www.art-active24.ru/images/upload/terrasa.jpg"] }
+    ],
+    "stepsTitle": "Как проходит",
+    "steps": [
+      { "title": "Знакомство с глиной", "text": "Ведущий показывает приёмы работы." },
+      { "title": "Работа на круге", "text": "Каждый делает своё изделие." },
+      { "title": "Декор", "text": "Украшаем и подписываем работы." }
+    ],
+    "includedTitle": "Что включено",
+    "included": ["Ведущий мастер", "Глина и инструменты", "Фартуки", "Упаковка изделий"],
+    "relatedTitle": "Похожие мастер-классы",
+    "related": [
+      { "id": 10667, "slug": "mk-svechi", "name": "Мастер-класс по свечам", "image": "https://www.art-active24.ru/images/upload/mk-svechi.jpg", "price": { "amount": 9000, "from": true }, "template": "configurator" }
+    ],
+    "tags": [ { "id": 901, "name": "Творческие" }, { "id": 902, "name": "Для взрослых" } ]
+  },
+  "shareUrl": "https://www.art-active24.ru/master-klass-po-goncharnomu-delu/"
+}

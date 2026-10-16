@@ -1,0 +1,73 @@
+{
+  "id": 7138,
+  "slug": "stol-skladnoj-viktoriya-180-sm",
+  "art": "07138",
+  "name": "Стол складной Виктория 180 см",
+  "template": "configurator",
+  "configuratorMode": "standard",
+  "orderMode": "cart",
+  "categoryId": 225,
+  "breadcrumbs": [ { "id": 257, "name": "Мебель" }, { "id": 225, "name": "Столы" } ],
+  "badge": { "text": "Хит", "color": "#705ABF" },
+  "media": [
+    { "type": "image", "url": "https://www.art-active24.ru/images/upload/stol-viktoriya-180-1.jpg" },
+    { "type": "image", "url": "https://www.art-active24.ru/images/upload/stol-viktoriya-180-2.jpg" },
+    { "type": "image", "url": "https://www.art-active24.ru/images/upload/stol-viktoriya-180-3.jpg" }
+  ],
+  "price": { "amount": 770, "from": true },
+  "specs": [
+    { "name": "Длина", "value": "180 см" },
+    { "name": "Ширина", "value": "75 см" },
+    { "name": "Высота", "value": "74 см" },
+    { "name": "Посадочных мест", "value": "6–8" },
+    { "name": "Цвет", "value": "Белый" }
+  ],
+  "descriptionHtml": "<p><strong>Прокат Стола Виктория 180 с доставкой</strong></p><p>Аренда стола «Виктория 180» в Москве — удобное решение для банкетов, свадеб, корпоративов и презентаций. Просторная столешница длиной 180 см позволяет разместить большое количество гостей.</p><ul><li>Лёгкий и устойчивый</li><li>Быстро складывается</li><li>Подходит для улицы и помещений</li></ul>",
+  "complectsLabel": "Комплекты",
+  "complects": [
+    {
+      "id": 1724, "title": "«Технический»", "subtitle": "Без скатерти",
+      "textHtml": "<p>Изделие имеет следы эксплуатации. Рекомендуется со скатертью.</p>",
+      "image": "https://www.art-active24.ru/images/upload/stol-viktoriya-mini.jpg",
+      "rent": { "amount": 770, "label": "Аренда" },
+      "time": { "unit": "days", "default": 1, "percent": 20 }
+    },
+    {
+      "id": 1725, "title": "«Прокатный»",
+      "textHtml": "<p>Аккуратное состояние, подходит для большинства мероприятий.</p>",
+      "image": "https://www.art-active24.ru/images/upload/stol-viktoriya-mini.jpg",
+      "rent": { "amount": 1540, "label": "Аренда" },
+      "time": { "unit": "days", "default": 1, "percent": 20 }
+    },
+    {
+      "id": 1726, "title": "«Корпоративный»",
+      "textHtml": "<p>Новый стол премиального вида с юбкой.</p>",
+      "image": "https://www.art-active24.ru/images/upload/stol-viktoriya-mini.jpg",
+      "rent": { "amount": 5520, "label": "Аренда" },
+      "time": { "unit": "days", "default": 1, "percent": 20 }
+    },
+    {
+      "id": 1727, "title": "«+наперон»",
+      "pdfUrl": "https://www.art-active24.ru/files/naperon.pdf",
+      "image": "https://www.art-active24.ru/images/upload/stol-viktoriya-naperon.jpg",
+      "rent": { "amount": 1160, "label": "Аренда" },
+      "time": { "unit": "days", "default": 1, "percent": 20 }
+    },
+    {
+      "id": 1728, "title": "«+скатерть»",
+      "image": "https://www.art-active24.ru/images/upload/stol-viktoriya-skatert.jpg",
+      "rent": { "amount": 1350, "label": "Аренда" },
+      "time": { "unit": "days", "default": 1, "percent": 20 }
+    }
+  ],
+  "extras": [
+    { "id": "stul-kyavari", "name": "Стул «Кьявари»", "price": 450, "group": "Мебель", "image": "https://www.art-active24.ru/images/upload/stul-kyavari.jpg" },
+    { "id": "skatert-belaya", "name": "Скатерть белая 180", "price": 600, "group": "Текстиль", "image": "https://www.art-active24.ru/images/upload/skatert-belaya.jpg" },
+    { "id": "stolbiki", "name": "Столбики ограждения", "price": 900, "group": "Столбики ограждения и указатели", "image": "https://www.art-active24.ru/images/upload/stolbiki.jpg" }
+  ],
+  "similar": [
+    { "id": 7139, "slug": "stol-kruglyj-180", "name": "Стол круглый 180 см", "image": "https://www.art-active24.ru/images/upload/stol-kruglyj.jpg", "price": { "amount": 990, "from": true }, "template": "configurator" },
+    { "id": 7140, "slug": "stol-furshetnyj", "name": "Стол фуршетный", "image": "https://www.art-active24.ru/images/upload/stol-furshet.jpg", "price": { "amount": 1100, "from": true }, "template": "configurator" }
+  ],
+  "shareUrl": "https://www.art-active24.ru/stol-skladnoj-viktoriya-180-sm/"
+}

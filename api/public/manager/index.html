@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https://www.art-active24.ru; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F5F5F7">
+<title>Заявки — Арт-Актив</title>
+<link rel="preload" href="fonts/golos3.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="manager.css">
+<script type="module" src="manager.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">К содержимому</a>
+
+<header class="topbar" id="topbar" hidden>
+  <div class="topbar__inner">
+    <img class="topbar__logo" src="logo-dark.svg" alt="Арт-Актив" width="114" height="36">
+    <span class="topbar__title">Заявки</span>
+    <span class="topbar__new" id="new-pill" hidden></span>
+    <span class="topbar__spacer"></span>
+    <span class="topbar__user" id="user-phone"></span>
+    <button type="button" class="btn btn--ghost btn--sm" id="logout-btn">Выйти</button>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+
+  <!-- Вход -->
+  <section class="auth" id="screen-login" hidden aria-labelledby="login-title">
+    <div class="auth__card">
+      <img class="auth__logo" src="logo-dark.svg" alt="Арт-Актив" width="152" height="48">
+      <h1 class="auth__title" id="login-title">Панель менеджера</h1>
+      <p class="auth__lead" id="login-lead">Войдите по номеру телефона — пришлём код в SMS.</p>
+
+      <form id="phone-form" class="auth__form" novalidate>
+        <label class="field">
+          <span class="field__label">Телефон</span>
+          <input class="field__input" id="phone-input" name="phone" type="tel" inputmode="tel"
+                 autocomplete="tel" placeholder="+7 (999) 999-99-99" maxlength="18" required
+                 aria-describedby="phone-error">
+        </label>
+        <p class="field__error" id="phone-error" role="alert"></p>
+        <button class="btn btn--primary btn--block" type="submit" id="phone-submit">Получить код</button>
+      </form>
+
+      <form id="code-form" class="auth__form" novalidate hidden>
+        <p class="auth__sent" id="code-sent"></p>
+        <label class="field">
+          <span class="field__label">Код из SMS</span>
+          <input class="field__input field__input--code" id="code-input" name="code" type="text"
+                 inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+                 placeholder="••••••" required aria-describedby="code-error">
+        </label>
+        <p class="field__error" id="code-error" role="alert"></p>
+        <button class="btn btn--primary btn--block" type="submit" id="code-submit">Войти</button>
+        <div class="auth__row">
+          <button class="btn btn--link" type="button" id="change-phone">Изменить номер</button>
+          <button class="btn btn--link" type="button" id="resend-btn" disabled>Отправить снова</button>
+        </div>
+        <p class="auth__timer" id="resend-timer" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- Нет доступа -->
+  <section class="auth" id="screen-denied" hidden aria-labelledby="denied-title">
+    <div class="auth__card">
+      <img class="auth__logo" src="logo-dark.svg" alt="Арт-Актив" width="152" height="48">
+      <h1 class="auth__title" id="denied-title">Нет доступа</h1>
+      <p class="auth__lead" id="denied-text">Этот номер не зарегистрирован как менеджер. Обратитесь к администратору.</p>
+      <button class="btn btn--primary btn--block" type="button" id="denied-back">Войти с другим номером</button>
+    </div>
+  </section>
+
+  <!-- Рабочий экран -->
+  <section class="workspace" id="screen-app" hidden>
+    <div class="list-pane" id="list-pane">
+      <div class="list-pane__head">
+        <h1 class="visually-hidden">Заявки</h1>
+        <nav class="tabs" aria-label="Фильтр по статусу">
+          <div class="tabs__scroll" id="status-tabs" role="tablist"></div>
+        </nav>
+        <div class="toolbar">
+          <label class="search">
+            <span class="visually-hidden">Поиск по номеру заявки, телефону или имени</span>
+            <svg class="search__icon" viewBox="0 0 20 20" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="m14 14 4 4"/></svg>
+            <input class="search__input" id="search-input" type="search" placeholder="Номер, телефон или имя" autocomplete="off" maxlength="50">
+          </label>
+          <button type="button" class="btn btn--icon" id="refresh-btn" aria-label="Обновить список" title="Обновить">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10a6 6 0 1 1-1.8-4.3"/><path d="M16 3v4h-4"/></svg>
+          </button>
+        </div>
+        <p class="list-pane__meta" id="list-meta" aria-live="polite"></p>
+      </div>
+      <p class="banner banner--error" id="list-error" role="alert" hidden></p>
+      <ul class="order-list" id="order-list" aria-label="Список заявок"></ul>
+      <nav class="pager" id="pager" aria-label="Страницы" hidden>
+        <button type="button" class="btn btn--secondary btn--sm" id="prev-page">← Назад</button>
+        <span class="pager__info" id="page-info"></span>
+        <button type="button" class="btn btn--secondary btn--sm" id="next-page">Вперёд →</button>
+      </nav>
+    </div>
+
+    <div class="detail-pane" id="detail-pane">
+      <div class="detail-empty" id="detail-empty">
+        <p>Выберите заявку в списке</p>
+      </div>
+      <article class="detail" id="detail" hidden></article>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

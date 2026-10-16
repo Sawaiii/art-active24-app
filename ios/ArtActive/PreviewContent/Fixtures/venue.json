@@ -1,0 +1,28 @@
+{
+  "id": 3501,
+  "slug": "loft-idealista",
+  "name": "Лофт «Идеалиста»",
+  "type": "Лофт",
+  "photos": [
+    "https://www.art-active24.ru/images/upload/places26/w600/idealista-1.webp",
+    "https://www.art-active24.ru/images/upload/places26/w600/idealista-2.webp",
+    "https://www.art-active24.ru/images/upload/places26/w600/idealista-3.webp"
+  ],
+  "area": 370,
+  "capacity": 150,
+  "address": "Москва, ул. Большая Новодмитровская, 36с4",
+  "metro": [
+    { "name": "Дмитровская", "color": "#A2A5B4", "distance": 240 },
+    { "name": "Савёловская", "color": "#A2A5B4", "distance": 900 }
+  ],
+  "price": { "amount": 10000, "from": true, "unit": "/ час" },
+  "minHours": 4,
+  "descriptionHtml": "<p>Просторный лофт с панорамными окнами и сценой. Подходит для корпоративов, презентаций и свадеб.</p>",
+  "howToRent": [ "Оставьте заявку на расчёт", "Менеджер подтвердит дату и смету", "Бронь — после 100% оплаты" ],
+  "geo": { "lat": 55.8065, "lng": 37.5822 },
+  "eventTypes": ["Корпоратив", "День рождения", "Свадьба", "Презентация"],
+  "similar": [
+    { "id": 3502, "slug": "loft-rassvet", "name": "Лофт «Рассвет»", "type": "Лофт", "photos": ["https://www.art-active24.ru/images/upload/places26/w600/rassvet-1.webp"], "area": 250, "capacity": 120, "address": "Москва, Столярный пер., 3", "metro": [ { "name": "Улица 1905 года", "color": "#943E90", "distance": 600 } ], "price": { "amount": 8000, "from": true, "unit": "/ час" } }
+  ],
+  "shareUrl": "https://www.art-active24.ru/arenda-ploshchadki/loft-idealista/"
+}

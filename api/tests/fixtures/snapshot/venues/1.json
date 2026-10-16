@@ -1,0 +1,17 @@
+{
+ "id": 1,
+ "slug": "loft-idealista",
+ "name": "Loft Idealista",
+ "type": "Лофт",
+ "photos": [],
+ "area": 370,
+ "capacity": 150,
+ "address": "Москва",
+ "metro": [],
+ "price": {
+  "amount": 50000,
+  "from": true,
+  "unit": "/ час"
+ },
+ "minHours": 1
+}

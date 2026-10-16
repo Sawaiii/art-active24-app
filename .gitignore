@@ -1,0 +1,43 @@
+# общие
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+!.env.example
+
+# research: разбор сайта заказчика (внутренние эндпоинты, скачанные скрипты) — только локально
+research/
+
+# api
+api/vendor/
+api/var/
+api/.phpunit.cache/
+
+# snapshot (генерируемый)
+tools/snapshot/node_modules/
+tools/snapshot/cache/
+api/data/snapshot/**
+!api/data/snapshot/.gitkeep
+
+# android
+android/.gradle/
+android/build/
+android/**/build/
+android/local.properties
+android/.idea/
+android/*.iml
+android/captures/
+
+# ios
+ios/*.xcodeproj/
+ios/build/
+ios/DerivedData/
+ios/tools/node_modules/
+ios/Config/Secrets.xcconfig
+ios/tools/strings-missing.json
+ios/*.ipa
+ios/Payload/
+
+# Сборщик снапшота обращается к внутренним эндпоинтам сайта — только локально
+tools/snapshot/

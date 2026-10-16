@@ -1,0 +1,70 @@
+{
+ "id": 7138,
+ "slug": "stol-viktoriya-180",
+ "art": "07138",
+ "name": "Стол складной Виктория 180 см",
+ "template": "configurator",
+ "configuratorMode": "standard",
+ "orderMode": "cart",
+ "categoryId": 225,
+ "breadcrumbs": [
+  {
+   "id": 257,
+   "name": "Мебель"
+  },
+  {
+   "id": 225,
+   "name": "Столы"
+  }
+ ],
+ "badge": {
+  "text": "Хит",
+  "color": "#705ABF"
+ },
+ "media": [
+  {
+   "type": "image",
+   "url": "https://www.art-active24.ru/images/upload/stol-viktoriya-180.jpg"
+  }
+ ],
+ "specs": [
+  {
+   "name": "Цвет",
+   "value": "Белый"
+  }
+ ],
+ "descriptionHtml": "<p>Стол</p>",
+ "complectsLabel": "Комплекты",
+ "complects": [
+  {
+   "id": 1724,
+   "title": "«Технический»",
+   "rent": {
+    "amount": 770,
+    "label": "Аренда"
+   },
+   "time": {
+    "unit": "days",
+    "default": 1,
+    "percent": 20
+   }
+  },
+  {
+   "id": 1725,
+   "title": "«Прокатный»",
+   "rent": {
+    "amount": 1540,
+    "label": "Аренда"
+   },
+   "time": {
+    "unit": "days",
+    "default": 1,
+    "percent": 20
+   }
+  }
+ ],
+ "extras": [],
+ "similar": [],
+ "variantLinks": [],
+ "shareUrl": "https://www.art-active24.ru/stol-viktoriya-180/"
+}

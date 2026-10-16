@@ -1,0 +1,74 @@
+[
+ {
+  "id": 1,
+  "slug": "loft-idealista",
+  "name": "Loft Idealista",
+  "type": "Лофт",
+  "photos": [],
+  "area": 370,
+  "capacity": 150,
+  "address": "Москва",
+  "metro": [
+   {
+    "name": "Курская",
+    "color": "#0033A0",
+    "distance": 240
+   }
+  ],
+  "price": {
+   "amount": 50000,
+   "from": true,
+   "unit": "/ час"
+  },
+  "events": [
+   2,
+   6
+  ],
+  "types": [
+   7
+  ],
+  "metroIds": [
+   10
+  ],
+  "props": [
+   3,
+   5
+  ],
+  "priceAmount": 50000,
+  "sortPopular": 1,
+  "collections": [
+   900002
+  ]
+ },
+ {
+  "id": 2,
+  "slug": "hall",
+  "name": "Hall",
+  "type": "Ресторан",
+  "photos": [],
+  "area": 100,
+  "capacity": 40,
+  "address": "Москва",
+  "metro": [],
+  "price": {
+   "amount": 10000,
+   "from": true,
+   "unit": "/ час"
+  },
+  "events": [
+   6
+  ],
+  "types": [
+   41
+  ],
+  "metroIds": [
+   11
+  ],
+  "props": [
+   3
+  ],
+  "priceAmount": 10000,
+  "sortPopular": 2,
+  "collections": []
+ }
+]

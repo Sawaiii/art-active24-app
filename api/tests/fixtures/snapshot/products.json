@@ -1,0 +1,104 @@
+[
+ {
+  "id": 7138,
+  "slug": "stol-viktoriya-180",
+  "name": "Стол складной Виктория 180 см",
+  "image": "https://www.art-active24.ru/images/upload/stol-viktoriya-180.jpg",
+  "price": {
+   "amount": 770,
+   "from": false,
+   "unit": null,
+   "onRequest": false
+  },
+  "badge": null,
+  "template": "configurator",
+  "categoryIds": [
+   225,
+   257
+  ],
+  "sortPopular": 1,
+  "createdRank": 2,
+  "colors": [
+   "Белый"
+  ]
+ },
+ {
+  "id": 7140,
+  "slug": "stol-chernyy",
+  "name": "Стол чёрный",
+  "image": "https://www.art-active24.ru/images/upload/stol-chernyy.jpg",
+  "price": {
+   "amount": 1500,
+   "from": false,
+   "unit": null,
+   "onRequest": false
+  },
+  "badge": null,
+  "template": "configurator",
+  "categoryIds": [
+   225
+  ],
+  "sortPopular": 2,
+  "createdRank": 1,
+  "colors": [
+   "Черный"
+  ]
+ },
+ {
+  "id": 469,
+  "slug": "plov",
+  "name": "Плов",
+  "image": "https://www.art-active24.ru/images/upload/plov.jpg",
+  "price": {
+   "amount": 340,
+   "from": true,
+   "unit": "/ порц.",
+   "onRequest": false
+  },
+  "badge": null,
+  "template": "configurator",
+  "categoryIds": [
+   81
+  ],
+  "sortPopular": 1,
+  "createdRank": 3,
+  "colors": []
+ },
+ {
+  "id": 3344,
+  "slug": "hostes-na-meropriyatie",
+  "name": "Хостес",
+  "image": "https://www.art-active24.ru/images/upload/hostes-na-meropriyatie.jpg",
+  "price": {
+   "amount": 1000,
+   "from": true,
+   "unit": "/ час",
+   "onRequest": false
+  },
+  "badge": null,
+  "template": "staff",
+  "categoryIds": [
+   313
+  ],
+  "sortPopular": 1,
+  "createdRank": 4,
+  "colors": []
+ },
+ {
+  "id": 1055,
+  "slug": "chajnaya-stanciya",
+  "name": "Чайная станция",
+  "image": "https://www.art-active24.ru/images/upload/chai.jpg",
+  "price": {
+   "amount": 11000,
+   "from": false
+  },
+  "template": "simple",
+  "categoryIds": [
+   81
+  ],
+  "sortPopular": 2,
+  "createdRank": 5,
+  "colors": []
+ }
+]

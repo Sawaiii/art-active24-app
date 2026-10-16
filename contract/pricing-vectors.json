@@ -1,0 +1,760 @@
+{
+  "description": "Эталонные примеры расчёта цены. Прогоняются тестами PHP (PriceCalculator), Kotlin (Pricing) и Swift (Pricing). unitPrice — цена 1 ед. без допов и базы; total — итог позиции. Формулы — docs/DATA-MODEL.md. Векторы с expect.error — расчёт должен завершиться ошибкой валидации по указанному полю. Округление: floor(x + 0.5 + 1e-9). Обязательные допы (required) добавляются автоматически.",
+  "vectors": [
+    {
+      "name": "Мебель посуточно: Виктория 180, 2 дня × 2 шт",
+      "complect": {
+        "rent": {
+          "amount": 770,
+          "label": "Аренда"
+        },
+        "time": {
+          "unit": "days",
+          "default": 1,
+          "percent": 20
+        }
+      },
+      "input": {
+        "priceType": "rent",
+        "time": {
+          "unit": "days",
+          "value": 2
+        },
+        "qty": 2
+      },
+      "expect": {
+        "unitPrice": 924,
+        "total": 1848,
+        "timeLabel": "2 д",
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Мебель посуточно: 4 дня — округление",
+      "complect": {
+        "rent": {
+          "amount": 770,
+          "label": "Аренда"
+        },
+        "time": {
+          "unit": "days",
+          "default": 1,
+          "percent": 20
+        }
+      },
+      "input": {
+        "priceType": "rent",
+        "time": {
+          "unit": "days",
+          "value": 4
+        },
+        "qty": 1
+      },
+      "expect": {
+        "unitPrice": 1232,
+        "total": 1232,
+        "timeLabel": "4 д",
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Мебель посуточно: 7 дней (ввод «ещё»)",
+      "complect": {
+        "rent": {
+          "amount": 770,
+          "label": "Аренда"
+        },
+        "time": {
+          "unit": "days",
+          "default": 1,
+          "percent": 20
+        }
+      },
+      "input": {
+        "priceType": "rent",
+        "time": {
+          "unit": "days",
+          "value": 7
+        },
+        "qty": 1
+      },
+      "expect": {
+        "unitPrice": 1694,
+        "total": 1694,
+        "timeLabel": "7 д",
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Без времени — по умолчанию default",
+      "complect": {
+        "rent": {
+          "amount": 770,
+          "label": "Аренда"
+        },
+        "time": {
+          "unit": "days",
+          "default": 1,
+          "percent": 20
+        }
+      },
+      "input": {
+        "priceType": "rent",
+        "qty": 3
+      },
+      "expect": {
+        "unitPrice": 770,
+        "total": 2310,
+        "timeLabel": "1 д",
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Аттракцион почасово: Поймай момент, 7 ч",
+      "complect": {
+        "rent": {
+          "amount": 45000,
+          "label": "Аренда"
+        },
+        "time": {
+          "unit": "hours",
+          "default": 6,
+          "percent": 15
+        }
+      },
+      "input": {
+        "priceType": "rent",
+        "time": {
+          "unit": "hours",
+          "value": 7
+        },
+        "qty": 1
+      },
+      "expect": {
+        "unitPrice": 51750,
+        "total": 51750,
+        "timeLabel": "7 ч",
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Аттракцион почасово: 2 дня (+30% от цены 8 ч за доп. день)",
+      "complect": {
+        "rent": {
+          "amount": 45000,
+          "label": "Аренда"
+        },
+        "time": {
+          "unit": "hours",
+          "default": 6,
+          "percent": 15
+        }
+      },
+      "input": {
+        "priceType": "rent",
+        "time": {
+          "unit": "days",
+          "value": 2
+        },
+        "qty": 1
+      },
+      "expect": {
+        "unitPrice": 76050,
+        "total": 76050,
+        "timeLabel": "2 д",
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Еда: плов с курицей, 10 порций + повар (доп один раз)",
+      "complect": {
+        "rent": {
+          "amount": 0,
+          "label": "Аренда",
+          "from": true
+        },
+        "subs": [
+          {
+            "id": "1591",
+            "name": "С курицей",
+            "rent": {
+              "amount": 340,
+              "label": "Аренда",
+              "postfix": "/ порц.",
+              "sale": true
+            }
+          }
+        ]
+      },
+      "extras": [
+        {
+          "id": "povar",
+          "name": "Повар",
+          "price": 8500
+        }
+      ],
+      "input": {
+        "priceType": "rent",
+        "subId": "1591",
+        "qty": 10,
+        "extras": [
+          {
+            "id": "povar"
+          }
+        ]
+      },
+      "expect": {
+        "unitPrice": 340,
+        "total": 11900,
+        "timeLabel": null,
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Батут: на асфальте (фикс +10 000 не × время), 7 ч, обязательные барьеры",
+      "complect": {
+        "rent": {
+          "amount": 64000,
+          "label": "Аренда"
+        },
+        "time": {
+          "unit": "hours",
+          "default": 6,
+          "percent": 11.719
+        },
+        "subs": [
+          {
+            "id": "tramp-asphalt-0",
+            "name": "На асфальте",
+            "rent": {
+              "amount": 0,
+              "label": "Аренда"
+            },
+            "flatSurcharge": 10000
+          }
+        ]
+      },
+      "extras": [
+        {
+          "id": "bariery",
+          "name": "Барьеры безопасности",
+          "price": 12000,
+          "required": true
+        }
+      ],
+      "input": {
+        "priceType": "rent",
+        "subId": "tramp-asphalt-0",
+        "time": {
+          "unit": "hours",
+          "value": 7
+        },
+        "qty": 1,
+        "extras": [
+          {
+            "id": "bariery"
+          }
+        ]
+      },
+      "expect": {
+        "unitPrice": 81500,
+        "total": 93500,
+        "timeLabel": "7 ч",
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Батут: обязательный доп добавляется сервером, даже если клиент его не прислал",
+      "complect": {
+        "rent": {
+          "amount": 64000,
+          "label": "Аренда"
+        },
+        "time": {
+          "unit": "hours",
+          "default": 6,
+          "percent": 11.719
+        },
+        "subs": [
+          {
+            "id": "tramp-asphalt-0",
+            "name": "На асфальте",
+            "rent": {
+              "amount": 0,
+              "label": "Аренда"
+            },
+            "flatSurcharge": 10000
+          }
+        ]
+      },
+      "extras": [
+        {
+          "id": "bariery",
+          "name": "Барьеры безопасности",
+          "price": 12000,
+          "required": true
+        }
+      ],
+      "input": {
+        "priceType": "rent",
+        "subId": "tramp-asphalt-0",
+        "time": {
+          "unit": "hours",
+          "value": 7
+        },
+        "qty": 1
+      },
+      "expect": {
+        "unitPrice": 81500,
+        "total": 93500,
+        "timeLabel": "7 ч",
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Батут: покупка — время не применяется",
+      "complect": {
+        "rent": {
+          "amount": 64000,
+          "label": "Аренда"
+        },
+        "buy": {
+          "amount": 1260000,
+          "label": "Купить",
+          "from": true,
+          "sale": true
+        },
+        "time": {
+          "unit": "hours",
+          "default": 6,
+          "percent": 11.719
+        }
+      },
+      "input": {
+        "priceType": "buy",
+        "time": {
+          "unit": "hours",
+          "value": 8
+        },
+        "qty": 1
+      },
+      "expect": {
+        "unitPrice": 1260000,
+        "total": 1260000,
+        "timeLabel": null,
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Минимум + шаг %: мин 10, шаг 50%, 14 шт",
+      "complect": {
+        "rent": {
+          "amount": 1000,
+          "label": "Аренда",
+          "minQty": 10,
+          "qtyStepPct": 50
+        }
+      },
+      "input": {
+        "priceType": "rent",
+        "qty": 14
+      },
+      "expect": {
+        "unitPrice": 1000,
+        "total": 12000,
+        "timeLabel": null,
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Минимум без шага: мин 5, заказано 3 — считаем 5",
+      "complect": {
+        "rent": {
+          "amount": 500,
+          "label": "Аренда",
+          "minQty": 5
+        }
+      },
+      "input": {
+        "priceType": "rent",
+        "qty": 3
+      },
+      "expect": {
+        "unitPrice": 500,
+        "total": 2500,
+        "timeLabel": null,
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Фикс за выезд (basePrice) — один раз",
+      "complect": {
+        "rent": {
+          "amount": 300,
+          "label": "Аренда",
+          "postfix": "/ порц."
+        },
+        "basePrice": 15000
+      },
+      "input": {
+        "priceType": "rent",
+        "qty": 50
+      },
+      "expect": {
+        "unitPrice": 300,
+        "total": 30000,
+        "timeLabel": null,
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Цена по запросу",
+      "complect": {
+        "rent": {
+          "amount": 0,
+          "label": "Аренда",
+          "onRequest": true
+        }
+      },
+      "input": {
+        "priceType": "rent",
+        "qty": 1
+      },
+      "expect": {
+        "unitPrice": 0,
+        "total": 0,
+        "timeLabel": null,
+        "onRequest": true
+      }
+    },
+    {
+      "name": "Кейтеринг-меню: строки × кол-во + выезд + официанты",
+      "complect": {
+        "rent": {
+          "amount": 0,
+          "label": "Стоимость"
+        },
+        "basePrice": 5000,
+        "menu": [
+          {
+            "id": "m1",
+            "name": "Mini (20 шт)",
+            "price": 150
+          },
+          {
+            "id": "m2",
+            "name": "Classic (10 шт)",
+            "price": 200
+          }
+        ],
+        "reward": {
+          "goal": 20000,
+          "type": "base_free",
+          "label": "Выезд бесплатно"
+        }
+      },
+      "extras": [
+        {
+          "id": "oficiant",
+          "name": "Официант",
+          "price": 7500,
+          "countable": true
+        }
+      ],
+      "input": {
+        "priceType": "rent",
+        "qty": 1,
+        "menu": [
+          {
+            "id": "m1",
+            "qty": 20
+          },
+          {
+            "id": "m2",
+            "qty": 10
+          }
+        ],
+        "extras": [
+          {
+            "id": "oficiant",
+            "qty": 2
+          }
+        ]
+      },
+      "expect": {
+        "unitPrice": 5000,
+        "total": 25000,
+        "timeLabel": null,
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Кейтеринг-меню: цель достигнута — выезд бесплатно",
+      "complect": {
+        "rent": {
+          "amount": 0,
+          "label": "Стоимость"
+        },
+        "basePrice": 5000,
+        "menu": [
+          {
+            "id": "m1",
+            "name": "Mini (20 шт)",
+            "price": 150
+          }
+        ],
+        "reward": {
+          "goal": 20000,
+          "type": "base_free",
+          "label": "Выезд бесплатно"
+        }
+      },
+      "input": {
+        "priceType": "rent",
+        "qty": 1,
+        "menu": [
+          {
+            "id": "m1",
+            "qty": 140
+          }
+        ]
+      },
+      "expect": {
+        "unitPrice": 21000,
+        "total": 21000,
+        "timeLabel": null,
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Меню: строка ниже минимума — ошибка",
+      "complect": {
+        "rent": {
+          "amount": 0,
+          "label": "Стоимость"
+        },
+        "menu": [
+          {
+            "id": "m1",
+            "name": "Канапе",
+            "price": 100,
+            "minQty": 20
+          }
+        ]
+      },
+      "input": {
+        "priceType": "rent",
+        "qty": 1,
+        "menu": [
+          {
+            "id": "m1",
+            "qty": 5
+          }
+        ]
+      },
+      "expect": {
+        "error": "menu"
+      }
+    },
+    {
+      "name": "Округление: половина рубля — вверх",
+      "complect": {
+        "rent": {
+          "amount": 1005,
+          "label": "Аренда"
+        },
+        "time": {
+          "unit": "days",
+          "default": 1,
+          "percent": 10
+        }
+      },
+      "input": {
+        "priceType": "rent",
+        "time": {
+          "unit": "days",
+          "value": 2
+        },
+        "qty": 1
+      },
+      "expect": {
+        "unitPrice": 1106,
+        "total": 1106,
+        "timeLabel": "2 д",
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Вариант без minQty наследует минимум комплекта (по полю)",
+      "complect": {
+        "rent": {
+          "amount": 0,
+          "label": "Аренда",
+          "minQty": 5
+        },
+        "subs": [
+          {
+            "id": "s1",
+            "name": "Вариант",
+            "rent": {
+              "amount": 200,
+              "label": "Аренда"
+            }
+          }
+        ]
+      },
+      "input": {
+        "priceType": "rent",
+        "subId": "s1",
+        "qty": 2
+      },
+      "expect": {
+        "unitPrice": 200,
+        "total": 1000,
+        "timeLabel": null,
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Фикс-надбавка варианта не применяется к покупке",
+      "complect": {
+        "rent": {
+          "amount": 64000,
+          "label": "Аренда"
+        },
+        "buy": {
+          "amount": 1000000,
+          "label": "Купить",
+          "sale": true
+        },
+        "subs": [
+          {
+            "id": "tramp-asphalt-0",
+            "name": "На асфальте",
+            "rent": {
+              "amount": 0,
+              "label": "Аренда"
+            },
+            "buy": {
+              "amount": 0,
+              "label": "Купить"
+            },
+            "flatSurcharge": 10000
+          }
+        ]
+      },
+      "input": {
+        "priceType": "buy",
+        "subId": "tramp-asphalt-0",
+        "qty": 1
+      },
+      "expect": {
+        "unitPrice": 1000000,
+        "total": 1000000,
+        "timeLabel": null,
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Покупка батута без варианта: у вариантов нет цены покупки — выбирать не нужно",
+      "complect": {
+        "rent": {
+          "amount": 64000,
+          "label": "Аренда"
+        },
+        "buy": {
+          "amount": 1260000,
+          "label": "Купить",
+          "sale": true
+        },
+        "subs": [
+          {
+            "id": "tramp-grunt-0",
+            "name": "На грунте",
+            "rent": {
+              "amount": 0,
+              "label": "Аренда"
+            }
+          },
+          {
+            "id": "tramp-asphalt-0",
+            "name": "На асфальте",
+            "rent": {
+              "amount": 0,
+              "label": "Аренда"
+            },
+            "flatSurcharge": 10000
+          }
+        ]
+      },
+      "input": {
+        "priceType": "buy",
+        "qty": 1
+      },
+      "expect": {
+        "unitPrice": 1260000,
+        "total": 1260000,
+        "timeLabel": null,
+        "onRequest": false
+      }
+    },
+    {
+      "name": "Аренда батута без варианта — ошибка (вариант обязателен)",
+      "complect": {
+        "rent": {
+          "amount": 64000,
+          "label": "Аренда"
+        },
+        "subs": [
+          {
+            "id": "tramp-grunt-0",
+            "name": "На грунте",
+            "rent": {
+              "amount": 0,
+              "label": "Аренда"
+            }
+          }
+        ]
+      },
+      "input": {
+        "priceType": "rent",
+        "qty": 1
+      },
+      "expect": {
+        "error": "subId"
+      }
+    },
+    {
+      "name": "Некоунтабельный доп считается один раз, даже если прислали qty",
+      "complect": {
+        "rent": {
+          "amount": 1000,
+          "label": "Аренда"
+        }
+      },
+      "extras": [
+        {
+          "id": "x",
+          "name": "Доставка",
+          "price": 500
+        }
+      ],
+      "input": {
+        "priceType": "rent",
+        "qty": 1,
+        "extras": [
+          {
+            "id": "x",
+            "qty": 3
+          }
+        ]
+      },
+      "expect": {
+        "unitPrice": 1000,
+        "total": 1500,
+        "timeLabel": null,
+        "onRequest": false
+      }
+    }
+  ]
+}

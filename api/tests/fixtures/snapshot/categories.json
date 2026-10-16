@@ -1,0 +1,68 @@
+[
+ {
+  "id": 257,
+  "parentId": null,
+  "name": "Мебель",
+  "slug": "arenda-mebeli",
+  "url": "https://www.art-active24.ru/arenda-mebeli/",
+  "icon": null,
+  "image": null,
+  "kind": "catalog",
+  "sort": 1,
+  "title": "Аренда мебели",
+  "heroVideo": null,
+  "seoHtml": "<p>Мебель</p>",
+  "scenarios": []
+ },
+ {
+  "id": 225,
+  "parentId": 257,
+  "name": "Столы",
+  "slug": "arenda-stolov",
+  "url": "https://www.art-active24.ru/arenda-stolov/",
+  "icon": null,
+  "image": null,
+  "kind": "catalog",
+  "sort": 1,
+  "title": "Аренда столов",
+  "heroVideo": null,
+  "seoHtml": null,
+  "scenarios": []
+ },
+ {
+  "id": 81,
+  "parentId": null,
+  "name": "Кейтеринг",
+  "slug": "keytering-moskva",
+  "url": "https://www.art-active24.ru/keytering-moskva/",
+  "icon": null,
+  "image": null,
+  "kind": "catalog",
+  "sort": 2,
+  "title": "Кейтеринг",
+  "heroVideo": null,
+  "seoHtml": null,
+  "scenarios": [
+   {
+    "title": "Работа на кассу",
+    "image": null,
+    "url": "https://www.art-active24.ru/rabota-na-kassu/"
+   }
+  ]
+ },
+ {
+  "id": 313,
+  "parentId": null,
+  "name": "Персонал",
+  "slug": "personal-na-meropriyatie",
+  "url": "https://www.art-active24.ru/personal-na-meropriyatie/",
+  "icon": null,
+  "image": null,
+  "kind": "catalog",
+  "sort": 3,
+  "title": "Персонал",
+  "heroVideo": null,
+  "seoHtml": null,
+  "scenarios": []
+ }
+]

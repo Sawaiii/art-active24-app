@@ -1,0 +1,14 @@
+{
+ "sections": [
+  {
+   "type": "hero",
+   "title": "Всё для фантастических мероприятий",
+   "items": []
+  },
+  {
+   "type": "products",
+   "title": "Новинки",
+   "productIds": []
+  }
+ ]
+}

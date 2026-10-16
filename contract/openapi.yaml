@@ -1,0 +1,1080 @@
+openapi: 3.1.0
+info:
+  title: Art-Active24 App API
+  version: 1.0.0
+  description: |
+    API мобильного приложения art-active24.ru. Все ответы — в конверте
+    `{success, data, error, meta?}`. Деньги — целые рубли. Даты — `YYYY-MM-DD`,
+    моменты времени — ISO-8601 UTC. Тексты с разметкой (`*Html`) — ограниченный HTML
+    (p, br, strong, em, ul, ol, li, a) — клиенты рендерят нативно.
+servers:
+  - url: '{baseUrl}'
+    description: Боевой адрес задаётся конфигурацией развёртывания
+    variables:
+      baseUrl: { default: 'https://example.com/api' }
+  - url: http://127.0.0.1:8080
+security: []
+
+tags:
+  - name: catalog
+  - name: venues
+  - name: cart
+  - name: auth
+  - name: me
+  - name: orders
+  - name: manager
+  - name: info
+
+paths:
+  /v1/home:
+    get:
+      tags: [catalog]
+      summary: Главная — секции в порядке показа
+      responses:
+        '200': { $ref: '#/components/responses/Home' }
+
+  /v1/catalog/tree:
+    get:
+      tags: [catalog]
+      summary: Дерево разделов (3 уровня, как меню «Услуги» сайта)
+      responses:
+        '200': { $ref: '#/components/responses/CategoryTree' }
+
+  /v1/categories/{id}:
+    get:
+      tags: [catalog]
+      summary: Страница раздела — заголовок, крошки, подразделы, сценарии, промо
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/CategoryPage' }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /v1/categories/{id}/products:
+    get:
+      tags: [catalog]
+      summary: Товары раздела (основного или дополнительного) с сортировкой и фильтрами
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+        - { name: sort, in: query, schema: { type: string, enum: [popular, price_low, price_high, new], default: popular } }
+        - { name: priceMin, in: query, schema: { type: integer, minimum: 0 } }
+        - { name: priceMax, in: query, schema: { type: integer, minimum: 0 } }
+        - { name: colors, in: query, description: 'Через запятую', schema: { type: string } }
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/Limit' }
+      responses:
+        '200': { $ref: '#/components/responses/ProductList' }
+
+  /v1/products/{id}:
+    get:
+      tags: [catalog]
+      summary: Карточка товара со всеми связями
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/Product' }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /v1/resolve:
+    get:
+      tags: [catalog]
+      summary: Разбор ссылки сайта (deep link) → что открыть
+      parameters:
+        - { name: path, in: query, required: true, schema: { type: string, example: /batut-korabl-bolshoj/arenda-batut-s-gorkoy-korabl/ } }
+      responses:
+        '200': { $ref: '#/components/responses/Resolve' }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /v1/search:
+    get:
+      tags: [catalog]
+      summary: Поиск по товарам и разделам
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string, minLength: 2, maxLength: 100 } }
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/Limit' }
+      responses:
+        '200': { $ref: '#/components/responses/Search' }
+
+  /v1/venues:
+    get:
+      tags: [venues]
+      summary: Площадки с фасетными фильтрами
+      parameters:
+        - { name: events, in: query, description: 'id через запятую', schema: { type: string } }
+        - { name: types, in: query, schema: { type: string } }
+        - { name: metro, in: query, schema: { type: string } }
+        - { name: props, in: query, schema: { type: string } }
+        - { name: priceFrom, in: query, schema: { type: integer } }
+        - { name: priceTo, in: query, schema: { type: integer } }
+        - { name: capacityFrom, in: query, schema: { type: integer } }
+        - { name: capacityTo, in: query, schema: { type: integer } }
+        - { name: areaFrom, in: query, schema: { type: integer } }
+        - { name: areaTo, in: query, schema: { type: integer } }
+        - { name: collection, in: query, description: 'Подборка (id категории 9000xx)', schema: { type: integer } }
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/Limit' }
+      responses:
+        '200': { $ref: '#/components/responses/VenueList' }
+
+  /v1/venues/filters:
+    get:
+      tags: [venues]
+      summary: Справочники фильтров площадок
+      responses:
+        '200': { $ref: '#/components/responses/VenueFilters' }
+
+  /v1/venues/{id}:
+    get:
+      tags: [venues]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/Venue' }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /v1/cart/quote:
+    post:
+      tags: [cart]
+      summary: Пересчитать корзину на сервере (гость и авторизованный)
+      requestBody: { $ref: '#/components/requestBodies/CartItems' }
+      responses:
+        '200': { $ref: '#/components/responses/Quote' }
+        '422': { $ref: '#/components/responses/Error' }
+
+  /v1/cart:
+    get:
+      tags: [cart]
+      security: [ { bearer: [] } ]
+      summary: Серверная корзина пользователя (синхронизация между устройствами)
+      responses:
+        '200': { $ref: '#/components/responses/Quote' }
+    put:
+      tags: [cart]
+      security: [ { bearer: [] } ]
+      summary: Заменить корзину целиком (клиент — источник порядка и состава)
+      requestBody: { $ref: '#/components/requestBodies/CartItems' }
+      responses:
+        '200': { $ref: '#/components/responses/Quote' }
+
+  /v1/auth/code:
+    post:
+      tags: [auth]
+      summary: Отправить SMS-код
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone: { type: string, example: '+79991234567' }
+      responses:
+        '200':
+          description: Код отправлен
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data:
+                        type: object
+                        properties:
+                          resendIn: { type: integer, description: 'Секунд до повторной отправки' }
+                          codeLength: { type: integer }
+        '429': { $ref: '#/components/responses/Error' }
+
+  /v1/auth/verify:
+    post:
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, code]
+              properties:
+                phone: { type: string }
+                code: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Session' }
+        '422': { $ref: '#/components/responses/Error' }
+
+  /v1/auth/refresh:
+    post:
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: { type: string }
+      responses:
+        '200': { $ref: '#/components/responses/Session' }
+        '401': { $ref: '#/components/responses/Error' }
+
+  /v1/auth/logout:
+    post:
+      tags: [auth]
+      security: [ { bearer: [] } ]
+      responses:
+        '204': { description: Сессия закрыта }
+
+  /v1/me:
+    get:
+      tags: [me]
+      security: [ { bearer: [] } ]
+      responses:
+        '200': { $ref: '#/components/responses/User' }
+    patch:
+      tags: [me]
+      security: [ { bearer: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, maxLength: 100 }
+                email: { type: string, format: email, maxLength: 150 }
+                company: { type: string, maxLength: 150 }
+      responses:
+        '200': { $ref: '#/components/responses/User' }
+
+  /v1/me/favorites:
+    get:
+      tags: [me]
+      security: [ { bearer: [] } ]
+      responses:
+        '200': { $ref: '#/components/responses/ProductList' }
+    put:
+      tags: [me]
+      security: [ { bearer: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [productIds]
+              properties:
+                productIds: { type: array, maxItems: 500, items: { type: integer } }
+      responses:
+        '200': { $ref: '#/components/responses/ProductList' }
+
+  /v1/me/devices:
+    post:
+      tags: [me]
+      security: [ { bearer: [] } ]
+      summary: Регистрация push-токена
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [platform, token]
+              properties:
+                platform: { type: string, enum: [ios, android] }
+                token: { type: string, maxLength: 512 }
+      responses:
+        '204': { description: OK }
+    delete:
+      tags: [me]
+      security: [ { bearer: [] } ]
+      summary: Снять push-токен (вызывать при выходе, ДО /v1/auth/logout)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string, maxLength: 512 }
+      responses:
+        '204': { description: OK }
+
+  /v1/orders:
+    get:
+      tags: [orders]
+      security: [ { bearer: [] } ]
+      parameters: [ { $ref: '#/components/parameters/Page' }, { $ref: '#/components/parameters/Limit' } ]
+      responses:
+        '200': { $ref: '#/components/responses/OrderList' }
+    post:
+      tags: [orders]
+      security: [ { bearer: [] } ]
+      summary: Оформить заявку из корзины → статус «В обработке»
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, maxLength: 64 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CheckoutRequest' }
+      responses:
+        '201': { $ref: '#/components/responses/Order' }
+        '400': { description: 'Нет заголовка Idempotency-Key', $ref: '#/components/responses/Error' }
+        '409': { description: 'cart_changed — позиция стала недоступна; клиент обновляет корзину через /v1/cart/quote', $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+
+  /v1/orders/{id}:
+    get:
+      tags: [orders]
+      security: [ { bearer: [] } ]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/Order' }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /v1/orders/{id}/cancel:
+    post:
+      tags: [orders]
+      security: [ { bearer: [] } ]
+      summary: Отменить заявку (только пока статус «В обработке»)
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/Order' }
+        '409': { $ref: '#/components/responses/Error' }
+
+  /v1/requests:
+    post:
+      tags: [orders]
+      security: [ { bearer: [] } ]
+      summary: Заявка без корзины (персонал, программа, площадка, звонок) — тоже попадает в «Мои заказы»
+      parameters:
+        - { name: Idempotency-Key, in: header, required: true, schema: { type: string, maxLength: 64 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RequestCreate' }
+      responses:
+        '201': { $ref: '#/components/responses/Order' }
+        '422': { $ref: '#/components/responses/Error' }
+
+  /v1/manager/orders:
+    get:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      summary: Заявки для менеджера (роль manager)
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/OrderStatus' } }
+        - { name: q, in: query, description: 'Поиск по номеру, телефону (цифры) или имени', schema: { type: string, maxLength: 50 } }
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/Limit' }
+      responses:
+        '200': { $ref: '#/components/responses/OrderList' }
+
+  /v1/manager/orders/{id}:
+    get:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/Order' }
+        '404': { $ref: '#/components/responses/Error' }
+    patch:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { $ref: '#/components/schemas/OrderStatus' }
+                comment: { type: string, maxLength: 1000, description: 'Видит клиент в истории заказа' }
+                total: { type: integer, description: 'Итог после согласования (необязательно)' }
+      responses:
+        '200': { $ref: '#/components/responses/Order' }
+        '409': { $ref: '#/components/responses/Error' }
+
+  /v1/info:
+    get:
+      tags: [info]
+      summary: Контакты, доставка, условия аренды, самовывоз
+      responses:
+        '200': { $ref: '#/components/responses/Info' }
+
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer }
+
+  parameters:
+    IdPath: { name: id, in: path, required: true, schema: { type: integer } }
+    Page: { name: page, in: query, schema: { type: integer, minimum: 1, default: 1 } }
+    Limit: { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 60, default: 24 } }
+
+  requestBodies:
+    CartItems:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [items]
+            properties:
+              items: { type: array, maxItems: 100, items: { $ref: '#/components/schemas/CartItemInput' } }
+
+  schemas:
+    Envelope:
+      type: object
+      required: [success, data, error]
+      properties:
+        success: { type: boolean }
+        data: {}
+        error:
+          oneOf:
+            - type: 'null'
+            - type: object
+              required: [code, message]
+              properties:
+                code: { type: string }
+                message: { type: string }
+                fields: { type: object, additionalProperties: { type: string } }
+        meta: { $ref: '#/components/schemas/PageMeta' }
+
+    PageMeta:
+      type: object
+      properties:
+        total: { type: integer }
+        page: { type: integer }
+        limit: { type: integer }
+
+    Image:
+      type: object
+      required: [url]
+      properties:
+        url: { type: string, format: uri }
+        width: { type: integer }
+        height: { type: integer }
+
+    Media:
+      type: object
+      required: [type, url]
+      properties:
+        type: { type: string, enum: [image, video] }
+        url: { type: string, format: uri }
+        poster: { type: string, format: uri }
+
+    Badge:
+      type: object
+      required: [text]
+      properties:
+        text: { type: string, example: Хит }
+        color: { type: string, example: '#705ABF' }
+
+    Money:
+      type: integer
+      description: Целые рубли
+
+    PriceTag:
+      type: object
+      description: Готовая к показу цена в листинге
+      properties:
+        amount: { $ref: '#/components/schemas/Money' }
+        from: { type: boolean, description: 'Префикс «от»' }
+        unit: { type: string, example: '/ порц.' }
+        onRequest: { type: boolean }
+
+    CategoryNode:
+      type: object
+      required: [id, name, kind]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        url: { type: string }
+        icon: { type: string, format: uri }
+        image: { type: string, format: uri }
+        kind: { type: string, enum: [catalog, buy, venues, landing, scenario] }
+        children: { type: array, items: { $ref: '#/components/schemas/CategoryNode' } }
+
+    Crumb:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+
+    Scenario:
+      type: object
+      description: Карточка-сценарий (лендинг/scenlink) — открывается как веб-страница внутри приложения
+      required: [title, url]
+      properties:
+        title: { type: string }
+        image: { type: string, format: uri }
+        url: { type: string, format: uri }
+
+    CategoryPage:
+      type: object
+      required: [category, breadcrumbs, children]
+      properties:
+        category: { $ref: '#/components/schemas/CategoryNode' }
+        title: { type: string }
+        heroVideo: { type: string, format: uri }
+        breadcrumbs: { type: array, items: { $ref: '#/components/schemas/Crumb' } }
+        children: { type: array, items: { $ref: '#/components/schemas/CategoryNode' } }
+        scenarios: { type: array, items: { $ref: '#/components/schemas/Scenario' } }
+        seoHtml: { type: string }
+
+    ProductSummary:
+      type: object
+      required: [id, slug, name, template]
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        image: { type: string, format: uri }
+        price: { $ref: '#/components/schemas/PriceTag' }
+        badge: { $ref: '#/components/schemas/Badge' }
+        template: { $ref: '#/components/schemas/Template' }
+
+    ProductFacets:
+      type: object
+      properties:
+        priceMin: { type: integer }
+        priceMax: { type: integer }
+        colors:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              hex: { type: string }
+              count: { type: integer }
+
+    Template:
+      type: string
+      enum: [configurator, simple, showcase, staff, program]
+
+    PriceSide:
+      type: object
+      required: [amount, label]
+      properties:
+        amount: { $ref: '#/components/schemas/Money' }
+        label: { type: string, example: Аренда }
+        postfix: { type: string, example: '/ порц.' }
+        from: { type: boolean }
+        sale: { type: boolean, description: 'Фиксированная цена — время не применяется' }
+        onRequest: { type: boolean }
+        minQty: { type: integer, minimum: 1, default: 1 }
+        qtyStepPct: { type: number, minimum: 0, default: 0 }
+
+    TimeRule:
+      type: object
+      required: [unit, default, percent]
+      properties:
+        unit: { type: string, enum: [hours, days] }
+        default: { type: integer, minimum: 1 }
+        percent: { type: number, description: '% от цены за каждый шаг сверх default' }
+
+    Sub:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string, description: 'id подкомплекта CMS (строка — бывают составные)' }
+        name: { type: string }
+        group: { type: string, description: 'Заголовок группы вариантов, напр. «Привозим готовое»' }
+        rent: { $ref: '#/components/schemas/PriceSide' }
+        buy: { $ref: '#/components/schemas/PriceSide' }
+        flatSurcharge: { $ref: '#/components/schemas/Money' }
+        image: { type: string, format: uri }
+        text: { type: string }
+
+    MenuRow:
+      type: object
+      required: [id, name, price]
+      properties:
+        id: { type: string }
+        group: { type: string }
+        name: { type: string }
+        price: { $ref: '#/components/schemas/Money' }
+        minQty: { type: integer, default: 0 }
+
+    Reward:
+      type: object
+      properties:
+        goal: { $ref: '#/components/schemas/Money' }
+        type: { type: string, enum: [base_free, every_nth] }
+        label: { type: string }
+
+    Complect:
+      type: object
+      required: [id, title]
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        subtitle: { type: string }
+        textHtml: { type: string }
+        image: { type: string, format: uri }
+        pdfUrl: { type: string, format: uri }
+        rent: { $ref: '#/components/schemas/PriceSide' }
+        buy: { $ref: '#/components/schemas/PriceSide' }
+        time: { $ref: '#/components/schemas/TimeRule' }
+        basePrice: { $ref: '#/components/schemas/Money' }
+        basePriceName: { type: string }
+        subsLabel: { type: string, example: Варианты }
+        subs: { type: array, items: { $ref: '#/components/schemas/Sub' } }
+        menu: { type: array, items: { $ref: '#/components/schemas/MenuRow' } }
+        reward: { $ref: '#/components/schemas/Reward' }
+        includes: { type: array, items: { type: string } }
+        requirements: { type: array, items: { type: string } }
+        comment: { type: string, description: 'Условие комплекта, напр. «Выход на чел: 850 гр»' }
+
+    Extra:
+      type: object
+      required: [id, name, price]
+      properties:
+        id: { type: string, description: 'Стабильный id (CMS id опции или хеш имени)' }
+        name: { type: string }
+        price: { $ref: '#/components/schemas/Money' }
+        from: { type: boolean }
+        image: { type: string, format: uri }
+        group: { type: string, description: 'Группа для «Также подходит»' }
+        required: { type: boolean }
+        note: { type: string }
+        countable: { type: boolean, description: 'Свой счётчик (cateringMenu)' }
+
+    Spec:
+      type: object
+      required: [name, value]
+      properties:
+        name: { type: string }
+        value: { type: string }
+
+    VariantLink:
+      type: object
+      properties:
+        complectId: { type: integer }
+        subId: { type: string }
+        priceType: { type: string, enum: [rent, buy] }
+        slug: { type: string }
+        title: { type: string }
+
+    Masterclass:
+      type: object
+      properties:
+        variantsLabel: { type: string }
+        priceBadge: { type: string, example: за 10 участников }
+        venueTitle: { type: string }
+        venueText: { type: string }
+        venues:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              text: { type: string }
+              images: { type: array, items: { type: string, format: uri } }
+        stepsTitle: { type: string }
+        steps:
+          type: array
+          items:
+            type: object
+            properties:
+              title: { type: string }
+              text: { type: string }
+        includedTitle: { type: string }
+        included: { type: array, items: { type: string } }
+        relatedTitle: { type: string }
+        related: { type: array, items: { $ref: '#/components/schemas/ProductSummary' } }
+        tags: { type: array, items: { $ref: '#/components/schemas/Crumb' } }
+
+    ContentBlock:
+      type: object
+      description: Типизированный блок для шаблонов showcase/staff/program
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [lead, text, facts, gallery, video, cards, steps, tiers, links]
+        title: { type: string }
+        text: { type: string }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              title: { type: string }
+              subtitle: { type: string }
+              text: { type: string }
+              image: { type: string, format: uri }
+              video: { type: string, format: uri }
+              price: { $ref: '#/components/schemas/PriceTag' }
+              rows: { type: array, items: { $ref: '#/components/schemas/Spec' } }
+              link: { type: string }
+
+    Product:
+      type: object
+      required: [id, slug, name, template, orderMode, media, complects, extras]
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        art: { type: string, example: '07138' }
+        name: { type: string }
+        template: { $ref: '#/components/schemas/Template' }
+        configuratorMode: { type: string, enum: [standard, trampoline, cateringMenu, masterclass] }
+        orderMode: { type: string, enum: [cart, toggle, request] }
+        categoryId: { type: integer }
+        breadcrumbs: { type: array, items: { $ref: '#/components/schemas/Crumb' } }
+        badge: { $ref: '#/components/schemas/Badge' }
+        media: { type: array, items: { $ref: '#/components/schemas/Media' } }
+        price: { $ref: '#/components/schemas/PriceTag' }
+        lead: { type: string }
+        specs: { type: array, items: { $ref: '#/components/schemas/Spec' } }
+        descriptionHtml: { type: string }
+        complectsLabel: { type: string, example: Комплекты }
+        complects: { type: array, items: { $ref: '#/components/schemas/Complect' } }
+        extras: { type: array, items: { $ref: '#/components/schemas/Extra' } }
+        similar: { type: array, items: { $ref: '#/components/schemas/ProductSummary' } }
+        variantLinks: { type: array, items: { $ref: '#/components/schemas/VariantLink' } }
+        masterclass: { $ref: '#/components/schemas/Masterclass' }
+        blocks: { type: array, items: { $ref: '#/components/schemas/ContentBlock' } }
+        shareUrl: { type: string, format: uri }
+
+    CartItemInput:
+      type: object
+      description: |
+        Без complectId — строка-опция (только для orderMode=toggle, шаблоны simple/showcase): нужен хотя бы
+        один доп в extras, цена = сумма допов × qty (обязательные допы не добавляются).
+      required: [productId, qty]
+      properties:
+        productId: { type: integer }
+        complectId: { type: integer }
+        subId: { type: string }
+        priceType: { type: string, enum: [rent, buy], default: rent }
+        time:
+          type: object
+          properties:
+            unit: { type: string, enum: [hours, days] }
+            value: { type: integer, minimum: 1, maximum: 365 }
+        qty: { type: integer, minimum: 1, maximum: 10000 }
+        extras:
+          type: array
+          maxItems: 50
+          items:
+            type: object
+            required: [id]
+            properties:
+              id: { type: string }
+              qty: { type: integer, minimum: 1, default: 1 }
+        menu:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            required: [id, qty]
+            properties:
+              id: { type: string }
+              qty: { type: integer, minimum: 0 }
+
+    QuoteLine:
+      type: object
+      required: [key, input, productName, complectTitle, unitPrice, total, available]
+      properties:
+        key: { type: string, description: 'Стабильный ключ позиции (хеш конфигурации)' }
+        input: { $ref: '#/components/schemas/CartItemInput' }
+        productName: { type: string }
+        productSlug: { type: string }
+        image: { type: string, format: uri }
+        art: { type: string }
+        complectTitle: { type: string }
+        subTitle: { type: string }
+        priceLabel: { type: string }
+        timeLabel: { type: string, example: '2 д' }
+        qtyUnit: { type: string, example: шт }
+        extras:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              qty: { type: integer }
+              price: { $ref: '#/components/schemas/Money' }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+        total: { $ref: '#/components/schemas/Money' }
+        onRequest: { type: boolean }
+        available: { type: boolean, description: 'false — товар/комплект снят с продажи' }
+        warning: { type: string }
+
+    Quote:
+      type: object
+      required: [lines, total]
+      properties:
+        lines: { type: array, items: { $ref: '#/components/schemas/QuoteLine' } }
+        total: { $ref: '#/components/schemas/Money' }
+        hasOnRequest: { type: boolean }
+        count: { type: integer }
+
+    User:
+      type: object
+      required: [id, phone]
+      properties:
+        id: { type: integer }
+        phone: { type: string }
+        name: { type: string }
+        email: { type: string }
+        company: { type: string }
+        role: { type: string, enum: [customer, manager] }
+
+    Session:
+      type: object
+      required: [accessToken, refreshToken, expiresIn, user]
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        expiresIn: { type: integer }
+        user: { $ref: '#/components/schemas/User' }
+        isNew: { type: boolean }
+
+    OrderStatus:
+      type: string
+      enum: [processing, confirmed, preparing, delivering, in_progress, completed, cancelled]
+      description: |
+        processing — «В обработке» (сразу после оформления), confirmed — «Подтверждён»,
+        preparing — «Комплектуется», delivering — «В пути», in_progress — «Мероприятие идёт»,
+        completed — «Завершён», cancelled — «Отменён»
+
+    CheckoutRequest:
+      type: object
+      required: [items, eventDate, delivery]
+      properties:
+        items: { type: array, minItems: 1, maxItems: 100, items: { $ref: '#/components/schemas/CartItemInput' } }
+        eventDate: { type: string, format: date }
+        eventDateTo: { type: string, format: date }
+        delivery:
+          type: object
+          required: [method]
+          properties:
+            method: { type: string, enum: [delivery, pickup] }
+            address: { type: string, maxLength: 300 }
+        contactName: { type: string, maxLength: 100 }
+        contactPhone: { type: string }
+        comment: { type: string, maxLength: 2000 }
+
+    RequestCreate:
+      type: object
+      required: [kind]
+      properties:
+        kind: { type: string, enum: [product, venue, callback] }
+        productId: { type: integer }
+        complectId: { type: integer }
+        venueId: { type: integer }
+        eventDate: { type: string, format: date }
+        eventType: { type: string, maxLength: 100 }
+        guests: { type: integer, minimum: 1, maximum: 100000 }
+        comment: { type: string, maxLength: 2000 }
+
+    OrderLine:
+      type: object
+      properties:
+        productId: { type: integer }
+        productName: { type: string }
+        productSlug: { type: string }
+        image: { type: string, format: uri }
+        art: { type: string }
+        complectTitle: { type: string }
+        subTitle: { type: string }
+        timeLabel: { type: string }
+        qty: { type: integer }
+        qtyUnit: { type: string }
+        extras: { type: array, items: { type: object, properties: { name: { type: string }, qty: { type: integer }, price: { type: integer } } } }
+        unitPrice: { type: integer }
+        total: { type: integer }
+        onRequest: { type: boolean }
+        input: { $ref: '#/components/schemas/CartItemInput' }
+
+    StatusEvent:
+      type: object
+      properties:
+        status: { $ref: '#/components/schemas/OrderStatus' }
+        label: { type: string }
+        at: { type: string, format: date-time }
+        comment: { type: string }
+
+    Order:
+      type: object
+      required: [id, number, kind, status, statusLabel, createdAt, lines, total, history]
+      properties:
+        id: { type: integer }
+        number: { type: string, example: 'AA-000123' }
+        kind: { type: string, enum: [cart, product, venue, callback] }
+        status: { $ref: '#/components/schemas/OrderStatus' }
+        statusLabel: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        eventDate: { type: string, format: date }
+        eventDateTo: { type: string, format: date }
+        delivery:
+          type: object
+          properties:
+            method: { type: string, enum: [delivery, pickup] }
+            address: { type: string }
+        contactName: { type: string }
+        contactPhone: { type: string }
+        comment: { type: string }
+        subject: { type: string, description: 'Для заявок без корзины: что заказали' }
+        details:
+          type: object
+          description: 'Параметры заявки без корзины'
+          properties:
+            eventType: { type: string }
+            guests: { type: integer }
+            productId: { type: integer }
+            complectId: { type: integer }
+            venueId: { type: integer }
+        lines: { type: array, items: { $ref: '#/components/schemas/OrderLine' } }
+        total: { type: integer }
+        hasOnRequest: { type: boolean }
+        canCancel: { type: boolean }
+        history: { type: array, items: { $ref: '#/components/schemas/StatusEvent' } }
+
+    VenueSummary:
+      type: object
+      required: [id, slug, name]
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        type: { type: string }
+        photos: { type: array, items: { type: string, format: uri } }
+        area: { type: integer }
+        capacity: { type: integer }
+        address: { type: string }
+        metro:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              color: { type: string }
+              distance: { type: integer, description: метры }
+        price: { $ref: '#/components/schemas/PriceTag' }
+
+    Venue:
+      allOf:
+        - $ref: '#/components/schemas/VenueSummary'
+        - type: object
+          properties:
+            minHours: { type: integer }
+            descriptionHtml: { type: string }
+            howToRent: { type: array, items: { type: string } }
+            geo:
+              type: object
+              properties:
+                lat: { type: number }
+                lng: { type: number }
+            eventTypes: { type: array, items: { type: string } }
+            similar: { type: array, items: { $ref: '#/components/schemas/VenueSummary' } }
+            shareUrl: { type: string, format: uri }
+
+    FilterOption:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        group: { type: string }
+        color: { type: string }
+        count: { type: integer }
+
+    HomeSection:
+      type: object
+      required: [type]
+      properties:
+        type: { type: string, enum: [hero, promoTiles, directions, products, cases, benefits, recentlyViewed] }
+        title: { type: string }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              title: { type: string }
+              subtitle: { type: string }
+              image: { type: string, format: uri }
+              video: { type: string, format: uri }
+              badge: { type: string }
+              categoryId: { type: integer }
+              url: { type: string }
+        products: { type: array, items: { $ref: '#/components/schemas/ProductSummary' } }
+
+    Info:
+      type: object
+      properties:
+        phone: { type: string }
+        phoneHint: { type: string }
+        email: { type: string }
+        address: { type: string }
+        pickupAddress: { type: string }
+        pickupHours: { type: string }
+        geo: { type: object, properties: { lat: { type: number }, lng: { type: number } } }
+        telegram: { type: string }
+        whatsapp: { type: string }
+        socials: { type: array, items: { type: object, properties: { name: { type: string }, url: { type: string } } } }
+        deliveryHtml: { type: string }
+        rentalTermsHtml: { type: string }
+        cartNotice: { type: string }
+        rating: { type: object, properties: { value: { type: number }, reviews: { type: integer }, source: { type: string } } }
+
+  responses:
+    Error:
+      description: Ошибка
+      content: { application/json: { schema: { $ref: '#/components/schemas/Envelope' } } }
+    Home:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: object, properties: { sections: { type: array, items: { $ref: '#/components/schemas/HomeSection' } } } } } } ] } } }
+    CategoryTree:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: array, items: { $ref: '#/components/schemas/CategoryNode' } } } } ] } } }
+    CategoryPage:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/CategoryPage' } } } ] } } }
+    ProductList:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/ProductSummary' } }, facets: { $ref: '#/components/schemas/ProductFacets' } } } } } ] } } }
+    Product:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/Product' } } } ] } } }
+    Resolve:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: object, properties: { type: { type: string, enum: [product, category, venue, web] }, id: { type: integer }, complectId: { type: integer }, subId: { type: string }, priceType: { type: string }, url: { type: string } } } } } ] } } }
+    Search:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: object, properties: { products: { type: array, items: { $ref: '#/components/schemas/ProductSummary' } }, categories: { type: array, items: { $ref: '#/components/schemas/CategoryNode' } }, correctedQuery: { type: string } } } } } ] } } }
+    VenueList:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: object, properties: { items: { type: array, items: { $ref: '#/components/schemas/VenueSummary' } }, counts: { type: object, additionalProperties: { type: object, additionalProperties: { type: integer } } } } } } } ] } } }
+    VenueFilters:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: object, properties: { events: { type: array, items: { $ref: '#/components/schemas/FilterOption' } }, types: { type: array, items: { $ref: '#/components/schemas/FilterOption' } }, metro: { type: array, items: { $ref: '#/components/schemas/FilterOption' } }, props: { type: array, items: { $ref: '#/components/schemas/FilterOption' } }, ranges: { type: object, additionalProperties: { type: object, properties: { min: { type: integer }, max: { type: integer } } } } } } } } ] } } }
+    Venue:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/Venue' } } } ] } } }
+    Quote:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/Quote' } } } ] } } }
+    Session:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/Session' } } } ] } } }
+    User:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/User' } } } ] } } }
+    Order:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/Order' } } } ] } } }
+    OrderList:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: array, items: { $ref: '#/components/schemas/Order' } } } } ] } } }
+    Info:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/Info' } } } ] } } }

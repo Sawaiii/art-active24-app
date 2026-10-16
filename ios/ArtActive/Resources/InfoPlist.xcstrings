@@ -1,0 +1,42 @@
+{
+  "sourceLanguage": "ru",
+  "strings": {
+    "CFBundleDisplayName": {
+      "comment": "Имя приложения под иконкой",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Арт-Актив"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Art-Active"
+          }
+        }
+      }
+    },
+    "CFBundleName": {
+      "comment": "Имя бандла",
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Арт-Актив"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Art-Active"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

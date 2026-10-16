@@ -1,0 +1,108 @@
+{
+  "home": {
+    "sections": [
+      { "type": "hero", "items": [ { "title": "Всё для фантастических мероприятий", "subtitle": "Аренда мебели, аттракционов, кейтеринг и площадки с 2007 года", "image": "https://www.art-active24.ru/images/upload/hero.jpg", "video": "https://cdn.example.invalid/video/hero.mp4", "url": "https://www.art-active24.ru/o-nas/" } ] },
+      { "type": "promoTiles", "items": [
+        { "title": "Новогодние аттракционы", "badge": "Скоро праздник", "image": "https://www.art-active24.ru/images/upload/ng.jpg", "categoryId": 600 },
+        { "title": "Хэллоуин", "badge": "Скоро праздник", "image": "https://www.art-active24.ru/images/upload/halloween.jpg", "categoryId": 834 }
+      ] },
+      { "type": "directions", "title": "Наши возможности", "items": [
+        { "title": "Мебель", "image": "https://www.art-active24.ru/images/upload/dir-mebel.jpg", "categoryId": 257 },
+        { "title": "Кейтеринг", "image": "https://www.art-active24.ru/images/upload/dir-catering.jpg", "categoryId": 81 },
+        { "title": "Фотозоны", "image": "https://www.art-active24.ru/images/upload/dir-foto.jpg", "categoryId": 127 },
+        { "title": "Тимбилдинг", "image": "https://www.art-active24.ru/images/upload/dir-tb.jpg", "categoryId": 181 }
+      ] },
+      { "type": "products", "title": "Новинки", "products": [
+        { "id": 7138, "slug": "stol-skladnoj-viktoriya-180-sm", "name": "Стол складной Виктория 180 см", "image": "https://www.art-active24.ru/images/upload/stol-viktoriya-180-1.jpg", "price": { "amount": 770, "from": true }, "badge": { "text": "Хит", "color": "#705ABF" }, "template": "configurator" },
+        { "id": 469, "slug": "plov", "name": "Плов в казане на мероприятие", "image": "https://www.art-active24.ru/images/upload/plov-1.jpg", "price": { "amount": 340, "from": true, "unit": "/ порц." }, "template": "configurator" },
+        { "id": 10500, "slug": "batut-korabl-bolshoj", "name": "Батут «Корабль» большой", "image": "https://www.art-active24.ru/images/upload/batut-korabl-1.jpg", "price": { "amount": 64000, "from": true }, "badge": { "text": "Новинка!", "color": "#00CC00" }, "template": "configurator" }
+      ] },
+      { "type": "cases", "title": "Наши кейсы", "items": [ { "title": "ТМХ — Лужники", "image": "https://www.art-active24.ru/images/upload/case-tmh.jpg", "url": "https://www.art-active24.ru/cases/tmh-luzhniki/" } ] },
+      { "type": "benefits", "title": "Почему мы", "items": [
+        { "title": "С 2007 года", "subtitle": "750+ мероприятий в год" },
+        { "title": "Своя площадка и склад", "subtitle": "Доставка и монтаж в Москве и области" }
+      ] },
+      { "type": "recentlyViewed", "title": "Вы смотрели" }
+    ]
+  },
+  "tree": [
+    { "id": 81, "name": "Кейтеринг", "slug": "keytering-moskva", "kind": "catalog", "children": [
+      { "id": 529, "name": "Гастро-станции", "kind": "catalog" },
+      { "id": 283, "name": "Фуршет", "kind": "catalog" }
+    ] },
+    { "id": 257, "name": "Мебель", "slug": "arenda-mebeli", "kind": "catalog", "children": [
+      { "id": 225, "name": "Столы", "kind": "catalog" },
+      { "id": 228, "name": "Стулья", "kind": "catalog" }
+    ] },
+    { "id": 676, "name": "Площадки", "slug": "arenda-ploshchadki", "kind": "venues" },
+    { "id": 5, "name": "Работа на кассу", "url": "https://www.art-active24.ru/rabota-na-kassu/", "kind": "scenario" }
+  ],
+  "category": {
+    "category": { "id": 225, "name": "Столы", "slug": "stoly", "kind": "catalog" },
+    "title": "Аренда столов для мероприятий",
+    "heroVideo": "https://cdn.example.invalid/video/mebel.mp4",
+    "breadcrumbs": [ { "id": 257, "name": "Мебель" }, { "id": 225, "name": "Столы" } ],
+    "children": [ { "id": 2251, "name": "Фуршетные", "kind": "catalog" }, { "id": 2252, "name": "Круглые", "kind": "catalog" } ],
+    "scenarios": [ { "title": "Работа на кассу", "image": "https://www.art-active24.ru/images/upload/kassa.jpg", "url": "https://www.art-active24.ru/rabota-na-kassu/" } ],
+    "seoHtml": "<p>Столы для банкетов, фуршетов и конференций — с доставкой и монтажом.</p>"
+  },
+  "products": {
+    "items": [
+      { "id": 7138, "slug": "stol-skladnoj-viktoriya-180-sm", "name": "Стол складной Виктория 180 см", "image": "https://www.art-active24.ru/images/upload/stol-viktoriya-180-1.jpg", "price": { "amount": 770, "from": true }, "badge": { "text": "Хит", "color": "#705ABF" }, "template": "configurator" },
+      { "id": 7139, "slug": "stol-kruglyj-180", "name": "Стол круглый 180 см", "image": "https://www.art-active24.ru/images/upload/stol-kruglyj.jpg", "price": { "amount": 990, "from": true }, "template": "configurator" },
+      { "id": 7140, "slug": "stol-furshetnyj", "name": "Стол фуршетный", "image": "https://www.art-active24.ru/images/upload/stol-furshet.jpg", "price": { "amount": 1100, "from": true }, "template": "configurator" }
+    ],
+    "facets": { "priceMin": 500, "priceMax": 12000, "colors": [ { "name": "Белый", "hex": "#FFFFFF", "count": 12 }, { "name": "Чёрный", "hex": "#000000", "count": 4 } ] }
+  },
+  "venues": {
+    "items": [
+      { "id": 3501, "slug": "loft-idealista", "name": "Лофт «Идеалиста»", "type": "Лофт", "photos": ["https://www.art-active24.ru/images/upload/places26/w600/idealista-1.webp", "https://www.art-active24.ru/images/upload/places26/w600/idealista-2.webp"], "area": 370, "capacity": 150, "address": "Москва, ул. Большая Новодмитровская, 36с4", "metro": [ { "name": "Дмитровская", "color": "#A2A5B4", "distance": 240 } ], "price": { "amount": 10000, "from": true, "unit": "/ час" } }
+    ],
+    "counts": { "cats": { "7": 120 }, "props": { "3": 40 }, "metro": { "150": 12 } }
+  },
+  "venueFilters": {
+    "events": [ { "id": 6, "name": "Корпоратив", "count": 540 }, { "id": 19, "name": "Свадьба", "count": 310 } ],
+    "types": [ { "id": 7, "name": "Лофт", "count": 120 }, { "id": 41, "name": "Ресторан", "count": 210 } ],
+    "metro": [ { "id": 150, "name": "Дмитровская", "color": "#A2A5B4", "count": 12 } ],
+    "props": [ { "id": 3, "name": "Парковка", "group": "Парковка", "count": 40 }, { "id": 163, "name": "Сцена", "group": "Оборудование", "count": 95 } ],
+    "ranges": { "price": { "min": 62, "max": 166666 }, "capacity": { "min": 2, "max": 1500 }, "area": { "min": 7, "max": 7140 } }
+  },
+  "info": {
+    "phone": "+74950326750",
+    "phoneHint": "Работаем круглосуточно",
+    "email": "info@art-active24.ru",
+    "address": "Москва, Егорьевский проезд, 2А стр. 6",
+    "pickupAddress": "Москва, Егорьевский проезд, 2Ас6",
+    "pickupHours": "Пн.-Вс., круглосуточно",
+    "geo": { "lat": 55.7091, "lng": 37.7535 },
+    "telegram": "@artactive24",
+    "whatsapp": "+74950326750",
+    "deliveryHtml": "<p>Доставка по Москве — от 4 500 ₽. По области — 60 ₽/км от МКАД.</p>",
+    "rentalTermsHtml": "<p>Минимальный срок аренды — 1 сутки.</p>",
+    "cartNotice": "Цены не окончательные — это список интересующих вас позиций.",
+    "rating": { "value": 5.0, "reviews": 430, "source": "Яндекс" }
+  },
+  "order": {
+    "id": 123,
+    "number": "AA-000123",
+    "kind": "cart",
+    "status": "confirmed",
+    "statusLabel": "Подтверждён",
+    "createdAt": "2026-10-14T09:30:00Z",
+    "updatedAt": "2026-10-15T12:00:00.000Z",
+    "eventDate": "2026-10-25",
+    "eventDateTo": "2026-10-26",
+    "delivery": { "method": "delivery", "address": "Москва, Лужники" },
+    "contactName": "Иван",
+    "contactPhone": "+79991234567",
+    "lines": [
+      { "productId": 7138, "productName": "Стол складной Виктория 180 см", "complectTitle": "«Технический»", "timeLabel": "2 д", "qty": 2, "qtyUnit": "шт", "unitPrice": 924, "total": 1848, "input": { "productId": 7138, "complectId": 1724, "priceType": "rent", "time": { "unit": "days", "value": 2 }, "qty": 2 } }
+    ],
+    "total": 1848,
+    "canCancel": false,
+    "history": [
+      { "status": "processing", "label": "В обработке", "at": "2026-10-14T09:30:00Z" },
+      { "status": "confirmed", "label": "Подтверждён", "at": "2026-10-15T12:00:00Z", "comment": "Доставим 25.10 к 9:00" }
+    ]
+  }
+}

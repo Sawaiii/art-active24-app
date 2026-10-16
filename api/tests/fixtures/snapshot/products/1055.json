@@ -1,0 +1,30 @@
+{
+ "id": 1055,
+ "slug": "chajnaya-stanciya",
+ "name": "Чайная станция",
+ "template": "simple",
+ "orderMode": "toggle",
+ "media": [],
+ "complects": [
+  {
+   "id": 3218,
+   "title": "Комплект — «Mini»",
+   "rent": {
+    "amount": 11000,
+    "label": "Аренда",
+    "postfix": "/ до 40 чел"
+   },
+   "includes": [
+    "Термопот - 1 шт."
+   ]
+  }
+ ],
+ "extras": [
+  {
+   "id": "x-barmen",
+   "name": "Бармен",
+   "price": 8000,
+   "from": true
+  }
+ ]
+}
