@@ -1,0 +1,162 @@
+name: iOS — build, test, unsigned IPA
+
+# Компилятор для iOS-части — этот workflow: на Windows Swift не собирается.
+# 1) xcodegen generate  2) сборка под симулятор  3) XCTest (векторы цены из contract/,
+# декодирование фикстур)  4) Release-сборка под устройство без подписи → .ipa артефактом
+# (ставится через Sideloadly, см. ios/README.md).
+
+on:
+  push:
+    paths:
+      - 'ios/**'
+      - 'contract/**'
+      - '.github/workflows/ios.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: ios
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Liquid Glass требует SDK iOS 26 → Xcode 26. На macos-15 он установлен рядом с Xcode 16;
+      # выбираем самый свежий Xcode_26*. (Когда macos-26 станет образом по умолчанию — достаточно runs-on.)
+      - name: Select Xcode 26
+        run: |
+          set -eo pipefail
+          XCODE=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1 || true)
+          if [ -z "$XCODE" ]; then
+            echo "::error::На раннере нет Xcode 26 — нужен для SDK iOS 26 (Liquid Glass)"
+            ls -d /Applications/Xcode*.app
+            exit 1
+          fi
+          sudo xcode-select -s "$XCODE/Contents/Developer"
+          xcodebuild -version
+          swift --version
+          xcrun simctl list runtimes
+
+      - name: Verify String Catalog (ru + en)
+        run: node tools/extract-strings.mjs --check
+
+      # Боевой адрес API не хранится в публичном репозитории: берётся из секрета
+      # репозитория API_BASE_URL (Settings → Secrets and variables → Actions).
+      - name: API address from secret
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        run: |
+          set -eo pipefail
+          if [ -z "$API_BASE_URL" ]; then
+            echo "::warning::Секрет API_BASE_URL не задан — Release собирается с плейсхолдером https://api.invalid/api/ (приложение не достучится до API)"
+            rm -f Config/Secrets.xcconfig
+          else
+            # В xcconfig «//» — начало комментария, поэтому экранируем как /$()/
+            ESCAPED=$(printf '%s' "$API_BASE_URL" | sed 's#//#/$()/#g')
+            printf 'API_BASE_URL = %s\n' "$ESCAPED" > Config/Secrets.xcconfig
+            echo "API_BASE_URL задан из секрета (значение скрыто)"
+          fi
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Pick iPhone simulator
+        id: sim
+        run: |
+          set -eo pipefail
+          SIM_ID=$(xcrun simctl list devices available -j \
+            | jq -r '[.devices | to_entries[] | select(.key | test("iOS")) | .value[] | select(.name | startswith("iPhone"))] | last | .udid')
+          if [ -z "$SIM_ID" ] || [ "$SIM_ID" = "null" ]; then
+            echo "::error::Нет доступного симулятора iPhone"; xcrun simctl list devices available; exit 1
+          fi
+          echo "Симулятор: $SIM_ID"
+          echo "id=$SIM_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Build (simulator)
+        run: |
+          set -eo pipefail
+          xcodebuild \
+            -project ArtActive.xcodeproj \
+            -scheme ArtActive \
+            -configuration Debug \
+            -destination "id=${{ steps.sim.outputs.id }}" \
+            -derivedDataPath build/sim \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_ENTITLEMENTS="" \
+            build-for-testing
+
+      - name: Test (pricing vectors, DTO fixtures, domain)
+        run: |
+          set -eo pipefail
+          xcodebuild \
+            -project ArtActive.xcodeproj \
+            -scheme ArtActive \
+            -configuration Debug \
+            -destination "id=${{ steps.sim.outputs.id }}" \
+            -derivedDataPath build/sim \
+            -resultBundlePath build/TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_ENTITLEMENTS="" \
+            test-without-building
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ArtActive-test-results
+          path: ios/build/TestResults.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Build Release (device, unsigned)
+        run: |
+          set -eo pipefail
+          xcodebuild \
+            -project ArtActive.xcodeproj \
+            -scheme ArtActive \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build/device \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            build
+
+      - name: Package .ipa
+        run: |
+          set -eo pipefail
+          APP_PATH="build/device/Build/Products/Release-iphoneos/ArtActive.app"
+          if [ ! -d "$APP_PATH" ]; then
+            echo "::error::Не найден .app по пути $APP_PATH"
+            find build/device -name "*.app" -maxdepth 6 || true
+            exit 1
+          fi
+          plutil -p "$APP_PATH/Info.plist" | grep -E "CFBundleDisplayName|CFBundleIdentifier"
+          if plutil -p "$APP_PATH/Info.plist" | grep -q "api.invalid"; then
+            echo "::warning::В .ipa плейсхолдер API (секрет API_BASE_URL не задан)"
+          fi
+          rm -rf Payload ArtActive.ipa
+          mkdir -p Payload
+          cp -R "$APP_PATH" Payload/
+          zip -qry ArtActive.ipa Payload
+          ls -lh ArtActive.ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ArtActive-unsigned-ipa
+          path: ios/ArtActive.ipa
+          if-no-files-found: error
+          retention-days: 14
