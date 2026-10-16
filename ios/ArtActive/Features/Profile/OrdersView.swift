@@ -54,7 +54,7 @@ struct OrdersView: View {
     var body: some View {
         Group {
             switch orders.status {
-            case .idle, .loading where orders.orders.isEmpty:
+            case .idle where orders.orders.isEmpty, .loading where orders.orders.isEmpty:
                 ScrollView { ListSkeleton().padding(Spacing.gutter) }
             case let .failed(message) where orders.orders.isEmpty:
                 ErrorStateView(message: message) { await orders.load() }
@@ -74,7 +74,7 @@ struct OrdersView: View {
         .navigationTitle(Text("Мои заказы"))
         .navigationBarTitleDisplayMode(.large)
         .refreshable {
-            await Haptics.play(.refresh)
+            Haptics.play(.refresh)
             await orders.load()
         }
         .task { await orders.load() }

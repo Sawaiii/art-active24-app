@@ -22,7 +22,7 @@ struct VenuesView: View {
         .navigationTitle(Text(viewModel.title ?? String(localized: "Площадки")))
         .navigationBarTitleDisplayMode(.large)
         .refreshable {
-            await Haptics.play(.refresh)
+            Haptics.play(.refresh)
             await viewModel.reload()
         }
         .sheet(isPresented: $isFilterPresented) {

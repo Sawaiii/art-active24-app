@@ -163,7 +163,7 @@ struct CartView: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .refreshable {
-            await Haptics.play(.refresh)
+            Haptics.play(.refresh)
             await cart.refreshQuote()
         }
     }

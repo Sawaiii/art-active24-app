@@ -17,7 +17,7 @@ struct HomeView: View {
         }
         .background(Palette.catalogPage)
         .refreshable {
-            await Haptics.play(.refresh)
+            Haptics.play(.refresh)
             await viewModel.load()
         }
         .navigationBarTitleDisplayMode(.inline)

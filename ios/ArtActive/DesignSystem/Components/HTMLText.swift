@@ -182,12 +182,20 @@ enum HTMLParser {
         let body = text.index(after: start)
         let limit = text.index(body, offsetBy: 10, limitedBy: text.endIndex) ?? text.endIndex
         var cursor = body
-        while cursor < limit, text[cursor].isLetter || text[cursor].isNumber || text[cursor] == "#" {
+        // Имена сущностей — только ASCII: «&laquoСтол» не должен считаться одним именем.
+        while cursor < limit, text[cursor].isASCII, text[cursor].isLetter || text[cursor].isNumber || text[cursor] == "#" {
             cursor = text.index(after: cursor)
         }
         let name = String(text[body..<cursor])
         let hasSemicolon = cursor < text.endIndex && text[cursor] == ";"
         let end = hasSemicolon ? text.index(after: cursor) : cursor
+
+        // Без «;» («&laquoStol») берём самое длинное известное начало имени.
+        if !hasSemicolon, !name.hasPrefix("#") {
+            guard let prefix = entitiesWithoutSemicolon.filter({ name.hasPrefix($0) }).max(by: { $0.count < $1.count }),
+                  let decoded = namedEntities[prefix] else { return nil }
+            return (decoded, text.index(body, offsetBy: prefix.count))
+        }
 
         if name.hasPrefix("#"), hasSemicolon {
             let digits = name.dropFirst()
