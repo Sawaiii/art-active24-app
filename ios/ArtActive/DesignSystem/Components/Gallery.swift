@@ -135,7 +135,7 @@ struct FullscreenGallery: View {
     var body: some View {
         ZStack(alignment: .top) {
             Color.black
-                .opacity(1 - dismissProgress * 0.8)
+                .opacity(Double(1 - dismissProgress * 0.8))
                 .ignoresSafeArea()
 
             TabView(selection: $selection) {
@@ -162,7 +162,7 @@ struct FullscreenGallery: View {
                 GlassIconButton(systemName: "xmark", label: String(localized: "Закрыть"), action: close)
             }
             .padding(.horizontal, 16)
-            .opacity(1 - dismissProgress)
+            .opacity(Double(1 - dismissProgress))
         }
         .statusBarHidden()
         .onChange(of: selection) { _, _ in Haptics.play(.selection) }
