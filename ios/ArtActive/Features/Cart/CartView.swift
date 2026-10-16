@@ -209,6 +209,7 @@ struct CartView: View {
             }
             .buttonStyle(PrimaryButtonStyle(height: 54, radius: Radius.md, font: .aaSubmit))
             .disabled(cart.quote?.lines.contains(where: { !$0.available }) == true)
+            .accessibilityIdentifier("cart.checkout")
         }
         .padding(16)
         .background(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).fill(Palette.surfaceMuted))

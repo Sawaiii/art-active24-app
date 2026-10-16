@@ -54,6 +54,7 @@ struct VenueFilterSheet: View {
                         dismiss()
                     }
                     .fontWeight(.semibold)
+                    .accessibilityIdentifier("venuefilter.apply")
                 }
             }
         }

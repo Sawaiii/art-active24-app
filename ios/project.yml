@@ -73,6 +73,22 @@ targets:
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/ArtActive.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ArtActive"
         BUNDLE_LOADER: "$(TEST_HOST)"
 
+  # UI-тесты = сценарий скриншотов для визуальной проверки (workflow ios-screenshots.yml).
+  # Отдельная схема ArtActiveScreenshots: основная схема ArtActive и ios.yml их не собирают.
+  ArtActiveUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: ArtActiveUITests
+    dependencies:
+      - target: ArtActive
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ru.artactive24.app.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: ArtActive
+
 schemes:
   ArtActive:
     build:
@@ -95,3 +111,15 @@ schemes:
       config: Debug
     archive:
       config: Release
+
+  ArtActiveScreenshots:
+    build:
+      targets:
+        ArtActive: all
+        ArtActiveUITests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - name: ArtActiveUITests

@@ -16,6 +16,7 @@ struct ProductTile: View {
                 ProductCard(product: product)
             }
             .buttonStyle(PressableStyle())
+            .accessibilityIdentifier("product.tile.\(product.id)")
 
             FavoriteButton(isOn: isFavorite, size: 32) {
                 favorites.toggle(product)

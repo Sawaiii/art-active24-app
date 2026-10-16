@@ -39,6 +39,7 @@ struct MasterclassVenuesButton: View {
                 .background(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).fill(Palette.surfaceMuted))
             }
             .buttonStyle(PressableStyle(scale: 0.98))
+            .accessibilityIdentifier("mk.venues")
             .sheet(isPresented: $isPresented) {
                 MasterclassVenuesSheet(masterclass: masterclass)
                     .presentationDetents([.medium, .large])
@@ -85,6 +86,7 @@ private struct MasterclassVenuesSheet: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Готово") { dismiss() }
+                        .accessibilityIdentifier("mk.venues.done")
                 }
             }
         }

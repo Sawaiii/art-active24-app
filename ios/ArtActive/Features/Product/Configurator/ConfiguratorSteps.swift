@@ -56,6 +56,7 @@ struct ComplectsStep: View {
                         }
                     }
                     .buttonStyle(LinkButtonStyle(font: BrandFont.inter(14, .medium)))
+                    .accessibilityIdentifier("config.complects.all")
                 }
             }
         }
@@ -120,6 +121,7 @@ struct ComplectCard: View {
             )
         }
         .buttonStyle(PressableStyle())
+        .accessibilityIdentifier("config.complect.\(complect.id)")
         .overlay(alignment: .topTrailing) {
             if let onInfo {
                 Button(action: onInfo) {
@@ -283,6 +285,7 @@ struct PriceTypeStep: View {
                 Text("Формат")
             }
             .pickerStyle(.segmented)
+            .accessibilityIdentifier("config.priceType")
         }
     }
 
@@ -364,6 +367,7 @@ private struct SubButton: View {
         }
         .buttonStyle(PressableStyle())
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("config.sub.\(sub.id)")
     }
 }
 
@@ -414,6 +418,7 @@ private struct InstallOptionCard: View {
         }
         .buttonStyle(PressableStyle(scale: 0.98))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("config.sub.\(sub.id)")
     }
 
     private var surchargeText: String {
@@ -601,6 +606,7 @@ struct ExtraRow: View {
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
         .accessibilityAddTraits(isOn ? .isSelected : [])
+        .accessibilityIdentifier("config.extra.\(extra.id)")
     }
 }
 

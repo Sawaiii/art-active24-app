@@ -17,6 +17,7 @@ struct ProfileView: View {
                 NavigationLink(value: Route.orders) {
                     row(String(localized: "Мои заказы"), systemImage: "shippingbox", badge: orders.unseenCount)
                 }
+                .accessibilityIdentifier("profile.orders")
                 .disabled(!auth.isLoggedIn)
                 NavigationLink(value: Route.favorites) {
                     row(String(localized: "Избранное"), systemImage: "heart", badge: 0, trailing: favorites.items.isEmpty ? nil : "\(favorites.items.count)")

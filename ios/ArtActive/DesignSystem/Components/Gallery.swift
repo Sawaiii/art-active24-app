@@ -84,6 +84,7 @@ struct GalleryPager: View {
                     .buttonStyle(.plain)
                     .tag(item.id)
                     .accessibilityLabel(item.videoURL == nil ? Text("Фото, открыть на весь экран") : Text("Видео, воспроизвести"))
+                    .accessibilityIdentifier("gallery.item")
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
@@ -160,6 +161,7 @@ struct FullscreenGallery: View {
                 }
                 Spacer()
                 GlassIconButton(systemName: "xmark", label: String(localized: "Закрыть"), action: close)
+                    .accessibilityIdentifier("gallery.close")
             }
             .padding(.horizontal, 16)
             .opacity(Double(1 - dismissProgress))

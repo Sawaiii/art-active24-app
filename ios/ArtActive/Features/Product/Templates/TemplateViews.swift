@@ -213,6 +213,7 @@ private struct ToggleComplectCard: View {
                 .buttonStyle(PrimaryButtonStyle(height: 46, radius: Radius.md, font: .pCartButton, shadow: false))
                 .opacity(isInCart ? 0.85 : 1)
                 .accessibilityAddTraits(isInCart ? .isSelected : [])
+                .accessibilityIdentifier("toggle.complect.\(complect.id)")
 
                 Button("Заказать", action: onOrder)
                     .buttonStyle(SecondaryButtonStyle(height: 46, fill: Palette.surfaceMuted))

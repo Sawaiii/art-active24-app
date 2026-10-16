@@ -22,6 +22,8 @@ final class PushService {
 
     /// Спрашиваем разрешение в осмысленный момент — после входа или первого заказа.
     func requestAuthorizationIfNeeded() async {
+        // В UI-тестах системный алерт разрешения перекрыл бы экраны.
+        guard !UITestSupport.isActive else { return }
         let center = UNUserNotificationCenter.current()
         let settings = await center.notificationSettings()
         switch settings.authorizationStatus {

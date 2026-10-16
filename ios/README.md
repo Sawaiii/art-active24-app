@@ -53,6 +53,16 @@ brew install xcodegen
 cd ios && xcodegen generate && open ArtActive.xcodeproj
 ```
 
+### Скриншоты всех экранов (визуальная проверка)
+
+Workflow `.github/workflows/ios-screenshots.yml` (вручную или push с изменениями в `ios/**`,
+`api/tests/fixtures/demo/**`): поднимает `api/` на демо-датасете `api/tests/fixtures/demo`
+(собирается `node tools/demo-dataset/build.mjs` из локального снапшота), сидит две заявки
+(review-номер, менеджер переводит первую в «Подтверждён»), прогоняет UI-тест `ArtActiveUITests`
+(схема `ArtActiveScreenshots`; основная схема `ArtActive` и `ios.yml` его не собирают) на симуляторе
+iPhone 17 Pro и выкладывает PNG `NN-экран.png` артефактом **`ios-screenshots`**.
+Режим UI-тестов — только Debug и только с launch-аргументом `-UITests YES` (см. `App/UITestSupport.swift`).
+
 ## Установка на iPhone через Sideloadly
 
 1. Скачайте артефакт `ArtActive-unsigned-ipa` из запуска workflow, распакуйте `ArtActive.ipa`.

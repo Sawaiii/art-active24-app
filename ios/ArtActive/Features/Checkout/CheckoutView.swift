@@ -213,6 +213,7 @@ struct CheckoutView: View {
                 Text("Способ получения")
             }
             .pickerStyle(.segmented)
+            .accessibilityIdentifier("checkout.delivery")
             .onChange(of: viewModel.delivery) { _, _ in Haptics.play(.selection) }
 
             if viewModel.delivery == .delivery {
@@ -289,6 +290,7 @@ struct CheckoutView: View {
             }
             .buttonStyle(PrimaryButtonStyle(height: 54, radius: Radius.md, font: .aaSubmit))
             .disabled(viewModel.isSending)
+            .accessibilityIdentifier("checkout.submit")
             .listRowInsets(EdgeInsets())
             .listRowBackground(Color.clear)
         } footer: {

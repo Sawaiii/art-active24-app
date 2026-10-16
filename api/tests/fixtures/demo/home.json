@@ -1,0 +1,397 @@
+{
+ "sections": [
+  {
+   "type": "hero",
+   "title": "Всё для фантастических мероприятий",
+   "items": [
+    {
+     "title": "Всё для фантастических мероприятий",
+     "video": "https://storage.yandexcloud.net/art-active/Banner-Ng-Art-2024-Mob-1.mp4"
+    }
+   ]
+  },
+  {
+   "type": "promoTiles",
+   "title": "Скоро праздник",
+   "items": [
+    {
+     "title": "Новый год",
+     "image": "https://www.art-active24.ru/images/upload/ng-kozyol-new-art-2027-1.jpg",
+     "badge": "Скоро праздник",
+     "categoryId": 126,
+     "url": "https://www.art-active24.ru/novogodnie-attrakciony/"
+    },
+    {
+     "title": "Хэллоуин",
+     "image": "https://www.art-active24.ru/images/upload/helloin-1.jpg",
+     "badge": "Скоро праздник",
+     "categoryId": 164,
+     "url": "https://www.art-active24.ru/halloween/"
+    },
+    {
+     "title": "День Народного Единства",
+     "image": "https://www.art-active24.ru/images/upload/den-narodnogo-edinstva-2.jpg",
+     "badge": "Скоро праздник",
+     "categoryId": 156,
+     "url": "https://www.art-active24.ru/den-narodnogo-edinstva/"
+    }
+   ]
+  },
+  {
+   "type": "directions",
+   "title": "Наши возможности",
+   "items": [
+    {
+     "title": "Мебель",
+     "image": "https://www.art-active24.ru/images/upload/mebel-new-ng-2.jpg",
+     "categoryId": 257,
+     "url": "https://www.art-active24.ru/arenda-mebeli/"
+    },
+    {
+     "title": "Кейтеринг",
+     "image": "https://www.art-active24.ru/images/upload/ng-kategoria-1111.jpg",
+     "categoryId": 81,
+     "url": "https://www.art-active24.ru/keytering-moskva/"
+    },
+    {
+     "title": "Фотозоны",
+     "video": "https://storage.yandexcloud.net/art-content/Fotozoni-New-Kategorii-1.mp4",
+     "categoryId": 127,
+     "url": "https://www.art-active24.ru/fotozona-v-arendu/"
+    },
+    {
+     "title": "Тимбилдинг",
+     "image": "https://www.art-active24.ru/images/upload/timbilding-new-kategoria-2.jpg",
+     "categoryId": 181,
+     "url": "https://www.art-active24.ru/teambuilding/"
+    },
+    {
+     "title": "Мастер классы",
+     "image": "https://www.art-active24.ru/images/upload/akva-grim-mk-new-kategoria-1.jpg",
+     "categoryId": 91,
+     "url": "https://www.art-active24.ru/vyezdnye-master-klassy/"
+    },
+    {
+     "title": "Сцены",
+     "image": "https://www.art-active24.ru/images/upload/scena-new-kategoria-1.jpg",
+     "categoryId": 410,
+     "url": "https://www.art-active24.ru/arenda-sceny/"
+    },
+    {
+     "title": "Квизы",
+     "image": "https://www.art-active24.ru/images/upload/kviz-tyda-syda-1.jpg",
+     "categoryId": 397,
+     "url": "https://www.art-active24.ru/organizatsiya-kviza/"
+    },
+    {
+     "title": "Игровое оборудование",
+     "video": "https://storage.yandexcloud.net/art-content/Igrovoe-Oborudovanie-New-2.mp4",
+     "categoryId": 90,
+     "url": "https://www.art-active24.ru/igrovoe-oborudovanie/"
+    },
+    {
+     "title": "VR аттракционы",
+     "image": "https://www.art-active24.ru/images/upload/vr-new-kategoria-1.jpg",
+     "categoryId": 118,
+     "url": "https://www.art-active24.ru/arenda-vr-attrakcionov/"
+    },
+    {
+     "title": "Подиумы",
+     "image": "https://www.art-active24.ru/images/upload/podiumi-plitka-art-2025-new-1.jpg",
+     "categoryId": 450,
+     "url": "https://www.art-active24.ru/arenda-podiumov/"
+    },
+    {
+     "title": "Шатры",
+     "image": "https://www.art-active24.ru/images/upload/shater-pagoda-plitka-art-2024-ava.jpg",
+     "categoryId": 234,
+     "url": "https://www.art-active24.ru/arenda-shatrov/"
+    },
+    {
+     "title": "Кулинарное казино",
+     "image": "https://www.art-active24.ru/images/upload/test3.jpg",
+     "url": "https://www.art-active24.ru/syedobnoe-kazino/"
+    },
+    {
+     "title": "Выездной бар",
+     "image": "https://www.art-active24.ru/images/upload/test7.jpg",
+     "categoryId": 290,
+     "url": "https://www.art-active24.ru/vyezdnoy-bar/"
+    },
+    {
+     "title": "Обогреватели",
+     "image": "https://www.art-active24.ru/images/upload/test10.jpg",
+     "categoryId": 296,
+     "url": "https://www.art-active24.ru/arenda-obogrevateley/"
+    }
+   ]
+  },
+  {
+   "type": "products",
+   "title": "Новинки",
+   "products": [
+    {
+     "id": 10604,
+     "slug": "stol-polygonal-120110h60-sm-derevyannyy",
+     "name": "Стол Polygonal 120×110×60 см деревянный",
+     "image": "https://www.art-active24.ru/images/upload/polygonal-wood-v3-1-1.jpg",
+     "price": {
+      "amount": 2380,
+      "from": true,
+      "unit": "",
+      "onRequest": false
+     },
+     "badge": {
+      "text": "Хит",
+      "color": "#705ABF"
+     },
+     "template": "configurator"
+    },
+    {
+     "id": 10603,
+     "slug": "stol-dlya-torta",
+     "name": "Стол для торта",
+     "image": "https://www.art-active24.ru/images/upload/stol-tort-1-1.jpg",
+     "price": {
+      "amount": 4250,
+      "from": true,
+      "unit": "",
+      "onRequest": false
+     },
+     "badge": {
+      "text": "Хит",
+      "color": "#705ABF"
+     },
+     "template": "configurator"
+    },
+    {
+     "id": 10602,
+     "slug": "stol-ulichnyy-skladnoy-d120-sm-derevyannyy-korichnevyy",
+     "name": "Стол уличный складной d-120 см деревянный коричневый",
+     "image": "https://www.art-active24.ru/images/upload/ulichnyy-d120-v2-1-1.jpg",
+     "price": {
+      "amount": 1110,
+      "from": true,
+      "unit": "",
+      "onRequest": false
+     },
+     "badge": {
+      "text": "Хит",
+      "color": "#705ABF"
+     },
+     "template": "configurator"
+    },
+    {
+     "id": 10601,
+     "slug": "stolik-kofeynyy-armenian-table",
+     "name": "Столик кофейный Armenian table",
+     "image": "https://www.art-active24.ru/images/upload/armenian-table-1-1.jpg",
+     "price": {
+      "amount": 510,
+      "from": true,
+      "unit": "",
+      "onRequest": false
+     },
+     "badge": {
+      "text": "Хит",
+      "color": "#705ABF"
+     },
+     "template": "configurator"
+    },
+    {
+     "id": 10600,
+     "slug": "stol-peregovornyy-450h75-sm-chyornyy",
+     "name": "Стол переговорный 450×75 см чёрный",
+     "image": "https://www.art-active24.ru/images/upload/peregovor-450-chyornyy-v2-1-1.jpg",
+     "price": {
+      "amount": 5500,
+      "from": true,
+      "unit": "",
+      "onRequest": false
+     },
+     "badge": {
+      "text": "Хит",
+      "color": "#705ABF"
+     },
+     "template": "configurator"
+    },
+    {
+     "id": 10599,
+     "slug": "stol-peregovornyy-450h75-sm-belyy",
+     "name": "Стол переговорный 450×75 см белый",
+     "image": "https://www.art-active24.ru/images/upload/peregovor-450-belyy-v2-1-1.jpg",
+     "price": {
+      "amount": 5500,
+      "from": true,
+      "unit": "",
+      "onRequest": false
+     },
+     "badge": {
+      "text": "Хит",
+      "color": "#705ABF"
+     },
+     "template": "configurator"
+    },
+    {
+     "id": 10591,
+     "slug": "stol-vysokiy-d80-sm-s-kromkoy",
+     "name": "Стол высокий d-80 см с кромкой",
+     "image": "https://www.art-active24.ru/images/upload/stol-vysokiy-d80-sm-s-kromkoy-art-2027-1.jpg",
+     "price": {
+      "amount": 1110,
+      "from": true,
+      "unit": "",
+      "onRequest": false
+     },
+     "badge": {
+      "text": "Хит",
+      "color": "#705ABF"
+     },
+     "template": "configurator"
+    },
+    {
+     "id": 10578,
+     "slug": "stol-barnyy-kokteylnyy-d60-sm-kruglyy-s-led-podsvetkoy",
+     "name": "Стол барный коктейльный d-60 см круглый с LED подсветкой",
+     "image": "https://www.art-active24.ru/images/upload/led-d60-real-1-1.jpg",
+     "price": {
+      "amount": 1770,
+      "from": true,
+      "unit": "",
+      "onRequest": false
+     },
+     "badge": {
+      "text": "Хит",
+      "color": "#705ABF"
+     },
+     "template": "configurator"
+    },
+    {
+     "id": 10560,
+     "slug": "stol-aesthetic-black",
+     "name": "Стол Aesthetic Black",
+     "image": "https://www.art-active24.ru/images/upload/stol-aesthetic-black-v2-1-1.jpg",
+     "price": {
+      "amount": 1800,
+      "from": true,
+      "unit": "",
+      "onRequest": false
+     },
+     "badge": {
+      "text": "Хит",
+      "color": "#705ABF"
+     },
+     "template": "configurator"
+    },
+    {
+     "id": 10559,
+     "slug": "stol-eames-d80-sm-s-kromkoy",
+     "name": "Стол Eames d-80 см с кромкой",
+     "image": "https://www.art-active24.ru/images/upload/10559-tech.jpg",
+     "price": {
+      "amount": 940,
+      "from": true,
+      "unit": "",
+      "onRequest": false
+     },
+     "badge": {
+      "text": "Хит",
+      "color": "#705ABF"
+     },
+     "template": "configurator"
+    }
+   ],
+   "productIds": [
+    10604,
+    10603,
+    10602,
+    10601,
+    10600,
+    10599,
+    10591,
+    10578,
+    10560,
+    10559
+   ]
+  },
+  {
+   "type": "cases",
+   "title": "Пример работ нашей Команды",
+   "items": [
+    {
+     "title": "Серпухов",
+     "image": "https://www.art-active24.ru/images/upload/dsc06922.jpg",
+     "url": "https://www.art-active24.ru/cases/serpuhov/"
+    },
+    {
+     "title": "Шатры и ничего больше в Питер",
+     "image": "https://www.art-active24.ru/images/upload/hater-keys-16.jpg",
+     "url": "https://www.art-active24.ru/cases/shatri-v-piter-2024/"
+    },
+    {
+     "title": "День Индии",
+     "image": "https://www.art-active24.ru/images/upload/den-indii-24.jpg",
+     "url": "https://www.art-active24.ru/cases/den-indii-2024/"
+    },
+    {
+     "title": "Промо НОВЫЙ ГОД",
+     "image": "https://www.art-active24.ru/images/upload/100-k-1-gallery-3_1.jpg",
+     "url": "https://www.art-active24.ru/cases/promo-ng/"
+    },
+    {
+     "title": "Новогодний кейтеринг",
+     "image": "https://www.art-active24.ru/images/upload/keys-ng-keytering-10.jpg",
+     "url": "https://www.art-active24.ru/cases/keytering-ng/"
+    }
+   ]
+  },
+  {
+   "type": "benefits",
+   "title": "Почему мы",
+   "items": [
+    {
+     "title": "Работаем с 2007 г."
+    },
+    {
+     "title": "4 самостоятельно работающих подразделения"
+    },
+    {
+     "title": "Собственная площадка для вашего события в пределах МКАД"
+    },
+    {
+     "title": "Наполним и застроим любое событие от шатров любой сложности, до интерактивных площадок"
+    }
+   ]
+  },
+  {
+   "type": "benefits",
+   "title": "Безопасность и сертификация",
+   "items": [
+    {
+     "title": "Безопасная эксплуатация аттракционов и устройств для развлечений"
+    },
+    {
+     "title": "Пожарно-технический минимум"
+    },
+    {
+     "title": "Охрана труда"
+    },
+    {
+     "title": "Cертифицированный технический состав, по работам на высоте, в том числе спортивных скалодромах"
+    },
+    {
+     "title": "Паспорт изделия"
+    },
+    {
+     "title": "Акт технического освидетельствования"
+    },
+    {
+     "title": "Декларация соответствия"
+    },
+    {
+     "title": "Внутренняя эксплуатационная документация, соответствующая ГОСТу РФ и техническим регламентам ЕАЭС."
+    }
+   ]
+  }
+ ]
+}

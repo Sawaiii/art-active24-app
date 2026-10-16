@@ -116,11 +116,13 @@ private struct CategoryList: View {
                             .foregroundStyle(Palette.accent)
                     }
                 }
+                .accessibilityIdentifier("catalog.all")
             }
             ForEach(nodes) { node in
                 Button { open(node, preferChildren: true) } label: {
                     CategoryRow(node: node)
                 }
+                .accessibilityIdentifier("catalog.node.\(node.id)")
             }
         }
         .listStyle(.insetGrouped)

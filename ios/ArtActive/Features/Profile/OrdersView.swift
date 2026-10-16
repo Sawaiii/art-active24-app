@@ -86,6 +86,7 @@ struct OrdersView: View {
                 NavigationLink(value: Route.order(id: order.id)) {
                     OrderRow(order: order, isUnseen: orders.isUnseen(order))
                 }
+                .accessibilityIdentifier("order.\(order.id)")
                 .task {
                     if order.id == orders.orders.last?.id { await orders.loadMore() }
                 }

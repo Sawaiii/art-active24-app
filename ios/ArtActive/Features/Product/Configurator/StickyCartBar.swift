@@ -103,6 +103,7 @@ struct StickyCartBar: View {
         .buttonStyle(PressableStyle(scale: 0.98))
         .accessibilityElement(children: .combine)
         .accessibilityHint(Text("Показать расшифровку итога"))
+        .accessibilityIdentifier("cartbar.total")
     }
 
     @ViewBuilder
@@ -171,6 +172,7 @@ struct StickyCartBar: View {
                 Text("В корзину")
             }
             .buttonStyle(PrimaryButtonStyle(height: 54, radius: Radius.md, font: .pCartButton))
+            .accessibilityIdentifier("cartbar.add")
             .frame(width: 150)
             .onAppear { Haptics.prepare(.addedToCart) }
             .transition(.scale(scale: 0.9).combined(with: .opacity))
@@ -236,6 +238,7 @@ struct BreakdownSheet: View {
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Готово") { dismiss() }
+                        .accessibilityIdentifier("breakdown.done")
                 }
             }
         }

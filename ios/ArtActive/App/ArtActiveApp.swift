@@ -14,6 +14,7 @@ struct ArtActiveApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .preferredColorScheme(UITestSupport.colorScheme)
                 .environment(env)
                 .environment(env.router)
                 .environment(env.auth)
@@ -25,6 +26,9 @@ struct ArtActiveApp: App {
                 .task {
                     appDelegate.attach(env)
                     await env.bootstrap()
+                    if let link = UITestSupport.deepLink {
+                        env.deepLinks.handle(link)
+                    }
                 }
                 .onOpenURL { url in
                     env.deepLinks.handle(url)
@@ -44,6 +48,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+        if UITestSupport.isActive {
+            UIView.setAnimationsEnabled(false)
+        }
         return true
     }
 

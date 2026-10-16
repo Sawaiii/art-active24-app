@@ -36,6 +36,7 @@ struct HomeView: View {
                     Image(systemName: "magnifyingglass")
                 }
                 .accessibilityLabel(Text("Поиск"))
+                .accessibilityIdentifier("home.search")
                 ContactMenuButton {
                     Image(systemName: "bubble.left.and.text.bubble.right")
                 }

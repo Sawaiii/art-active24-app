@@ -115,6 +115,7 @@ struct TimeSegmentControl: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(isActive ? .isSelected : [])
+                    .accessibilityIdentifier("time.\(option.id)")
                 }
             }
             .padding(3)

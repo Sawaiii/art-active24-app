@@ -108,6 +108,7 @@ struct CategoryView: View {
                 }
             }
             .buttonStyle(PressableStyle())
+            .accessibilityIdentifier("category.filter")
 
             Text(viewModel.query.sort.title)
                 .font(.aaCaption)
@@ -143,6 +144,7 @@ struct CategoryView: View {
             Image(systemName: "arrow.up.arrow.down")
         }
         .accessibilityLabel(Text("Сортировка"))
+        .accessibilityIdentifier("category.sort")
     }
 
     // MARK: - Products

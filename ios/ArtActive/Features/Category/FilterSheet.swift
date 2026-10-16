@@ -76,6 +76,7 @@ struct FilterSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Применить") { apply() }
                         .fontWeight(.semibold)
+                        .accessibilityIdentifier("filter.apply")
                 }
             }
         }

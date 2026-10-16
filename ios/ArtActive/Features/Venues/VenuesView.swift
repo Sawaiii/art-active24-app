@@ -59,6 +59,7 @@ struct VenuesView: View {
                     }
                 }
                 .buttonStyle(PressableStyle())
+                .accessibilityIdentifier("venues.filter")
                 Spacer()
                 if let total = viewModel.total {
                     Text("\(total) площадок")
@@ -187,6 +188,7 @@ struct VenueCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("venue.card.\(venue.id)")
         }
         .padding(12)
         .background(RoundedRectangle(cornerRadius: Radius.card + 4, style: .continuous).fill(Palette.surface))

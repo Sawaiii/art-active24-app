@@ -22,6 +22,7 @@ struct PhoneTextField: UIViewRepresentable {
         field.tintColor = UIColor(Palette.accent)
         field.placeholder = placeholder
         field.text = text
+        field.accessibilityIdentifier = "phone.field"
         field.setContentHuggingPriority(.defaultLow, for: .horizontal)
         field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         if autoFocus {
@@ -121,6 +122,7 @@ struct OneTimeCodeTextField: UIViewRepresentable {
         field.backgroundColor = .clear
         field.addTarget(context.coordinator, action: #selector(Coordinator.changed(_:)), for: .editingChanged)
         field.accessibilityLabel = String(localized: "Код из SMS")
+        field.accessibilityIdentifier = "login.code"
         return field
     }
 

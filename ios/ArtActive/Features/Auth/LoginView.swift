@@ -180,6 +180,7 @@ struct LoginView: View {
             }
             .buttonStyle(PrimaryButtonStyle(height: 54, radius: Radius.md, font: .aaSubmit))
             .disabled(!viewModel.canRequest)
+            .accessibilityIdentifier("login.request")
         }
     }
 

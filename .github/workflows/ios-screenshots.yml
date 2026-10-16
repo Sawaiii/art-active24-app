@@ -1,0 +1,259 @@
+name: iOS — screenshots (UI tests)
+
+# Визуальная проверка всех экранов: локальный API на демо-датасете (api/tests/fixtures/demo),
+# сид заявок через curl, UI-тест ArtActiveUITests на симуляторе → PNG артефактом.
+# Только демо-данные: никаких боевых адресов и секретов (AUTH_PEPPER ниже — не секрет, CI-заглушка).
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ios/**'
+      - 'api/tests/fixtures/demo/**'
+
+concurrency:
+  group: ios-screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  API_URL: http://127.0.0.1:8080
+  REVIEW_PHONE: '+79005553535'
+  REVIEW_CODE: '424242'
+  MANAGER_PHONE: '+79990000001'
+
+jobs:
+  screenshots:
+    runs-on: macos-15
+    timeout-minutes: 75
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Как в ios.yml: SDK iOS 26 (Liquid Glass) → самый свежий Xcode_26*.
+      - name: Select Xcode 26
+        run: |
+          set -eo pipefail
+          XCODE=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1 || true)
+          if [ -z "$XCODE" ]; then
+            echo "::error::На раннере нет Xcode 26 — нужен для SDK iOS 26 (Liquid Glass)"
+            ls -d /Applications/Xcode*.app
+            exit 1
+          fi
+          sudo xcode-select -s "$XCODE/Contents/Developer"
+          xcodebuild -version
+
+      # ── API ────────────────────────────────────────────────────────────
+      - name: PHP and Composer
+        run: |
+          set -eo pipefail
+          command -v php >/dev/null || brew install php
+          command -v composer >/dev/null || brew install composer
+          php -v
+          php -m | grep -iE '^(pdo_sqlite|mbstring|json)$'
+          composer --version
+
+      - name: Install API dependencies
+        working-directory: api
+        run: composer install --no-dev --no-interaction --no-progress --prefer-dist
+
+      - name: Configure API (.env, demo dataset)
+        working-directory: api
+        run: |
+          set -eo pipefail
+          mkdir -p var/log
+          cat > .env <<EOF
+          APP_ENV=development
+          API_BASE_PATH=
+          TRUSTED_PROXIES=
+          DB_DSN=sqlite:var/app.sqlite
+          CATALOG_SOURCE=snapshot
+          SNAPSHOT_DIR=$PWD/tests/fixtures/demo
+          AUTH_PEPPER=ci-screenshots-demo-pepper-not-a-secret-0123456789
+          SMS_PROVIDER=log
+          AUTH_REVIEW_PHONE=$REVIEW_PHONE
+          AUTH_REVIEW_CODE=$REVIEW_CODE
+          MANAGER_PHONES=$MANAGER_PHONE
+          LOG_FILE=$PWD/var/log/app.log
+          EOF
+          sed -i '' 's/^[[:space:]]*//' .env
+          cat .env
+          php bin/migrate.php
+
+      - name: Start API
+        working-directory: api
+        run: |
+          set -eo pipefail
+          PHP_CLI_SERVER_WORKERS=4 nohup php -S 127.0.0.1:8080 -t public public/index.php > var/log/server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS "$API_URL/v1/home" -o /tmp/home.json; then break; fi
+            sleep 1
+          done
+          if ! jq -e '.success == true' /tmp/home.json >/dev/null; then
+            echo "::error::API не отвечает на /v1/home"
+            cat var/log/server.log || true
+            cat var/log/app.log || true
+            exit 1
+          fi
+          jq -r '.data.sections[] | "\(.type): \(.title // "")"' /tmp/home.json
+          curl -sS "$API_URL/v1/categories/225/products?limit=3" | jq -c '{total: .meta.total, first: [.data[]?.name]}' || true
+          curl -sS "$API_URL/v1/venues" | jq -c '{total: .meta.total, first: .data[0].name}' || true
+
+      # Заявки для ЛК: корзинная (POST /v1/orders) и площадка (POST /v1/requests) от review-номера;
+      # менеджер переводит первую в «Подтверждён» с комментарием → в карточке заказа есть таймлайн.
+      # Ошибки сида — предупреждения: скриншоты снимаются в любом случае.
+      - name: Seed orders
+        working-directory: api
+        run: |
+          set -uo pipefail
+          call() { # METHOD PATH TOKEN IDEMPOTENCY-KEY BODY → тело ответа; код ≠ 2xx — предупреждение
+            local method=$1 path=$2 token=${3:-} key=${4:-} body=${5:-}
+            local args=(-sS -X "$method" -H 'Content-Type: application/json' -H 'Accept: application/json' -o /tmp/resp.json -w '%{http_code}')
+            [ -n "$token" ] && args+=(-H "Authorization: Bearer $token")
+            [ -n "$key" ] && args+=(-H "Idempotency-Key: $key")
+            [ -n "$body" ] && args+=(--data "$body")
+            local status
+            status=$(curl "${args[@]}" "$API_URL$path")
+            if [ "${status:0:1}" != "2" ]; then
+              echo "::warning::$method $path → HTTP $status: $(cat /tmp/resp.json)" >&2
+            fi
+            cat /tmp/resp.json
+          }
+          login() { # PHONE CODE → accessToken
+            call POST /v1/auth/verify "" "" "$(jq -nc --arg p "$1" --arg c "$2" '{phone:$p, code:$c}')" | jq -r '.data.accessToken // empty'
+          }
+
+          EVENT_DATE=$(date -v+14d +%F)
+          VENUE_DATE=$(date -v+21d +%F)
+
+          call POST /v1/auth/code "" "" "$(jq -nc --arg p "$REVIEW_PHONE" '{phone:$p}')" >/dev/null
+          CLIENT=$(login "$REVIEW_PHONE" "$REVIEW_CODE")
+          if [ -z "$CLIENT" ]; then echo "::warning::Не удалось войти review-номером — сид пропущен"; exit 0; fi
+          call PATCH /v1/me "$CLIENT" "" '{"name":"Анна Демо","company":"Демо-компания"}' >/dev/null
+
+          ITEMS='[{"productId":7138,"complectId":1724,"time":{"unit":"days","value":2},"qty":4},{"productId":1055,"complectId":3218,"qty":1}]'
+          call POST /v1/cart/quote "" "" "{\"items\":$ITEMS}" | jq -c '{total: .data.total, lines: [.data.lines[] | {name: .productName, available, total}]}'
+
+          ORDER=$(call POST /v1/orders "$CLIENT" "ci-seed-order-0001" "$(jq -nc --argjson items "$ITEMS" --arg d "$EVENT_DATE" \
+            '{items:$items, eventDate:$d, delivery:{method:"delivery", address:"Москва, Егорьевский проезд, 2А"}, contactName:"Анна Демо", comment:"Монтаж к 10:00, 2 этаж, есть лифт"}')")
+          ORDER_ID=$(echo "$ORDER" | jq -r '.data.id // empty')
+          echo "Корзинная заявка: id=$ORDER_ID номер=$(echo "$ORDER" | jq -r '.data.number // "—"')"
+
+          REQUEST=$(call POST /v1/requests "$CLIENT" "ci-seed-request-0001" "$(jq -nc --arg d "$VENUE_DATE" \
+            '{kind:"venue", venueId:732, eventDate:$d, guests:60, eventType:"Корпоратив", comment:"Нужна сцена и звук"}')")
+          echo "Заявка на площадку: id=$(echo "$REQUEST" | jq -r '.data.id // "—"')"
+
+          if [ -n "$ORDER_ID" ]; then
+            call POST /v1/auth/code "" "" "$(jq -nc --arg p "$MANAGER_PHONE" '{phone:$p}')" >/dev/null
+            # Код менеджера — из var/log/sms.log (SMS_PROVIDER=log).
+            MANAGER_CODE=$(perl -ne 'print "$1\n" if /\Q'"$MANAGER_PHONE"'\E .*?(\d{6})\./' var/log/sms.log | tail -1)
+            MANAGER=$(login "$MANAGER_PHONE" "$MANAGER_CODE")
+            if [ -n "$MANAGER" ]; then
+              call PATCH "/v1/manager/orders/$ORDER_ID" "$MANAGER" "" \
+                '{"status":"confirmed","comment":"Наличие подтверждено, привезём к 9:30. Менеджер Ольга"}' \
+                | jq -c '{status: .data.status, history: [.data.history[]? | {status, comment}]}'
+            else
+              echo "::warning::Не удалось войти менеджером (код: '${MANAGER_CODE}')"
+            fi
+          fi
+          call GET /v1/orders "$CLIENT" | jq -r '.data[] | "\(.number)  \(.status)  \(.subject // .lines[0].productName // "")"'
+
+      # ── Симулятор и UI-тесты ───────────────────────────────────────────
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: ios
+        run: xcodegen generate
+
+      - name: Pick and boot iPhone simulator
+        id: sim
+        run: |
+          set -eo pipefail
+          DEVICES=$(xcrun simctl list devices available -j)
+          pick() { echo "$DEVICES" | jq -r "[.devices | to_entries[] | select(.key | test(\"$1\")) | .value[] | select(.name | $2)] | last | .udid // empty"; }
+          SIM_ID=$(pick 'iOS-26' '. == "iPhone 17 Pro"')
+          [ -n "$SIM_ID" ] || SIM_ID=$(pick 'iOS-26' 'startswith("iPhone")')
+          [ -n "$SIM_ID" ] || SIM_ID=$(pick 'iOS' 'startswith("iPhone")')
+          if [ -z "$SIM_ID" ]; then
+            echo "::error::Нет доступного симулятора iPhone"; xcrun simctl list devices available; exit 1
+          fi
+          echo "$DEVICES" | jq -r --arg id "$SIM_ID" '.devices | to_entries[] | .key as $rt | .value[] | select(.udid == $id) | "Симулятор: \(.name) (\($rt))"'
+          xcrun simctl boot "$SIM_ID" || true
+          xcrun simctl bootstatus "$SIM_ID" -b
+          xcrun simctl ui "$SIM_ID" appearance light || true
+          xcrun simctl status_bar "$SIM_ID" override --time "9:41" --dataNetwork wifi --wifiMode active --wifiBars 3 \
+            --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100 || true
+          echo "id=$SIM_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Build for UI tests
+        working-directory: ios
+        run: |
+          set -eo pipefail
+          xcodebuild \
+            -project ArtActive.xcodeproj \
+            -scheme ArtActiveScreenshots \
+            -configuration Debug \
+            -destination "id=${{ steps.sim.outputs.id }}" \
+            -derivedDataPath build/screens \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_ENTITLEMENTS="" \
+            build-for-testing
+
+      - name: Run screenshot scenario
+        working-directory: ios
+        env:
+          # Переменные TEST_RUNNER_* попадают в процесс UI-теста без префикса (SCREENSHOTS_DIR).
+          TEST_RUNNER_SCREENSHOTS_DIR: ${{ github.workspace }}/screenshots
+        run: |
+          set -eo pipefail
+          mkdir -p "$TEST_RUNNER_SCREENSHOTS_DIR"
+          xcodebuild \
+            -project ArtActive.xcodeproj \
+            -scheme ArtActiveScreenshots \
+            -configuration Debug \
+            -destination "id=${{ steps.sim.outputs.id }}" \
+            -derivedDataPath build/screens \
+            -resultBundlePath build/Screenshots.xcresult \
+            -parallel-testing-enabled NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_ENTITLEMENTS="" \
+            test-without-building
+
+      # Запасной путь: если тест не смог писать в каталог — достаём вложения из .xcresult.
+      - name: Collect screenshots
+        if: always()
+        run: |
+          set -uo pipefail
+          OUT="$GITHUB_WORKSPACE/screenshots"
+          mkdir -p "$OUT"
+          COUNT=$(find "$OUT" -name '*.png' | wc -l | tr -d ' ')
+          if [ "$COUNT" = "0" ] && [ -d ios/build/Screenshots.xcresult ]; then
+            xcrun xcresulttool export attachments --path ios/build/Screenshots.xcresult --output-path "$OUT/xcresult" || true
+          fi
+          echo "PNG: $(find "$OUT" -name '*.png' | wc -l | tr -d ' ')"
+          {
+            echo "### Скриншоты"
+            echo
+            find "$OUT" -maxdepth 1 -name '*.png' -exec basename {} \; | sort | sed 's/^/- /'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-screenshots
+          path: screenshots/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload API logs and test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-screenshots-diagnostics
+          path: |
+            api/var/log/
+            ios/build/Screenshots.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
