@@ -150,26 +150,57 @@ enum HTMLParser {
         return result
     }
 
+    private static let namedEntities: [String: String] = [
+        "nbsp": "\u{00A0}", "amp": "&", "lt": "<", "gt": ">", "quot": "\"", "apos": "'",
+        "laquo": "«", "raquo": "»", "mdash": "—", "ndash": "–", "hellip": "…",
+        "rsquo": "’", "lsquo": "‘", "ldquo": "“", "rdquo": "”", "bull": "•", "times": "×", "deg": "°",
+    ]
+    /// Сущности, которые сайт иногда пишет без «;».
+    private static let entitiesWithoutSemicolon: Set<String> = ["laquo", "raquo", "nbsp", "amp"]
+
+    /// Однопроходное декодирование: результат не зависит от порядка и не декодируется повторно
+    /// («&amp;lt;» → «&lt;», а не «<»).
     static func decodeEntities(_ text: String) -> String {
         guard text.contains("&") else { return text }
-        let named: [String: String] = [
-            "&nbsp;": "\u{00A0}", "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": "\"", "&#39;": "'",
-            "&apos;": "'", "&laquo;": "«", "&raquo;": "»", "&mdash;": "—", "&ndash;": "–", "&hellip;": "…",
-            "&rsquo;": "’", "&lsquo;": "‘", "&ldquo;": "“", "&rdquo;": "”", "&bull;": "•", "&times;": "×",
-            "&deg;": "°", "&laquo": "«", "&raquo": "»",
-        ]
-        var result = text
-        for (entity, value) in named { result = result.replacingOccurrences(of: entity, with: value) }
-        // Числовые &#NNN; и &#xHH;
-        while let start = result.range(of: "&#"), let end = result[start.upperBound...].firstIndex(of: ";") {
-            let code = result[start.upperBound..<end]
-            let scalarValue: UInt32? = code.hasPrefix("x") || code.hasPrefix("X")
-                ? UInt32(code.dropFirst(), radix: 16)
-                : UInt32(code)
-            let replacement = scalarValue.flatMap { Unicode.Scalar($0) }.map { String(Character($0)) } ?? ""
-            result.replaceSubrange(start.lowerBound...end, with: replacement)
+        var output = ""
+        output.reserveCapacity(text.count)
+        var index = text.startIndex
+        while index < text.endIndex {
+            guard text[index] == "&", let (decoded, next) = entity(in: text, at: index) else {
+                output.append(text[index])
+                index = text.index(after: index)
+                continue
+            }
+            output.append(decoded)
+            index = next
         }
-        return result
+        return output
+    }
+
+    /// Разбирает сущность, начинающуюся с «&» в позиции `start`: (текст, позиция после сущности).
+    private static func entity(in text: String, at start: String.Index) -> (String, String.Index)? {
+        let body = text.index(after: start)
+        let limit = text.index(body, offsetBy: 10, limitedBy: text.endIndex) ?? text.endIndex
+        var cursor = body
+        while cursor < limit, text[cursor].isLetter || text[cursor].isNumber || text[cursor] == "#" {
+            cursor = text.index(after: cursor)
+        }
+        let name = String(text[body..<cursor])
+        let hasSemicolon = cursor < text.endIndex && text[cursor] == ";"
+        let end = hasSemicolon ? text.index(after: cursor) : cursor
+
+        if name.hasPrefix("#"), hasSemicolon {
+            let digits = name.dropFirst()
+            let value = digits.first == "x" || digits.first == "X"
+                ? UInt32(digits.dropFirst(), radix: 16)
+                : UInt32(digits)
+            guard let scalar = value.flatMap(Unicode.Scalar.init) else { return nil }
+            return (String(Character(scalar)), end)
+        }
+        guard let decoded = namedEntities[name], hasSemicolon || entitiesWithoutSemicolon.contains(name) else {
+            return nil
+        }
+        return (decoded, end)
     }
 
     /// Плоский текст без разметки (для превью, VoiceOver).

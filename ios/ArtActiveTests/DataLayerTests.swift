@@ -85,6 +85,13 @@ final class DataLayerTests: XCTestCase {
         XCTAssertNil(PhoneFormatter.e164("+7 (999) 12"))
     }
 
+    func testEntityDecodingIsSinglePass() {
+        XCTAssertEqual(HTMLParser.decodeEntities("&amp;lt;b&amp;gt;"), "&lt;b&gt;", "без двойного декодирования")
+        XCTAssertEqual(HTMLParser.decodeEntities("&#171;&#x00BB; 5&nbsp;₽"), "«» 5\u{00A0}₽")
+        XCTAssertEqual(HTMLParser.decodeEntities("&laquoСтол&raquo"), "«Стол»", "сущности сайта без «;»")
+        XCTAssertEqual(HTMLParser.decodeEntities("A & B &unknown; C"), "A & B &unknown; C")
+    }
+
     func testHTMLParser() {
         let blocks = HTMLParser.parse("<p>Привет, <strong>мир</strong>&nbsp;&laquo;да&raquo;</p><ul><li>Один</li><li>Два</li></ul>")
         XCTAssertEqual(blocks.count, 3)
