@@ -50,7 +50,7 @@ struct VenuesView: View {
                     .font(.aaChip)
                     .foregroundStyle(Palette.text)
                     .padding(.horizontal, 14)
-                    .frame(minHeight: 40)
+                    .frame(minHeight: 44)
                     .brandGlass(in: Capsule(), interactive: true)
                     .overlay(alignment: .topTrailing) {
                         if viewModel.query.activeCount > 0 {
@@ -79,13 +79,16 @@ struct VenuesView: View {
                             } label: {
                                 HStack(spacing: 4) {
                                     Text(chip.title)
-                                    Image(systemName: "xmark").font(.system(size: 10, weight: .bold))
+                                    Image(systemName: "xmark").font(.caption2.weight(.bold))
                                 }
                                 .font(.aaCaption)
                                 .foregroundStyle(Palette.accent)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 7)
                                 .background(Capsule().fill(Palette.accentTint10))
+                                // Видимая пилюля компактная, зона нажатия — 44 pt.
+                                .frame(minHeight: 44)
+                                .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
                             .accessibilityLabel(Text("Убрать фильтр \(chip.title)"))
@@ -103,11 +106,13 @@ struct VenuesView: View {
         case .loading:
             VStack(spacing: 16) {
                 ForEach(0..<3, id: \.self) { _ in
-                    SkeletonBlock(height: 300, radius: Radius.card)
+                    VenueCardSkeleton()
                 }
             }
             .padding(.horizontal, Spacing.gutter)
             .shimmering()
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text("Загрузка"))
         case let .error(message):
             ErrorStateView(message: message) { await viewModel.reload() }
         case .empty:
@@ -131,6 +136,23 @@ struct VenuesView: View {
                 Task { await viewModel.loadMore() }
             }
         }
+    }
+}
+
+/// Скелетон карточки площадки: фото 4:3, тип, название, адрес, цена — те же отступы, что у VenueCard.
+private struct VenueCardSkeleton: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
+                .fill(Palette.bgTertiary.opacity(0.7))
+                .aspectRatio(MediaAspect.photo, contentMode: .fit)
+            SkeletonBlock(width: 80, height: 12)
+            SkeletonBlock(height: 18)
+            SkeletonBlock(width: 200, height: 14)
+            SkeletonBlock(width: 120, height: 16)
+        }
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: Radius.card + 4, style: .continuous).fill(Palette.surface))
     }
 }
 
@@ -159,7 +181,9 @@ struct VenueCard: View {
                         .padding(.bottom, 10)
                 }
             }
-            .frame(height: 230)
+            // Фото площадок 600×450 — 4:3. Для VoiceOver тап по фото дублирует кнопку ниже.
+            .accessibilityHidden(true)
+            .aspectRatio(MediaAspect.photo, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             .overlay(alignment: .topLeading) {
                 VenueTags(area: venue.area, capacity: venue.capacity, metroDistance: venue.metro?.first?.distance)

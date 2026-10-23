@@ -23,6 +23,20 @@ struct PhoneTextField: UIViewRepresentable {
         field.placeholder = placeholder
         field.text = text
         field.accessibilityIdentifier = "phone.field"
+        // У .phonePad нет клавиши Return — даём «Готово», которое отправляет форму.
+        let bar = UIToolbar()
+        bar.sizeToFit()
+        bar.items = [
+            UIBarButtonItem(systemItem: .flexibleSpace),
+            UIBarButtonItem(
+                title: String(localized: "Готово"),
+                style: .done,
+                target: context.coordinator,
+                action: #selector(Coordinator.donePressed)
+            ),
+        ]
+        field.inputAccessoryView = bar
+        context.coordinator.field = field
         field.setContentHuggingPriority(.defaultLow, for: .horizontal)
         field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         if autoFocus {
@@ -38,7 +52,13 @@ struct PhoneTextField: UIViewRepresentable {
 
     final class Coordinator: NSObject, UITextFieldDelegate {
         var parent: PhoneTextField
+        weak var field: UITextField?
         init(parent: PhoneTextField) { self.parent = parent }
+
+        @objc func donePressed() {
+            field?.resignFirstResponder()
+            parent.onSubmit()
+        }
 
         func textField(_ field: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
             let current = (field.text ?? "") as NSString

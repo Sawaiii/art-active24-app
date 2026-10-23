@@ -50,7 +50,8 @@ struct PageDots: View {
 /// Горизонтальный пейджинг галереи товара; тап — полноэкранный просмотр.
 struct GalleryPager: View {
     let items: [GalleryItem]
-    var aspectRatio: CGFloat = 1
+    /// Пропорция ячейки по исходникам: фото товара 800×600 → 4:3 (MediaAspect).
+    var aspectRatio: CGFloat = MediaAspect.photo
     var badge: Badge?
     var cornerRadius: CGFloat = 0
     var imageBackground: Color = Palette.page
@@ -71,7 +72,8 @@ struct GalleryPager: View {
                         }
                     } label: {
                         ZStack {
-                            RemoteImage(url: item.imageURL, contentMode: .fit, maxPixel: 1200, placeholder: imageBackground)
+                            // Совпадает с пропорцией ячейки — заполняет её; другая пропорция — показывается целиком.
+                            RemoteImage(url: item.imageURL, contentMode: .fill, maxPixel: 1200, placeholder: imageBackground, fitWhenAspectDiffers: aspectRatio)
                             if item.videoURL != nil {
                                 Image(systemName: "play.fill")
                                     .font(.system(size: 22, weight: .semibold))

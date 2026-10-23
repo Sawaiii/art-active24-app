@@ -37,9 +37,12 @@ struct OrderStatusChip: View {
             Text(status != .unknown || label.isEmpty ? status.title : label)
         } icon: {
             Image(systemName: OrderStatusStyle.symbol(status))
+                .foregroundStyle(OrderStatusStyle.color(status))
         }
         .font(BrandFont.golos(12, .semibold, relativeTo: .caption))
-        .foregroundStyle(OrderStatusStyle.color(status))
+        // Текст — нейтральным цветом (контраст ≥ 4.5:1); цвет несут только иконка и подложка,
+        // статус читается по слову и символу, а не по цвету.
+        .foregroundStyle(Palette.textStrong)
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
         .background(Capsule().fill(OrderStatusStyle.color(status).opacity(0.12)))
@@ -109,6 +112,7 @@ private struct OrderRow: View {
                 if isUnseen {
                     Circle().fill(Palette.accent).frame(width: 8, height: 8)
                         .accessibilityLabel(Text("Есть изменения"))
+                        .accessibilityIdentifier("order.unseenDot")
                 }
                 Spacer()
                 OrderStatusChip(status: order.status, label: order.statusLabel)
@@ -294,10 +298,11 @@ struct OrderDetailView: View {
                     } label: {
                         if viewModel.isCancelling { ProgressView() } else { Label("Отменить заявку", systemImage: "xmark.circle") }
                     }
+                    .accessibilityLabel(Text("Отменить заявку"))
                     .disabled(viewModel.isCancelling)
                 }
                 if let error = viewModel.actionError {
-                    Text(error).font(.aaCaption).foregroundStyle(Palette.error)
+                    Label(error, systemImage: "exclamationmark.circle.fill").font(.aaCaption).foregroundStyle(Palette.error)
                 }
             }
 
@@ -386,10 +391,15 @@ private struct StatusTimeline: View {
             ForEach(Array(all.enumerated()), id: \.element.id) { index, step in
                 HStack(alignment: .top, spacing: 12) {
                     VStack(spacing: 0) {
-                        Circle()
-                            .fill(step.isDone ? OrderStatusStyle.color(step.status) : Palette.bgTertiary)
-                            .frame(width: 12, height: 12)
-                            .padding(.top, 4)
+                        Group {
+                            if step.isDone {
+                                Circle().fill(OrderStatusStyle.color(step.status))
+                            } else {
+                                Circle().strokeBorder(Palette.textTertiary, lineWidth: 1.5)
+                            }
+                        }
+                        .frame(width: 12, height: 12)
+                        .padding(.top, 4)
                         if index < all.count - 1 {
                             Rectangle()
                                 .fill(step.isDone ? OrderStatusStyle.color(step.status).opacity(0.4) : Palette.bgTertiary)
@@ -411,6 +421,7 @@ private struct StatusTimeline: View {
                     .padding(.bottom, 12)
                 }
                 .accessibilityElement(children: .combine)
+                .accessibilityValue(step.isDone ? Text("Пройден") : Text("Ожидается"))
             }
         }
         .padding(.vertical, 4)

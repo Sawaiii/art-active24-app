@@ -73,7 +73,6 @@ extension Font {
     static let pVariantPrice = BrandFont.inter(12, .medium, relativeTo: .caption)
     static let pPriceAmount = BrandFont.inter(18, .bold, relativeTo: .headline)
     static let pPriceLabel = BrandFont.inter(11, .medium, relativeTo: .caption2)
-    static let pPriceHint = BrandFont.inter(10, .regular, relativeTo: .caption2)
     static let pSegment = BrandFont.inter(12, .regular, relativeTo: .caption)
     static let pSegmentActive = BrandFont.inter(12, .semibold, relativeTo: .caption)
     static let pBadge = BrandFont.inter(12, .medium, relativeTo: .caption)
@@ -91,6 +90,11 @@ enum Appearance {
         let bar = UINavigationBar.appearance()
         bar.titleTextAttributes = [.font: titleFont]
         bar.largeTitleTextAttributes = [.font: largeTitleFont]
+
+        let tabBar = UITabBarAppearance()
+        tabBar.configureWithDefaultBackground()
+        UITabBar.appearance().standardAppearance = tabBar
+        UITabBar.appearance().scrollEdgeAppearance = tabBar
 
         UISegmentedControl.appearance().setTitleTextAttributes(
             [.font: BrandFont.uiFont(.golos, .medium, size: 13, style: .subheadline)], for: .normal

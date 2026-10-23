@@ -100,7 +100,7 @@ struct CartView: View {
         }
         .background(Palette.catalogPage)
         .navigationTitle(Text("Корзина"))
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .overlay(alignment: .bottom) {
             if let undo = viewModel.undo {
                 UndoToast(message: undo.message) { withAnimation { viewModel.undoRemoval() } }
@@ -110,6 +110,12 @@ struct CartView: View {
             }
         }
         .animation(.snappy, value: viewModel.undo)
+        .onChange(of: viewModel.undo?.id) { _, id in
+            // Тост исчезает через 4 с — VoiceOver-пользователь должен о нём узнать.
+            if id != nil, let message = viewModel.undo?.message {
+                AccessibilityNotification.Announcement(message).post()
+            }
+        }
         .task { await cart.refreshQuote() }
     }
 
@@ -121,8 +127,12 @@ struct CartView: View {
                         viewModel.setQty(qty, for: item)
                     }
                     .contentShape(Rectangle())
-                    .onTapGesture {
-                        env.router.push(.product(id: item.productId, preselect: ProductPreselection(complectId: item.complectId, subId: item.subId, priceType: item.priceType)))
+                    .onTapGesture { openProduct(item) }
+                    .accessibilityAction(named: Text("Открыть товар")) { openProduct(item) }
+                    .contextMenu {
+                        Button { openProduct(item) } label: { Label("Открыть товар", systemImage: "arrow.up.forward.app") }
+                        Button { withAnimation { viewModel.moveToFavorites(item) } } label: { Label("В избранное", systemImage: "heart") }
+                        Button(role: .destructive) { withAnimation { viewModel.remove(item) } } label: { Label("Удалить", systemImage: "trash") }
                     }
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
@@ -171,6 +181,10 @@ struct CartView: View {
         }
     }
 
+    private func openProduct(_ item: CartItemInput) {
+        env.router.push(.product(id: item.productId, preselect: ProductPreselection(complectId: item.complectId, subId: item.subId, priceType: item.priceType)))
+    }
+
     private var summary: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .firstTextBaseline) {
@@ -201,6 +215,7 @@ struct CartView: View {
                     Spacer()
                     Button("Повторить") { Task { await cart.refreshQuote() } }
                         .buttonStyle(LinkButtonStyle(font: .aaCaption))
+                        .frame(minHeight: 44)
                 }
             }
             Button {
@@ -226,8 +241,21 @@ private struct CartRow: View {
     let isQuoteLoading: Bool
     let onQty: (Int) -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private var isAccessibilitySize: Bool { dynamicTypeSize.isAccessibilitySize }
+
+    /// На крупных размерах шрифта строка перестраивается в колонку, а не сжимается.
+    private var rowLayout: AnyLayout {
+        isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10)) : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
+    }
+
+    private var controlsLayout: AnyLayout {
+        isAccessibilitySize ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(alignment: .center, spacing: 10))
+    }
+
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
+        rowLayout {
             RemoteImage(url: line?.image?.resolvedURL, contentMode: .fit, maxPixel: 240, placeholder: Palette.imagePlaceholder)
                 .frame(width: 72, height: 72)
                 .clipShape(RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
@@ -270,12 +298,12 @@ private struct CartRow: View {
                     SkeletonBlock(width: 120, height: 12)
                 }
 
-                HStack(alignment: .center, spacing: 10) {
+                controlsLayout {
                     if item.menu == nil {
                         QtyStepper(value: item.qty, minimum: 1, unit: nil, compact: true, onChange: onQty)
                     }
-                    Spacer(minLength: 4)
-                    VStack(alignment: .trailing, spacing: 2) {
+                    if !isAccessibilitySize { Spacer(minLength: 4) }
+                    VStack(alignment: isAccessibilitySize ? .leading : .trailing, spacing: 2) {
                         if let line {
                             if line.onRequest == true {
                                 Text("по запросу").font(.aaCartItemPrice).foregroundStyle(Palette.textStrong)
@@ -286,7 +314,7 @@ private struct CartRow: View {
                                     .contentTransition(.numericText(value: Double(line.total)))
                                 if item.menu == nil {
                                     Text(verbatim: "\(Money.rub(line.unitPrice))/\(line.qtyUnit ?? String(localized: "ед"))")
-                                        .font(BrandFont.golos(10, relativeTo: .caption2))
+                                        .font(BrandFont.golos(11, relativeTo: .caption2))
                                         .foregroundStyle(Palette.muted2)
                                 }
                             }

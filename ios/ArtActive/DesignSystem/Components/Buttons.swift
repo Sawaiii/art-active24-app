@@ -21,7 +21,8 @@ struct PrimaryButtonStyle: ButtonStyle {
             configuration.label
                 .font(style.font)
                 .foregroundStyle(Palette.onAccent)
-                .lineLimit(1)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.8)
                 .padding(.horizontal, 16)
                 .frame(maxWidth: .infinity, minHeight: style.height)
@@ -127,6 +128,7 @@ struct CircleIconButton: View {
                 .foregroundStyle(foreground)
                 .frame(width: size, height: size)
                 .background(Circle().fill(background))
+                .contentShape(Circle().inset(by: -max(0, (44 - size) / 2)))
         }
         .buttonStyle(PressableStyle(scale: 0.9))
         .accessibilityLabel(label)
@@ -157,6 +159,7 @@ struct FavoriteButton: View {
                 .scaleEffect(pulse ? 1.35 : 1)
                 .frame(width: size, height: size)
                 .background(Circle().fill(onDark ? Palette.glassDark : Palette.surface.opacity(0.92)))
+                .contentShape(Circle().inset(by: -max(0, (44 - size) / 2)))
                 .contentTransition(.symbolEffect(.replace))
         }
         .buttonStyle(.plain)

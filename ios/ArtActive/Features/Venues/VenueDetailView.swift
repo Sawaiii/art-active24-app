@@ -7,6 +7,7 @@ struct VenueDetailView: View {
     @State private var viewModel: VenueDetailViewModel
     @State private var request: RequestSubject?
     @Environment(AppEnvironment.self) private var env
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     init(viewModel: VenueDetailViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -16,7 +17,7 @@ struct VenueDetailView: View {
         Group {
             switch viewModel.state {
             case .loading:
-                ScrollView { ListSkeleton(rows: 6).padding(Spacing.gutter) }
+                VenueDetailSkeleton()
             case let .error(message):
                 ErrorStateView(message: message) { await viewModel.load() }
             case .empty:
@@ -46,8 +47,8 @@ struct VenueDetailView: View {
 
     private func content(_ venue: Venue) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                GalleryPager(items: GalleryItem.from(urls: venue.photos ?? []), aspectRatio: 4 / 3)
+            VStack(alignment: .leading, spacing: Spacing.sectionLarge) {
+                GalleryPager(items: GalleryItem.from(urls: venue.photos ?? []), aspectRatio: MediaAspect.photo)
 
                 VStack(alignment: .leading, spacing: 10) {
                     if let type = venue.type {
@@ -66,42 +67,38 @@ struct VenueDetailView: View {
                         MetroList(stations: metro)
                     }
                 }
-                .padding(.horizontal, Spacing.gutter)
+                .padding(.horizontal, Spacing.gutterProduct)
 
-                parameters(venue).padding(.horizontal, Spacing.gutter)
+                parameters(venue).padding(.horizontal, Spacing.gutterProduct)
 
                 if let lat = venue.geo?.lat, let lng = venue.geo?.lng {
                     VenueMap(name: venue.name, coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lng))
-                        .padding(.horizontal, Spacing.gutter)
+                        .padding(.horizontal, Spacing.gutterProduct)
                 }
 
                 if let html = venue.descriptionHtml, !html.isEmpty {
-                    DescriptionSection(html: html).padding(.horizontal, Spacing.gutter)
+                    DescriptionSection(html: html).padding(.horizontal, Spacing.gutterProduct)
                 }
 
                 if let steps = venue.howToRent, !steps.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Как арендовать").font(.pH3).foregroundStyle(Palette.textProduct)
+                        Text("Как арендовать")
+                            .font(.pH3)
+                            .foregroundStyle(Palette.textProduct)
+                            .accessibilityAddTraits(.isHeader)
                         ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
-                            HStack(alignment: .top, spacing: 12) {
-                                Text(verbatim: "\(index + 1)")
-                                    .font(BrandFont.inter(14, .bold))
-                                    .foregroundStyle(Palette.accent)
-                                    .frame(width: 30, height: 30)
-                                    .background(Circle().fill(Palette.accentTint10))
-                                Text(step).font(.pBody).foregroundStyle(Palette.textProduct)
-                            }
+                            HowToRentStep(number: index + 1, text: step)
                         }
                     }
-                    .padding(.horizontal, Spacing.gutter)
+                    .padding(.horizontal, Spacing.gutterProduct)
                 }
 
-                requestCard(venue).padding(.horizontal, Spacing.gutter)
+                requestCard(venue).padding(.horizontal, Spacing.gutterProduct)
 
                 if let similar = venue.similar, !similar.isEmpty {
                     VStack(alignment: .leading, spacing: 14) {
                         SectionHeader(title: String(localized: "Похожие площадки"))
-                            .padding(.horizontal, Spacing.gutter)
+                            .padding(.horizontal, Spacing.gutterProduct)
                         ScrollView(.horizontal, showsIndicators: false) {
                             LazyHStack(alignment: .top, spacing: 12) {
                                 ForEach(similar) { item in
@@ -110,18 +107,22 @@ struct VenueDetailView: View {
                                 }
                             }
                             .scrollTargetLayout()
-                            .padding(.horizontal, Spacing.gutter)
+                            .padding(.horizontal, Spacing.gutterProduct)
                         }
                         .scrollTargetBehavior(.viewAligned)
                     }
                 }
             }
-            .padding(.bottom, 32)
+            .padding(.bottom, Spacing.sectionLarge)
         }
     }
 
     private func parameters(_ venue: Venue) -> some View {
-        HStack(spacing: 10) {
+        // На крупных размерах шрифта плитки встают в столбец, иначе подписи ломаются по буквам.
+        let layout = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: 8))
+            : AnyLayout(HStackLayout(spacing: 8))
+        return layout {
             if let area = venue.area {
                 parameter(value: "\(area) м²", title: String(localized: "площадь"))
             }
@@ -139,6 +140,7 @@ struct VenueDetailView: View {
             Text(value).font(BrandFont.golos(17, .bold)).foregroundStyle(Palette.textProduct)
             Text(title).font(.aaCaption).foregroundStyle(Palette.textSecondary)
         }
+        .padding(.vertical, 8)
         .frame(maxWidth: .infinity, minHeight: 64)
         .background(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).fill(Palette.surfaceMuted))
         .accessibilityElement(children: .combine)
@@ -175,6 +177,59 @@ struct VenueDetailView: View {
     }
 }
 
+/// Шаг «Как арендовать»: номер растёт вместе с Dynamic Type, VoiceOver читает «номер, текст» одним элементом.
+private struct HowToRentStep: View {
+    let number: Int
+    let text: String
+    @ScaledMetric(relativeTo: .body) private var badgeSize: CGFloat = 32
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text(verbatim: "\(number)")
+                .font(BrandFont.inter(14, .bold))
+                .foregroundStyle(Palette.accent)
+                .frame(width: badgeSize, height: badgeSize)
+                .background(Circle().fill(Palette.accentTint10))
+            Text(text)
+                .font(.pBody)
+                .foregroundStyle(Palette.textProduct)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Скелетон карточки площадки: галерея 4:3, тип/название/адрес, плитки параметров.
+private struct VenueDetailSkeleton: View {
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Spacing.section) {
+                Rectangle()
+                    .fill(Palette.bgTertiary.opacity(0.6))
+                    .aspectRatio(MediaAspect.photo, contentMode: .fit)
+                VStack(alignment: .leading, spacing: 10) {
+                    SkeletonBlock(width: 80, height: 12)
+                    SkeletonBlock(height: 24)
+                    SkeletonBlock(width: 220, height: 14)
+                    HStack(spacing: 8) {
+                        ForEach(0..<3, id: \.self) { _ in
+                            SkeletonBlock(height: 64, radius: Radius.md)
+                        }
+                    }
+                    .padding(.top, 6)
+                    SkeletonBlock(height: 200, radius: Radius.card)
+                        .padding(.top, 6)
+                }
+                .padding(.horizontal, Spacing.gutterProduct)
+            }
+            .shimmering()
+        }
+        .scrollDisabled(true)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Загрузка"))
+    }
+}
+
 /// Карта MapKit с пином; тап — открыть в Картах.
 private struct VenueMap: View {
     let name: String
@@ -182,7 +237,10 @@ private struct VenueMap: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Локация").font(.pH3).foregroundStyle(Palette.textProduct)
+            Text("Локация")
+                .font(.pH3)
+                .foregroundStyle(Palette.textProduct)
+                .accessibilityAddTraits(.isHeader)
             Map(initialPosition: .region(MKCoordinateRegion(center: coordinate, latitudinalMeters: 1200, longitudinalMeters: 1200))) {
                 Marker(name, coordinate: coordinate)
                     .tint(Palette.accent)
@@ -191,19 +249,24 @@ private struct VenueMap: View {
             .frame(height: 200)
             .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             .allowsHitTesting(false)
+            // Карта — иллюстрация; действие одно, его даёт кнопка поверх (VoiceOver не должен
+            // застревать в недоступной для жестов карте).
+            .accessibilityHidden(true)
             .overlay(alignment: .bottomTrailing) {
                 Button {
+                    Haptics.play(.selection)
                     openInMaps()
                 } label: {
                     Label("Открыть в Картах", systemImage: "map")
                         .font(.aaCaption)
                         .foregroundStyle(Palette.textProduct)
                         .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
+                        .frame(minHeight: 44)
                         .brandGlass(in: Capsule(), interactive: true)
                 }
                 .buttonStyle(PressableStyle())
-                .padding(10)
+                .accessibilityLabel(Text(verbatim: "\(String(localized: "Открыть в Картах")): \(name)"))
+                .padding(6)
             }
         }
     }

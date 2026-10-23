@@ -23,7 +23,10 @@ struct FavoritesView: View {
         }
         .background(Palette.catalogPage)
         .navigationTitle(Text("Избранное"))
-        .navigationBarTitleDisplayMode(.large)
-        .refreshable { await favorites.refreshFromServer() }
+        .navigationBarTitleDisplayMode(.inline)
+        .refreshable {
+            Haptics.play(.refresh)
+            await favorites.refreshFromServer()
+        }
     }
 }

@@ -41,24 +41,34 @@ private struct ToggleTemplateBody: View {
     }
 
     var body: some View {
+        GeometryReader { viewport in
+            content
+                .environment(\.viewportSize, viewport.size)
+        }
+        .sheet(item: $request) { subject in
+            RequestFormSheet(viewModel: RequestFormViewModel(subject: subject, orders: env.orders))
+        }
+    }
+
+    private var content: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
+            VStack(alignment: .leading, spacing: Spacing.sectionLarge) {
                 if style == .showcase {
                     PromoHeader(product: product) { order(complect: nil) }
                 } else {
-                    GalleryPager(items: GalleryItem.from(product.media), badge: product.badge)
+                    GalleryPager(items: GalleryItem.from(product.media), aspectRatio: MediaAspect.photo, badge: product.badge)
                     ProductTitleRow(product: product)
                         .padding(.horizontal, Spacing.gutterProduct)
                 }
 
                 if style == .showcase, let blocks = product.blocks, !blocks.isEmpty {
-                    ContentBlocksView(blocks: blocks)
+                    ContentBlocksView(blocks: blocks, template: product.template)
                 }
 
                 complectsSection
                 extrasSection
 
-                VStack(alignment: .leading, spacing: 26) {
+                VStack(alignment: .leading, spacing: 24) {
                     if let specs = product.specs, !specs.isEmpty { SpecsSection(specs: specs) }
                     if let html = product.descriptionHtml, !html.isEmpty { DescriptionSection(html: html) }
                 }
@@ -69,15 +79,14 @@ private struct ToggleTemplateBody: View {
                 }
                 ManagerContactSection().padding(.horizontal, Spacing.gutterProduct)
             }
-            .padding(.bottom, 32)
-        }
-        .sheet(item: $request) { subject in
-            RequestFormSheet(viewModel: RequestFormViewModel(subject: subject, orders: env.orders))
+            .padding(.bottom, Spacing.sectionLarge)
         }
     }
 
+    @ViewBuilder
     private var complectsSection: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        if !product.complects.isEmpty {
+        VStack(alignment: .leading, spacing: 16) {
             Text(product.complectsLabel ?? String(localized: "Комплекты"))
                 .font(.pSection)
                 .tracking(-0.6)
@@ -95,18 +104,20 @@ private struct ToggleTemplateBody: View {
             }
         }
         .padding(.horizontal, Spacing.gutterProduct)
+        }
     }
 
     @ViewBuilder
     private var extrasSection: some View {
         if !viewModel.options.isEmpty {
             let groups = viewModel.extraGroups
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 16) {
                 Text(style == .simple ? String(localized: "Также подходит") : String(localized: "Дополнительно"))
                     .font(.pSection)
                     .tracking(-0.6)
                     .foregroundStyle(Palette.textProduct)
                     .padding(.horizontal, Spacing.gutterProduct)
+                    .accessibilityAddTraits(.isHeader)
                 if groups.count > 1 {
                     PillSegment(
                         items: groups,
@@ -128,7 +139,7 @@ private struct ToggleTemplateBody: View {
                 }
                 .padding(.horizontal, Spacing.gutterProduct)
                 Text("Опции кладутся в корзину отдельной позицией.")
-                    .font(.pPriceHint)
+                    .font(.pStepLabel)
                     .foregroundStyle(Palette.textSecondary)
                     .padding(.horizontal, Spacing.gutterProduct)
             }
@@ -156,14 +167,15 @@ private struct ToggleComplectCard: View {
     let onOrder: () -> Void
 
     @State private var showIncludes = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .top, spacing: 12) {
                 if let image = complect.image?.resolvedURL {
-                    RemoteImage(url: image, maxPixel: 300)
-                        .frame(width: 84, height: 84)
-                        .clipShape(RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
+                    AspectImage(url: image, aspect: MediaAspect.photo, cornerRadius: Radius.md, maxPixel: 360)
+                        .frame(width: 104)
                 }
                 VStack(alignment: .leading, spacing: 4) {
                     Text(complect.title)
@@ -176,7 +188,7 @@ private struct ToggleComplectCard: View {
                         .font(BrandFont.inter(16, .bold))
                         .foregroundStyle(Palette.textProduct)
                     if let hint {
-                        Text(hint).font(.pPriceHint).foregroundStyle(Palette.textSecondary)
+                        Text(hint).font(.pStepLabel).foregroundStyle(Palette.textSecondary)
                     }
                 }
                 Spacer(minLength: 0)
@@ -185,7 +197,7 @@ private struct ToggleComplectCard: View {
             let includes = complect.includes ?? []
             let requirements = complect.requirements ?? []
             if !includes.isEmpty || !requirements.isEmpty {
-                DisclosureGroup(isExpanded: $showIncludes.animation()) {
+                DisclosureGroup(isExpanded: $showIncludes.animation(Motion.snappy(reduceMotion))) {
                     VStack(alignment: .leading, spacing: 12) {
                         if !includes.isEmpty { BulletList(title: String(localized: "В комплекте"), items: includes) }
                         if !requirements.isEmpty {
@@ -201,7 +213,11 @@ private struct ToggleComplectCard: View {
                 .tint(Palette.accent)
             }
 
-            HStack(spacing: 10) {
+            // На крупных размерах шрифта кнопки встают друг под другом, а не обрезаются.
+            let buttonsLayout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(VStackLayout(spacing: 10))
+                : AnyLayout(HStackLayout(spacing: 10))
+            buttonsLayout {
                 Button(action: onToggle) {
                     Label {
                         Text(isInCart ? "В корзине" : "В корзину")
@@ -228,7 +244,7 @@ private struct ToggleComplectCard: View {
             RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
                 .strokeBorder(isInCart ? Palette.accent.opacity(0.6) : Palette.border, lineWidth: 1)
         )
-        .animation(.snappy, value: isInCart)
+        .animation(Motion.snappy(reduceMotion), value: isInCart)
     }
 }
 
@@ -240,16 +256,15 @@ private struct ToggleExtraRow: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
-                RemoteImage(url: extra.image?.resolvedURL, maxPixel: 160)
-                    .frame(width: 48, height: 48)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
+                AspectImage(url: extra.image?.resolvedURL, aspect: MediaAspect.photo, cornerRadius: Radius.sm, maxPixel: 200)
+                    .frame(width: 64)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(extra.name)
                         .font(BrandFont.inter(14, .semibold))
                         .foregroundStyle(Palette.textProduct)
                         .multilineTextAlignment(.leading)
                     if let note = extra.note {
-                        Text(note).font(.pPriceHint).foregroundStyle(Palette.textSecondary).multilineTextAlignment(.leading)
+                        Text(note).font(.pStepLabel).foregroundStyle(Palette.textSecondary).multilineTextAlignment(.leading)
                     }
                     Text(extra.from == true ? String(localized: "от \(Money.rub(extra.price))") : Money.rub(extra.price))
                         .font(.pVariantPrice)
@@ -282,20 +297,20 @@ private struct PromoHeader: View {
     let onOrder: () -> Void
 
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            RemoteImage(url: product.media.first?.posterURL ?? product.media.first?.resolvedURL, maxPixel: 1200)
-                .frame(height: 420)
-            LinearGradient(colors: [.black.opacity(0.1), .black.opacity(0.75)], startPoint: .top, endPoint: .bottom)
+        // Первый media — мобильный баннер сайта 430×768: натуральная портретная пропорция,
+        // высота не больше ~70% экрана (сверх лимита — заполнение с обрезкой).
+        PortraitBanner(url: product.media.first?.posterURL ?? product.media.first?.resolvedURL) {
             VStack(alignment: .leading, spacing: 10) {
                 Text(product.name)
                     .font(BrandFont.golos(28, .semibold, relativeTo: .largeTitle))
                     .foregroundStyle(.white)
-                if let lead = product.lead {
+                    .accessibilityAddTraits(.isHeader)
+                if let lead = product.lead, !lead.isEmpty {
                     Text(lead).font(.aaBodySmall).foregroundStyle(.white.opacity(0.9))
                 }
-                HStack(spacing: 10) {
+                FlowLayout(spacing: 10, lineSpacing: 6) {
                     PriceTagView(tag: product.price, color: .white)
-                    if let art = product.art { ArticleBadge(art: art) }
+                    if let art = product.art, !art.isEmpty { ArticleBadge(art: art) }
                 }
                 Button("Заказать", action: onOrder)
                     .buttonStyle(PrimaryButtonStyle(height: 48))
@@ -303,8 +318,44 @@ private struct PromoHeader: View {
             }
             .padding(Spacing.gutterProduct)
         }
-        .frame(height: 420)
-        .clipped()
+    }
+}
+
+/// Портретный баннер-шапка (шаблоны 81/123): пропорция исходника 430×768, высота ≤ 70% экрана,
+/// градиент и контент поверх нижней части — как на сайте.
+struct PortraitBanner<Overlay: View>: View {
+    let url: URL?
+    @ViewBuilder let overlay: Overlay
+    @Environment(\.viewportSize) private var viewport
+
+    /// Доля высоты экрана, сверх которой баннер обрезается.
+    private static var maxScreenShare: CGFloat { 0.7 }
+
+    var body: some View {
+        sizingBox
+            .frame(maxWidth: .infinity)
+            .overlay {
+                RemoteImage(url: url, contentMode: .fill, maxPixel: 1400)
+                    .accessibilityHidden(true)
+            }
+            .overlay {
+                LinearGradient(colors: [.black.opacity(0), .black.opacity(0.75)], startPoint: .center, endPoint: .bottom)
+                    .allowsHitTesting(false)
+            }
+            .overlay(alignment: .bottomLeading) {
+                overlay
+            }
+            .clipped()
+    }
+
+    @ViewBuilder
+    private var sizingBox: some View {
+        let limit = viewport.height * Self.maxScreenShare
+        if viewport.width > 0, viewport.height > 0, viewport.width / MediaAspect.banner > limit {
+            Color.clear.frame(height: limit)
+        } else {
+            Color.clear.aspectRatio(MediaAspect.banner, contentMode: .fit)
+        }
     }
 }
 
@@ -316,12 +367,29 @@ struct StaffProductView: View {
 
     var body: some View {
         RequestTemplateBody(product: product) {
-            GalleryPager(items: GalleryItem.from(product.media), badge: product.badge)
-            VStack(alignment: .leading, spacing: 12) {
-                ProductTitleRow(product: product)
-                PriceTagView(tag: product.price, numberFont: .pPriceAmount, color: Palette.textProduct)
+            // Шапка — портретный баннер сайта (430×932), имя/лид/ставка поверх нижней части.
+            PortraitBanner(url: product.media.first?.posterURL ?? product.media.first?.resolvedURL) {
+                VStack(alignment: .leading, spacing: 8) {
+                    if let badge = product.badge { BadgeView(badge) }
+                    Text(product.name)
+                        .font(BrandFont.golos(28, .semibold, relativeTo: .largeTitle))
+                        .foregroundStyle(.white)
+                        .accessibilityAddTraits(.isHeader)
+                    if let lead = product.lead, !lead.isEmpty {
+                        Text(lead).font(.aaBodySmall).foregroundStyle(.white.opacity(0.9))
+                    }
+                    FlowLayout(spacing: 10, lineSpacing: 6) {
+                        PriceTagView(tag: product.price, numberFont: .pPriceAmount, color: .white)
+                        if let art = product.art, !art.isEmpty { ArticleBadge(art: art) }
+                    }
+                }
+                .padding(Spacing.gutterProduct)
             }
-            .padding(.horizontal, Spacing.gutterProduct)
+            let gallery = GalleryItem.from(Array(product.media.dropFirst()))
+            if !gallery.isEmpty {
+                GalleryPager(items: gallery, aspectRatio: MediaAspect.photo, cornerRadius: Radius.card, imageBackground: Palette.imagePlaceholder)
+                    .padding(.horizontal, Spacing.gutterProduct)
+            }
         } similarTitle: {
             String(localized: "Похожий персонал")
         }
@@ -336,12 +404,11 @@ struct ProgramProductView: View {
 
     var body: some View {
         RequestTemplateBody(product: product) {
-            ZStack(alignment: .bottomLeading) {
-                if let video = product.media.first(where: { $0.type == .video })?.resolvedURL {
-                    InlineVideoCard(url: video, poster: product.media.first?.posterURL, title: product.name)
-                } else {
-                    GalleryPager(items: GalleryItem.from(product.media), badge: product.badge)
-                }
+            if let video = product.media.first(where: { $0.type == .video })?.resolvedURL {
+                InlineVideoCard(url: video, poster: product.media.first?.posterURL, title: product.name, aspect: MediaAspect.programVideo)
+            } else {
+                // Фото программы — 900×600.
+                GalleryPager(items: GalleryItem.from(product.media), aspectRatio: MediaAspect.wide, badge: product.badge)
             }
             VStack(alignment: .leading, spacing: 12) {
                 ProductTitleRow(product: product)
@@ -364,15 +431,28 @@ private struct RequestTemplateBody<Header: View>: View {
     @Environment(AppEnvironment.self) private var env
 
     var body: some View {
+        GeometryReader { viewport in
+            scrollContent
+                .environment(\.viewportSize, viewport.size)
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            orderBar
+        }
+        .sheet(item: $request) { subject in
+            RequestFormSheet(viewModel: RequestFormViewModel(subject: subject, orders: env.orders))
+        }
+    }
+
+    private var scrollContent: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 28) {
+            VStack(alignment: .leading, spacing: Spacing.sectionLarge) {
                 header
                 if let blocks = product.blocks, !blocks.isEmpty {
-                    ContentBlocksView(blocks: blocks) { tier in
+                    ContentBlocksView(blocks: blocks, template: product.template) { tier in
                         order(title: [product.name, tier.title].compactMap { $0 }.joined(separator: " — "))
                     }
                 }
-                VStack(alignment: .leading, spacing: 26) {
+                VStack(alignment: .leading, spacing: 24) {
                     if let specs = product.specs, !specs.isEmpty { SpecsSection(specs: specs) }
                     if let html = product.descriptionHtml, !html.isEmpty { DescriptionSection(html: html) }
                 }
@@ -382,9 +462,11 @@ private struct RequestTemplateBody<Header: View>: View {
                 }
                 ManagerContactSection().padding(.horizontal, Spacing.gutterProduct)
             }
-            .padding(.bottom, 24)
+            .padding(.bottom, Spacing.sectionLarge)
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
+    }
+
+    private var orderBar: some View {
             HStack(spacing: 10) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Стоимость").font(.pPriceLabel).foregroundStyle(Palette.textSecondary)
@@ -397,6 +479,7 @@ private struct RequestTemplateBody<Header: View>: View {
                 .padding(.horizontal, 12)
                 .frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
                 .background(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).fill(Palette.surfaceMuted))
+                .accessibilityElement(children: .combine)
                 Button("Заказать") { order(title: product.name) }
                     .buttonStyle(PrimaryButtonStyle(height: 54, radius: Radius.md, font: .pCartButton))
                     .frame(width: 150)
@@ -405,10 +488,6 @@ private struct RequestTemplateBody<Header: View>: View {
             .padding(.top, 12)
             .padding(.bottom, 8)
             .stickyBottomBarBackground()
-        }
-        .sheet(item: $request) { subject in
-            RequestFormSheet(viewModel: RequestFormViewModel(subject: subject, orders: env.orders))
-        }
     }
 
     private func order(title: String) {

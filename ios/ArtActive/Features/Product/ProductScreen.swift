@@ -189,6 +189,7 @@ struct ManagerContactSection: View {
             Text("Остались вопросы?")
                 .font(.pH3)
                 .foregroundStyle(Palette.textProduct)
+                .accessibilityAddTraits(.isHeader)
             Text("Менеджер ответит круглосуточно и поможет собрать комплект.")
                 .font(.pBody)
                 .foregroundStyle(Palette.textSecondary)
@@ -203,7 +204,7 @@ private struct ProductSkeleton: View {
             VStack(alignment: .leading, spacing: 16) {
                 RoundedRectangle(cornerRadius: 0)
                     .fill(Palette.bgTertiary.opacity(0.6))
-                    .aspectRatio(1, contentMode: .fit)
+                    .aspectRatio(MediaAspect.photo, contentMode: .fit)
                 VStack(alignment: .leading, spacing: 12) {
                     SkeletonBlock(height: 22)
                     SkeletonBlock(width: 90, height: 16)
@@ -218,6 +219,7 @@ private struct ProductSkeleton: View {
             .shimmering()
         }
         .scrollDisabled(true)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Загрузка"))
     }
 }

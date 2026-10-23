@@ -13,45 +13,69 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                logo
-                content
-            }
-            .padding(.bottom, 24)
+            content
+                .padding(.top, 4)
+                .padding(.bottom, 24)
         }
         .background(Palette.catalogPage)
-        .topScrollFade(Palette.catalogPage)
+        // Своя компактная шапка как на сайте (логотип + кнопки в стеклянной капсуле) вместо
+        // системного навбара: без пустой строки навбара контент начинается сразу под ней.
+        .safeAreaInset(edge: .top, spacing: 0) { header }
+        .toolbar(.hidden, for: .navigationBar)
         .refreshable {
             Haptics.play(.refresh)
             await viewModel.load()
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                Button {
-                    env.router.push(.search)
-                } label: {
-                    Image(systemName: "magnifyingglass")
-                }
-                .accessibilityLabel(Text("Поиск"))
-                .accessibilityIdentifier("home.search")
-                ContactMenuButton {
-                    Image(systemName: "bubble.left.and.text.bubble.right")
-                }
-                .accessibilityLabel(Text("Связь с нами"))
-            }
-        }
         .task { if viewModel.state.content == nil { await viewModel.load() } }
     }
 
-    /// Вордмарк «Арт-Актив · всё для мероприятий» как в шапке сайта (140×44).
+    private var header: some View {
+        HStack(spacing: 12) {
+            logo
+            Spacer(minLength: 0)
+            GlassGroup(spacing: 8) {
+                HStack(spacing: 2) {
+                    Button {
+                        env.router.push(.search)
+                    } label: {
+                        headerIcon("magnifyingglass")
+                    }
+                    .accessibilityLabel(Text("Поиск"))
+                    .accessibilityIdentifier("home.search")
+                    ContactMenuButton {
+                        headerIcon("bubble.left.and.text.bubble.right")
+                    }
+                    .accessibilityLabel(Text("Связь с нами"))
+                }
+                .padding(.horizontal, 4)
+                .brandGlass(in: Capsule(), interactive: true)
+            }
+        }
+        .padding(.horizontal, Spacing.gutter)
+        .padding(.vertical, 6)
+        .background {
+            // Плотный фон под статус-баром и шапкой: прокручиваемый контент уходит под него.
+            Palette.catalogPage.opacity(0.96)
+                .background(.ultraThinMaterial)
+                .ignoresSafeArea(edges: .top)
+        }
+    }
+
+    private func headerIcon(_ systemName: String) -> some View {
+        Image(systemName: systemName)
+            .font(.system(size: 17, weight: .medium))
+            .foregroundStyle(Palette.accent)
+            .frame(width: 42, height: 40)
+            // Зона нажатия 44×44 без роста высоты шапки.
+            .contentShape(Rectangle().inset(by: -2))
+    }
+
+    /// Вордмарк «Арт-Актив · всё для мероприятий» как в шапке сайта.
     private var logo: some View {
         Image(colorScheme == .dark ? "LogoWhite" : "LogoDark")
             .resizable()
             .scaledToFit()
-            .frame(width: 140, height: 44, alignment: .leading)
-            .padding(.horizontal, Spacing.gutter)
-            .padding(.bottom, 8)
+            .frame(width: 124, height: 39, alignment: .leading)
             .accessibilityLabel(Text("Арт-Актив"))
             .accessibilityAddTraits(.isHeader)
     }
@@ -208,13 +232,16 @@ private struct HeroBanner: View {
                 .buttonStyle(PressableStyle())
             }
             .padding(20)
+            // Баннер с фиксированным соотношением сторон: текст не растёт выше xxxLarge, чтобы не вылезать.
+            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         }
         .aspectRatio(0.82, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         .scrollTransition(.interactive, axis: .vertical) { content, phase in
             content.scaleEffect(phase.isIdentity || reduceMotion ? 1 : 0.96)
         }
-        .accessibilityElement(children: .combine)
+        // .contain, а не .combine: кнопка «Подробнее» остаётся отдельным действием для VoiceOver.
+        .accessibilityElement(children: .contain)
     }
 }
 
@@ -267,8 +294,11 @@ private struct PromoTilesRow: View {
                                     .lineLimit(3)
                             }
                             .padding(14)
+                            .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         }
-                        .frame(width: 260, height: 170)
+                        // Сезонные плитки — 535×305.
+                        .aspectRatio(MediaAspect.promo, contentMode: .fit)
+                        .frame(width: 280)
                         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                     }
                     .buttonStyle(PressableStyle())
@@ -286,25 +316,42 @@ private struct DirectionsGrid: View {
     let reduceMotion: Bool
     let action: (HomeItem) -> Void
 
+    /// Мозаика как на сайте: две колонки, высокие (305×364) и низкие (305×175) плитки чередуются
+    /// со сдвигом — слева «высокая, низкая…», справа «низкая, высокая…».
     var body: some View {
-        LazyVGrid(columns: ProductGrid.columns, spacing: Spacing.gridGap) {
-            ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                Button { action(item) } label: {
-                    ZStack(alignment: .bottomLeading) {
-                        MediaBackground(image: item.image, video: item.video, reduceMotion: reduceMotion)
-                        LinearGradient(colors: [.clear, .black.opacity(0.55)], startPoint: .center, endPoint: .bottom)
-                        Text(item.title ?? "")
-                            .font(BrandFont.golos(15, .semibold, relativeTo: .subheadline))
-                            .foregroundStyle(.white)
-                            .multilineTextAlignment(.leading)
-                            .padding(12)
-                    }
-                    .aspectRatio(1, contentMode: .fit)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
-                }
-                .buttonStyle(PressableStyle())
+        let indexed = Array(items.enumerated())
+        HStack(alignment: .top, spacing: Spacing.gridGap) {
+            column(indexed.filter { $0.offset % 2 == 0 }, startsTall: true)
+            column(indexed.filter { $0.offset % 2 == 1 }, startsTall: false)
+        }
+    }
+
+    private func column(_ entries: [(offset: Int, element: HomeItem)], startsTall: Bool) -> some View {
+        VStack(spacing: Spacing.gridGap) {
+            ForEach(Array(entries.enumerated()), id: \.offset) { row, entry in
+                let tall = (row % 2 == 0) == startsTall
+                tile(entry.element, aspect: tall ? MediaAspect.directionTall : MediaAspect.directionShort)
             }
         }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func tile(_ item: HomeItem, aspect: CGFloat) -> some View {
+        Button { action(item) } label: {
+            ZStack(alignment: .bottomLeading) {
+                MediaBackground(image: item.image, video: item.video, reduceMotion: reduceMotion)
+                LinearGradient(colors: [.clear, .black.opacity(0.55)], startPoint: .center, endPoint: .bottom)
+                Text(item.title ?? "")
+                    .font(BrandFont.golos(15, .semibold, relativeTo: .subheadline))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.leading)
+                    .padding(12)
+                    .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
+            }
+            .aspectRatio(aspect, contentMode: .fit)
+            .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+        }
+        .buttonStyle(PressableStyle())
     }
 }
 
@@ -326,8 +373,11 @@ private struct CasesRow: View {
                                 .lineLimit(2)
                                 .multilineTextAlignment(.leading)
                                 .padding(12)
+                                .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
                         }
-                        .frame(width: 200, height: 200)
+                        // Кейсы — 800×600.
+                        .aspectRatio(MediaAspect.photo, contentMode: .fit)
+                        .frame(width: 240)
                         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                     }
                     .buttonStyle(PressableStyle())

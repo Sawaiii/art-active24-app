@@ -75,9 +75,8 @@ struct ProductCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.cardInner) {
-            RemoteImage(url: product.image?.resolvedURL, maxPixel: 520)
-                .aspectRatio(1, contentMode: .fit)
-                .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            // Большая ава сайта 600×600 — квадрат с заполнением; если пришло фото 800×600 — целиком на подложке.
+            AspectImage(url: product.image?.resolvedURL, aspect: MediaAspect.square, cornerRadius: Radius.card, maxPixel: 520, fitMismatched: true)
                 .overlay(alignment: .topLeading) {
                     if let badge = product.badge {
                         BadgeView(badge).padding(8)

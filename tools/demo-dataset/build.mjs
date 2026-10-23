@@ -18,9 +18,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const MAX_PRODUCTS = 400;
 const MAX_PRODUCT_FILES = 60;
 const MAX_VENUES = 40;
-const MAX_VENUE_FILES = 10;
 const SEO_LIMIT = 600;
-const MAX_TOTAL_BYTES = 5 * 1024 * 1024;
+const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
 
 /** Разделы, чьи листинги показываем на скриншотах: [id, сколько товаров самого раздела, сколько из каждого подраздела]. */
 const SECTIONS = [
@@ -150,9 +149,26 @@ function main() {
   products.filter((p) => p.name.toLowerCase().includes(SEARCH_WORD)).sort(byPopular).slice(0, SEARCH_LIMIT).forEach((p) => add(p.id));
 
   // 4) Похожие у карточек — пока есть место.
-  const details = new Map(detailIds.map((id) => [id, readJson(`products/${id}.json`)]));
-  for (const d of details.values()) {
+  for (const id of detailIds) {
+    const d = readJson(`products/${id}.json`);
     for (const s of [...(d.similar ?? []), ...(d.masterclass?.related ?? [])]) add(s.id);
+  }
+
+  // 5) Полная карточка у КАЖДОГО товара набора: что видно в листинге — то открывается.
+  //    Товары без карточки в снапшоте в набор не попадают.
+  const details = new Map();
+  for (const id of picked) {
+    const d = readOptional(`products/${id}.json`);
+    if (d) details.set(id, d); else picked.delete(id);
+  }
+  // Ссылки только внутри набора: «Похожие» и связанные МК не ведут на отсутствующие товары.
+  const inSet = (s) => picked.has(s.id);
+  for (const [id, d] of details) {
+    details.set(id, {
+      ...d,
+      similar: (d.similar ?? []).filter(inSet),
+      ...(d.masterclass ? { masterclass: { ...d.masterclass, related: (d.masterclass.related ?? []).filter(inSet) } } : {}),
+    });
   }
 
   const productList = products.filter((p) => picked.has(p.id)).sort(byPopular);
@@ -161,12 +177,16 @@ function main() {
   const categoryList = categories.map((c) => ({ ...c, seoHtml: trimSeoHtml(c.seoHtml) }));
 
   // ── Площадки: топ по популярности, карточки — для первых ──
-  const venueList = [...venues].sort(byPopular).slice(0, MAX_VENUES);
+  // Каждая площадка списка открывается: без карточки в снапшоте — не берём; «Похожие» — внутри набора.
   const venueDetails = new Map();
-  for (const v of venueList) {
-    if (venueDetails.size >= MAX_VENUE_FILES) break;
+  for (const v of [...venues].sort(byPopular)) {
+    if (venueDetails.size >= MAX_VENUES) break;
     const d = readOptional(`venues/${v.id}.json`);
     if (d) venueDetails.set(v.id, d);
+  }
+  const venueList = [...venues].filter((v) => venueDetails.has(v.id)).sort(byPopular);
+  for (const [id, d] of venueDetails) {
+    venueDetails.set(id, { ...d, similar: (d.similar ?? []).filter((s) => venueDetails.has(s.id)) });
   }
 
   // ── Сборка и проверка ──

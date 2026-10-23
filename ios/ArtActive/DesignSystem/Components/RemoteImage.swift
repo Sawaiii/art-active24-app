@@ -83,18 +83,29 @@ struct RemoteImage: View {
     var contentMode: ContentMode = .fill
     var maxPixel: CGFloat = 900
     var placeholder: Color = Palette.imagePlaceholder
+    /// Для .fill: если пропорция картинки отличается от пропорции ячейки больше чем на 12%
+    /// (например, фото 800×600 вместо авы 600×600), показать целиком (.fit) на подложке — без обрезки.
+    var fitWhenAspectDiffers: CGFloat?
 
     @State private var image: UIImage?
     @State private var failed = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.displayScale) private var displayScale
 
-    init(url: URL?, previewURL: URL? = nil, contentMode: ContentMode = .fill, maxPixel: CGFloat = 900, placeholder: Color = Palette.imagePlaceholder) {
+    init(
+        url: URL?,
+        previewURL: URL? = nil,
+        contentMode: ContentMode = .fill,
+        maxPixel: CGFloat = 900,
+        placeholder: Color = Palette.imagePlaceholder,
+        fitWhenAspectDiffers: CGFloat? = nil
+    ) {
         self.url = url
         self.previewURL = previewURL
         self.contentMode = contentMode
         self.maxPixel = maxPixel
         self.placeholder = placeholder
+        self.fitWhenAspectDiffers = fitWhenAspectDiffers
         let cached = url.flatMap { ImageMemoryCache.shared.image(for: ImagePipeline.key($0, maxPixel: maxPixel)) }
         _image = State(initialValue: cached)
     }
@@ -106,7 +117,7 @@ struct RemoteImage: View {
                 if let image {
                     Image(uiImage: image)
                         .resizable()
-                        .aspectRatio(contentMode: contentMode)
+                        .aspectRatio(contentMode: effectiveMode(for: image))
                         .transition(.opacity)
                 } else if failed {
                     Image(systemName: "photo")
@@ -117,6 +128,14 @@ struct RemoteImage: View {
             .clipped()
             .task(id: url) { await load() }
             .accessibilityHidden(true)
+    }
+
+    private func effectiveMode(for image: UIImage) -> ContentMode {
+        guard contentMode == .fill, let target = fitWhenAspectDiffers, target > 0, image.size.height > 0 else {
+            return contentMode
+        }
+        let actual = image.size.width / image.size.height
+        return abs(actual - target) / target > 0.12 ? .fit : .fill
     }
 
     private func load() async {
@@ -140,5 +159,67 @@ struct RemoteImage: View {
         } catch {
             if !error.isCancellation, image == nil { failed = true }
         }
+    }
+}
+
+/// Картинка с фиксированной пропорцией ячейки: ширина — доступная, высота — по `aspect` (ширина / высота).
+/// Содержимое `.fill` (обрезка по краям) или `.fit` (целиком на подложке); всегда обрезано по форме.
+/// Единый способ задавать размер картинок — вместо `frame(height:)`.
+struct AspectImage: View {
+    let url: URL?
+    let aspect: CGFloat
+    var contentMode: ContentMode = .fill
+    var cornerRadius: CGFloat = 0
+    var maxPixel: CGFloat = 900
+    var placeholder: Color = Palette.imagePlaceholder
+    /// Не обрезать картинку другой пропорции (ава не найдена — пришло фото): показать целиком.
+    var fitMismatched = false
+
+    var body: some View {
+        Color.clear
+            .aspectRatio(aspect, contentMode: .fit)
+            .overlay {
+                RemoteImage(
+                    url: url,
+                    contentMode: contentMode,
+                    maxPixel: maxPixel,
+                    placeholder: placeholder,
+                    fitWhenAspectDiffers: fitMismatched ? aspect : nil
+                )
+            }
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+    }
+}
+
+/// Пропорции исходников сайта (ширина / высота).
+enum MediaAspect {
+    /// Фото галерей, кейсы, фото залов, комплекты и допы — 800×600; площадки — 600×450.
+    static let photo: CGFloat = 4 / 3
+    /// Большая ава листинга — 600×600; карточки «Фишки», «Похожий персонал».
+    static let square: CGFloat = 1
+    /// Галерея и этапы программы (тимбилдинг) — 900×600, 380×253.
+    static let wide: CGFloat = 3 / 2
+    /// Мобильный баннер шапки шаблонов 81/123 — 430×768 (портрет).
+    static let banner: CGFloat = 430.0 / 768.0
+    /// Тарифы программы — 396×220.
+    static let tier: CGFloat = 396.0 / 220.0
+    /// Постер видео программы — 960×445.
+    static let programVideo: CGFloat = 960.0 / 445.0
+    /// Сезонные плитки главной — 535×305.
+    static let promo: CGFloat = 535.0 / 305.0
+    /// Плитки «Наши возможности» — низкая 305×175 и высокая 305×364.
+    static let directionShort: CGFloat = 305.0 / 175.0
+    static let directionTall: CGFloat = 305.0 / 364.0
+}
+
+private struct ViewportSizeKey: EnvironmentKey {
+    static let defaultValue: CGSize = .zero
+}
+
+extension EnvironmentValues {
+    /// Размер видимой области экрана-контейнера (для ограничения высоты портретных баннеров).
+    var viewportSize: CGSize {
+        get { self[ViewportSizeKey.self] }
+        set { self[ViewportSizeKey.self] = newValue }
     }
 }

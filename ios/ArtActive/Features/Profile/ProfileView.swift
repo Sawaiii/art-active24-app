@@ -19,7 +19,12 @@ struct ProfileView: View {
             accountSection
             Section {
                 NavigationLink(value: Route.orders) {
-                    row(String(localized: "Мои заказы"), systemImage: "shippingbox", badge: orders.unseenCount)
+                    row(
+                        String(localized: "Мои заказы"),
+                        systemImage: "shippingbox",
+                        badge: orders.unseenCount,
+                        trailing: auth.isLoggedIn ? nil : String(localized: "После входа")
+                    )
                 }
                 .accessibilityIdentifier("profile.orders")
                 .disabled(!auth.isLoggedIn)
@@ -68,8 +73,9 @@ struct ProfileView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle(Text("Профиль"))
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .refreshable {
+            Haptics.play(.refresh)
             await auth.refreshUser()
             await orders.load()
         }
@@ -153,6 +159,7 @@ struct ProfileView: View {
             Spacer()
             if badge > 0 {
                 CounterBadge(count: badge)
+                    .accessibilityLabel(Text("Есть изменения: \(badge)"))
             } else if let trailing {
                 Text(trailing).foregroundStyle(Palette.textSecondary)
             }
@@ -212,6 +219,9 @@ final class ProfileEditViewModel {
 struct ProfileEditView: View {
     @State private var viewModel: ProfileEditViewModel
     @Environment(\.dismiss) private var dismiss
+    @FocusState private var focus: Field?
+
+    private enum Field { case name, email, company }
 
     init(viewModel: ProfileEditViewModel) {
         _viewModel = State(initialValue: viewModel)
@@ -222,13 +232,23 @@ struct ProfileEditView: View {
             Section {
                 TextField(text: $viewModel.name) { Text("Имя") }
                     .textContentType(.name)
+                    .textInputAutocapitalization(.words)
+                    .focused($focus, equals: .name)
+                    .submitLabel(.next)
+                    .onSubmit { focus = .email }
                 TextField(text: $viewModel.email) { Text("E-mail") }
                     .textContentType(.emailAddress)
                     .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
+                    .focused($focus, equals: .email)
+                    .submitLabel(.next)
+                    .onSubmit { focus = .company }
                 TextField(text: $viewModel.company) { Text("Компания") }
                     .textContentType(.organizationName)
+                    .focused($focus, equals: .company)
+                    .submitLabel(.done)
+                    .onSubmit { focus = nil }
             } header: {
                 Text("Мои данные")
             }
@@ -242,11 +262,12 @@ struct ProfileEditView: View {
                 Text("Номер телефона — логин, его сменить нельзя.")
             }
             if let error = viewModel.errorMessage {
-                Section { Text(error).foregroundStyle(Palette.error) }
+                Section { Label(error, systemImage: "exclamationmark.circle.fill").foregroundStyle(Palette.error) }
             }
         }
         .navigationTitle(Text("Мои данные"))
         .navigationBarTitleDisplayMode(.inline)
+        .scrollDismissesKeyboard(.interactively)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button {
@@ -254,6 +275,7 @@ struct ProfileEditView: View {
                 } label: {
                     if viewModel.isSaving { ProgressView() } else { Text("Сохранить") }
                 }
+                .accessibilityLabel(Text("Сохранить"))
                 .disabled(viewModel.isSaving)
             }
         }

@@ -83,6 +83,7 @@ struct ProductGridSkeleton: View {
             }
         }
         .shimmering()
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Загрузка"))
     }
 }
@@ -103,6 +104,7 @@ struct ListSkeleton: View {
             }
         }
         .shimmering()
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Загрузка"))
     }
 }
@@ -142,6 +144,7 @@ struct ErrorStateView: View {
                 .buttonStyle(PrimaryButtonStyle(height: 48))
                 .frame(maxWidth: 220)
                 .disabled(isRetrying)
+                .accessibilityLabel(Text("Повторить"))
             }
         }
         .padding(32)
@@ -199,6 +202,7 @@ struct LoadMoreFooter: View {
         Group {
             if isLoading {
                 ProgressView().tint(Palette.accent)
+                    .accessibilityLabel(Text("Загрузка"))
             } else if let error {
                 VStack(spacing: 8) {
                     Text(error).font(.aaCaption).foregroundStyle(Palette.textSecondary).multilineTextAlignment(.center)

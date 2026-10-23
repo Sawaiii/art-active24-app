@@ -1,5 +1,32 @@
 import SwiftUI
 
+/// Пояснения и мелкие подсказки: минимум 12 pt (HIG: не мельче 11), масштабируются вместе с caption.
+extension Font {
+    static let configHint = BrandFont.inter(12, .regular, relativeTo: .caption)
+}
+
+/// Русские формы числительных для подписей, которые не покрыты каталогом строк.
+enum RuPlural {
+    static func form(_ n: Int, one: String, few: String, many: String) -> String {
+        let mod100 = abs(n) % 100
+        let mod10 = abs(n) % 10
+        if mod100 >= 11, mod100 <= 14 { return many }
+        switch mod10 {
+        case 1: return one
+        case 2...4: return few
+        default: return many
+        }
+    }
+
+    static func days(_ n: Int) -> String {
+        "\(n) " + form(n, one: "день", few: "дня", many: "дней")
+    }
+
+    static func venues(_ n: Int) -> String {
+        "\(n) " + form(n, one: "площадка", few: "площадки", many: "площадок")
+    }
+}
+
 // MARK: - Комплекты: карусель + «Показать все»
 
 struct ComplectsStep: View {
@@ -58,10 +85,15 @@ struct ComplectsStep: View {
                     } label: {
                         HStack(spacing: 4) {
                             Text("Показать все \(complects.count)")
-                            Image(systemName: "chevron.down").font(.system(size: 12, weight: .semibold))
+                            Image(systemName: "chevron.down")
+                                .font(.system(size: 12, weight: .semibold))
+                                .accessibilityHidden(true)
                         }
+                        // 44 pt зона нажатия при компактной визуальной ссылке.
+                        .frame(minHeight: 44)
+                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(LinkButtonStyle(font: BrandFont.inter(14, .medium)))
+                    .buttonStyle(LinkButtonStyle(font: BrandFont.inter(14, .medium, relativeTo: .subheadline)))
                     .accessibilityIdentifier("config.complects.all")
                 }
             }
@@ -87,29 +119,31 @@ struct ComplectCard: View {
     var onInfo: (() -> Void)?
     let onSelect: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
         Button(action: onSelect) {
             HStack(spacing: 10) {
                 if let image = complect.image?.resolvedURL {
-                    RemoteImage(url: image, contentMode: .fit, maxPixel: 160, placeholder: Palette.surface)
-                        .frame(width: 44, height: 44)
-                        .clipShape(RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
+                    // Фото комплекта 800×600 — 4:3, без растяжения.
+                    AspectImage(url: image, aspect: MediaAspect.photo, cornerRadius: Radius.sm, maxPixel: 200, placeholder: Palette.surface)
+                        .frame(width: 56)
                 }
                 VStack(alignment: .leading, spacing: 3) {
                     Text(complect.title)
                         .font(.pVariantTitle)
                         .foregroundStyle(Palette.textProduct)
-                        .lineLimit(1)
+                        .lineLimit(typeSize.isAccessibilitySize ? 3 : 1)
                     if complect.side(priceType) != nil {
                         Text(ComplectPrice.text(complect, priceType: priceType))
                             .font(.pVariantPrice)
                             .foregroundStyle(Palette.variantPrice)
-                            .lineLimit(1)
+                            .lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
                     } else if let subtitle = complect.subtitle {
                         Text(subtitle)
                             .font(.pVariantPrice)
                             .foregroundStyle(Palette.variantPrice)
-                            .lineLimit(1)
+                            .lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
                     }
                 }
                 .padding(.trailing, onInfo == nil ? 0 : 18)
@@ -137,7 +171,8 @@ struct ComplectCard: View {
                         .frame(width: 20, height: 20)
                         .background(Circle().fill(isSelected ? Palette.accentTint10 : Palette.surfaceMuted))
                         .padding(6)
-                        .contentShape(Rectangle())
+                        // Визуально 20 pt, зона нажатия 44×44 (HIG).
+                        .contentShape(Rectangle().inset(by: -6))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(Text("Подробнее о комплекте"))
@@ -185,16 +220,15 @@ private struct AllComplectsSheet: View {
                     dismiss()
                 } label: {
                     HStack(alignment: .top, spacing: 12) {
-                        RemoteImage(url: complect.image?.resolvedURL, contentMode: .fit, maxPixel: 200, placeholder: Palette.imagePlaceholder)
-                            .frame(width: 64, height: 64)
-                            .clipShape(RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
+                        AspectImage(url: complect.image?.resolvedURL, aspect: MediaAspect.photo, cornerRadius: Radius.sm, maxPixel: 240)
+                            .frame(width: 84)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(complect.title)
-                                .font(BrandFont.inter(15, .semibold))
+                                .font(BrandFont.inter(15, .semibold, relativeTo: .subheadline))
                                 .foregroundStyle(Palette.textProduct)
                             if complect.side(viewModel.state?.priceType ?? .rent) != nil {
                                 Text(ComplectPrice.text(complect, priceType: viewModel.state?.priceType ?? .rent))
-                                    .font(BrandFont.inter(14, .medium))
+                                    .font(BrandFont.inter(14, .medium, relativeTo: .footnote))
                                     .foregroundStyle(Palette.accent)
                             }
                             if let html = complect.textHtml, !html.isEmpty {
@@ -208,10 +242,12 @@ private struct AllComplectsSheet: View {
                         if complect.id == viewModel.state?.complectId {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(Palette.accent)
+                                .accessibilityHidden(true)
                         }
                     }
                 }
                 .buttonStyle(.plain)
+                .accessibilityAddTraits(complect.id == viewModel.state?.complectId ? .isSelected : [])
             }
             .listStyle(.plain)
             .navigationTitle(Text(viewModel.configurator.complectsTitle()))
@@ -229,14 +265,14 @@ private struct AllComplectsSheet: View {
 private struct ComplectInfoSheet: View {
     let complect: Complect
     @Environment(Router.self) private var router
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     if let image = complect.image?.resolvedURL {
-                        RemoteImage(url: image, contentMode: .fit, maxPixel: 900, placeholder: Palette.page)
-                            .frame(height: 200)
+                        AspectImage(url: image, aspect: MediaAspect.photo, contentMode: .fit, cornerRadius: Radius.md, maxPixel: 900, placeholder: Palette.page)
                     }
                     if let html = complect.textHtml, !html.isEmpty {
                         HTMLText(html: html)
@@ -257,6 +293,12 @@ private struct ComplectInfoSheet: View {
             }
             .navigationTitle(Text(complect.title))
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                // Явный путь закрытия помимо свайпа (HIG: модальные экраны всегда закрываемы).
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Готово") { dismiss() }
+                }
+            }
         }
     }
 }
@@ -270,13 +312,15 @@ struct BulletList: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
-                .font(BrandFont.inter(15, .semibold))
+                .font(BrandFont.inter(15, .semibold, relativeTo: .subheadline))
                 .foregroundStyle(Palette.textProduct)
+                .accessibilityAddTraits(.isHeader)
             ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Image(systemName: systemImage)
-                        .font(.system(size: 11, weight: .bold))
+                        .font(BrandFont.inter(11, .bold, relativeTo: .caption2))
                         .foregroundStyle(Palette.accent)
+                        .accessibilityHidden(true)
                     Text(item)
                         .font(.pBody)
                         .foregroundStyle(Palette.textProduct)
@@ -330,8 +374,9 @@ struct SubsStep: View {
                 VStack(alignment: .leading, spacing: 10) {
                     if let title = group.title, !title.isEmpty {
                         Text(title)
-                            .font(BrandFont.inter(14, .semibold))
+                            .font(BrandFont.inter(14, .semibold, relativeTo: .subheadline))
                             .foregroundStyle(Palette.textProduct)
+                            .accessibilityAddTraits(.isHeader)
                     }
                     if viewModel.mode == .trampoline {
                         ForEach(group.subs) { sub in
@@ -367,7 +412,7 @@ private struct SubButton: View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(sub.name)
-                    .font(BrandFont.inter(13, .semibold))
+                    .font(BrandFont.inter(13, .semibold, relativeTo: .footnote))
                     .foregroundStyle(isSelected ? Palette.accent : Palette.textProduct)
                 if let side = sub.side(priceType), side.amount > 0 || side.onRequest == true {
                     Text(ComplectPrice.text(side))
@@ -377,6 +422,7 @@ private struct SubButton: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
+            .frame(minHeight: 44)
             .background(
                 RoundedRectangle(cornerRadius: Radius.input, style: .continuous)
                     .fill(isSelected ? Palette.accentTint05 : Palette.surface)
@@ -398,23 +444,31 @@ private struct InstallOptionCard: View {
     let isSelected: Bool
     let action: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
+        // На крупных размерах шрифта фото уходит над текстом.
+        let stacked = typeSize.isAccessibilitySize
+        let layout = stacked
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: 12))
         Button(action: action) {
-            HStack(alignment: .top, spacing: 12) {
+            layout {
                 if let image = sub.image?.resolvedURL {
-                    RemoteImage(url: image, maxPixel: 240)
-                        .frame(width: 72, height: 72)
-                        .clipShape(RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
+                    AspectImage(url: image, aspect: MediaAspect.photo, cornerRadius: Radius.sm, maxPixel: 300)
+                        .frame(width: stacked ? nil : 96)
                 }
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack {
+                    HStack(alignment: .firstTextBaseline) {
                         Text(sub.name)
-                            .font(BrandFont.inter(15, .semibold))
+                            .font(BrandFont.inter(15, .semibold, relativeTo: .subheadline))
                             .foregroundStyle(Palette.textProduct)
-                        Spacer()
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 8)
                         Text(surchargeText)
-                            .font(BrandFont.inter(13, .semibold))
+                            .font(BrandFont.inter(13, .semibold, relativeTo: .footnote))
                             .foregroundStyle(isSelected ? Palette.accent : Palette.textSecondary)
+                            .fixedSize()
                     }
                     if let text = sub.text, !text.isEmpty {
                         Text(text)
@@ -426,8 +480,10 @@ private struct InstallOptionCard: View {
                 }
                 Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
                     .foregroundStyle(isSelected ? Palette.accent : Palette.disabled)
+                    .accessibilityHidden(true)
             }
             .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
                     .fill(isSelected ? Palette.accentTint05 : Palette.surface)
@@ -465,8 +521,9 @@ struct TimeStep: View {
             }
             if !options.days.isEmpty {
                 Text("Несколько дней: каждый день — плюс 30 процентов от цены 8 часов")
-                    .font(.pPriceHint)
+                    .font(.configHint)
                     .foregroundStyle(Palette.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
                 TimeSegmentControl(options: options.days, selected: viewModel.state?.time) { option in
                     select(option)
                 }
@@ -479,7 +536,7 @@ struct TimeStep: View {
             ) { days in
                 viewModel.selectTime(TimeSelection(unit: .days, value: days))
             }
-            .presentationDetents([.height(320)])
+            .presentationDetents([.height(320), .large])
             .presentationDragIndicator(.visible)
         }
     }
@@ -512,7 +569,7 @@ private struct CustomDaysSheet: View {
         NavigationStack {
             Picker(selection: $days) {
                 ForEach(minimum...Configurator.maxDays, id: \.self) { value in
-                    Text("\(value) дней").tag(value)
+                    Text(verbatim: RuPlural.days(value)).tag(value)
                 }
             } label: {
                 Text("Количество дней")
@@ -551,8 +608,9 @@ struct ExtrasStep: View {
                 }
             }
             Text("Доп. опции считаются один раз на позицию — не умножаются на количество и дни.")
-                .font(.pPriceHint)
+                .font(.configHint)
                 .foregroundStyle(Palette.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
@@ -564,20 +622,23 @@ struct ExtraRow: View {
 
     var body: some View {
         let isOn = viewModel.isSelected(extra: extra.id)
+        // У счётной опции внутри свой степпер — его нельзя схлопывать в один элемент VoiceOver.
+        let hasStepper = extra.isCountable && isOn
         HStack(spacing: 12) {
             if let image = extra.image?.resolvedURL {
-                RemoteImage(url: image, maxPixel: 160)
-                    .frame(width: 44, height: 44)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.sm, style: .continuous))
+                AspectImage(url: image, aspect: MediaAspect.photo, cornerRadius: Radius.sm, maxPixel: 200)
+                    .frame(width: 60)
             }
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(extra.name)
-                        .font(BrandFont.inter(14, .semibold))
+                        .font(BrandFont.inter(14, .semibold, relativeTo: .subheadline))
                         .foregroundStyle(Palette.textProduct)
+                        .fixedSize(horizontal: false, vertical: true)
                     if extra.isRequired {
                         Text("обязательно")
-                            .font(BrandFont.inter(11, .semibold))
+                            .font(BrandFont.inter(11, .semibold, relativeTo: .caption2))
+                            .fixedSize()
                             .foregroundStyle(Palette.accent)
                             .padding(.horizontal, 7)
                             .padding(.vertical, 1)
@@ -589,13 +650,13 @@ struct ExtraRow: View {
                     .foregroundStyle(Palette.variantPrice)
                 if let note = extra.note, !note.isEmpty {
                     Text(note)
-                        .font(.pPriceHint)
+                        .font(.configHint)
                         .foregroundStyle(Palette.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
             Spacer(minLength: 8)
-            if extra.isCountable, isOn {
+            if hasStepper {
                 QtyStepper(
                     value: viewModel.extraQty(extra.id),
                     minimum: extra.isRequired ? 1 : 0,
@@ -604,14 +665,17 @@ struct ExtraRow: View {
                     onChange: { viewModel.setExtraQty(extra.id, $0) },
                     onRemove: { viewModel.setExtraQty(extra.id, 0) }
                 )
+                .accessibilityLabel(Text("Количество, \(extra.name)"))
             } else {
                 Image(systemName: isOn ? "checkmark.circle.fill" : "plus.circle")
                     .font(.system(size: 24))
                     .foregroundStyle(isOn ? Palette.accent : Palette.disabled)
                     .contentTransition(.symbolEffect(.replace))
+                    .accessibilityHidden(true)
             }
         }
         .padding(10)
+        .frame(minHeight: 56)
         .background(
             RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
                 .fill(isOn ? Palette.accentTint05 : Palette.surface)
@@ -622,10 +686,10 @@ struct ExtraRow: View {
         )
         .contentShape(Rectangle())
         .onTapGesture {
-            if !(extra.isCountable && isOn) { viewModel.toggleExtra(extra.id) }
+            if !hasStepper { viewModel.toggleExtra(extra.id) }
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isButton)
+        .accessibilityElement(children: hasStepper ? .contain : .combine)
+        .accessibilityAddTraits(hasStepper ? [] : .isButton)
         .accessibilityAddTraits(isOn ? .isSelected : [])
         .accessibilityIdentifier("config.extra.\(extra.id)")
     }
@@ -646,8 +710,9 @@ struct CateringMenuStep: View {
                 VStack(alignment: .leading, spacing: 8) {
                     if let title = group.title, !title.isEmpty {
                         Text(title)
-                            .font(BrandFont.inter(14, .semibold))
+                            .font(BrandFont.inter(14, .semibold, relativeTo: .subheadline))
                             .foregroundStyle(Palette.textProduct)
+                            .accessibilityAddTraits(.isHeader)
                     }
                     ForEach(group.rows) { row in
                         MenuRowView(row: row, qty: viewModel.menuQty(row.id)) { viewModel.setMenuQty(row.id, $0) }
@@ -655,9 +720,15 @@ struct CateringMenuStep: View {
                 }
             }
             if let error = viewModel.validationError {
-                Text(error.message)
-                    .font(.aaCaption)
-                    .foregroundStyle(Palette.error)
+                // Ошибка минимума: иконка + текст, не только цвет.
+                Label {
+                    Text(error.message)
+                        .fixedSize(horizontal: false, vertical: true)
+                } icon: {
+                    Image(systemName: "exclamationmark.circle.fill")
+                }
+                .font(.aaCaption)
+                .foregroundStyle(Palette.error)
             }
         }
     }
@@ -668,24 +739,30 @@ private struct MenuRowView: View {
     let qty: Int
     let onChange: (Int) -> Void
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
-        HStack(spacing: 12) {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+            : AnyLayout(HStackLayout(alignment: .center, spacing: 12))
+        layout {
             VStack(alignment: .leading, spacing: 2) {
                 Text(row.name)
-                    .font(BrandFont.inter(14, .medium))
+                    .font(BrandFont.inter(14, .medium, relativeTo: .subheadline))
                     .foregroundStyle(Palette.textProduct)
+                    .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 6) {
                     Text(Money.rub(row.price))
                         .font(.pVariantPrice)
                         .foregroundStyle(Palette.variantPrice)
                     if let minimum = row.minQty, minimum > 1 {
                         Text("мин. \(minimum)")
-                            .font(.pPriceHint)
+                            .font(.configHint)
                             .foregroundStyle(Palette.textSecondary)
                     }
                 }
             }
-            Spacer(minLength: 8)
+            if !typeSize.isAccessibilitySize { Spacer(minLength: 8) }
             if qty > 0 {
                 QtyStepper(
                     value: qty,
@@ -695,6 +772,7 @@ private struct MenuRowView: View {
                     onChange: onChange,
                     onRemove: { onChange(0) }
                 )
+                .accessibilityLabel(Text("Количество, \(row.name)"))
             } else {
                 Button {
                     Haptics.play(.selection)
@@ -705,12 +783,14 @@ private struct MenuRowView: View {
                         .foregroundStyle(Palette.accent)
                         .frame(width: 34, height: 34)
                         .background(Circle().fill(Palette.accentTint10))
+                        // Визуально 34 pt, зона нажатия 44×44 (HIG).
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
                 .buttonStyle(PressableStyle(scale: 0.9))
                 .accessibilityLabel(Text("Добавить \(row.name)"))
             }
         }
-        .padding(.vertical, 4)
     }
 }
 
@@ -720,19 +800,23 @@ private struct RewardProgressView: View {
     let reward: Reward
     let menuSum: Int
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             let left = max((reward.goal ?? 0) - menuSum, 0)
             Text(left > 0
                  ? String(localized: "Ещё \(Money.rub(left)) — \(reward.label ?? String(localized: "бонус"))")
                  : (reward.label ?? String(localized: "Бонус получен")))
-                .font(BrandFont.inter(13, .semibold))
+                .font(BrandFont.inter(13, .semibold, relativeTo: .footnote))
                 .foregroundStyle(left > 0 ? Palette.textProduct : Palette.success)
+                .fixedSize(horizontal: false, vertical: true)
                 .contentTransition(.numericText())
             ProgressView(value: progress)
                 .tint(left > 0 ? Palette.accent : Palette.success)
-                .animation(.snappy, value: progress)
+                .animation(Motion.snappy(reduceMotion), value: progress)
         }
+        .accessibilityElement(children: .combine)
         .padding(12)
         .background(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).fill(Palette.surfaceMuted))
     }
@@ -781,37 +865,43 @@ private struct AlsoFitsCard: View {
     let isOn: Bool
     let action: () -> Void
 
+    /// Ширина карточки растёт с Dynamic Type, но не шире 280.
+    @ScaledMetric(relativeTo: .body) private var cardWidth: CGFloat = 160
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            RemoteImage(url: extra.image?.resolvedURL, contentMode: .fit, maxPixel: 400, placeholder: Palette.surface)
-                .aspectRatio(1, contentMode: .fit)
-                .clipShape(RoundedRectangle(cornerRadius: Radius.md, style: .continuous))
-            Text(extra.name)
-                .font(BrandFont.inter(13, .semibold))
-                .foregroundStyle(Palette.textProduct)
-                .lineLimit(2)
-                .frame(height: 34, alignment: .top)
-            Text(extra.from == true ? String(localized: "от \(Money.rub(extra.price))") : Money.rub(extra.price))
-                .font(.pVariantPrice)
-                .foregroundStyle(Palette.variantPrice)
+            AspectImage(url: extra.image?.resolvedURL, aspect: MediaAspect.photo, cornerRadius: Radius.md, maxPixel: 400, placeholder: Palette.surface)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 8) {
+                // Две строки резервируются, а не фиксируются по высоте: кнопки выровнены, текст не обрезается.
+                Text(extra.name)
+                    .font(BrandFont.inter(13, .semibold, relativeTo: .footnote))
+                    .foregroundStyle(Palette.textProduct)
+                    .lineLimit(2, reservesSpace: true)
+                Text(extra.from == true ? String(localized: "от \(Money.rub(extra.price))") : Money.rub(extra.price))
+                    .font(.pVariantPrice)
+                    .foregroundStyle(Palette.variantPrice)
+            }
+            .accessibilityElement(children: .combine)
             Button(action: action) {
                 Label {
                     Text(isOn ? "Добавлено" : "Добавить")
                 } icon: {
                     Image(systemName: isOn ? "checkmark" : "plus")
                 }
-                .font(BrandFont.inter(13, .semibold))
+                .font(BrandFont.inter(13, .semibold, relativeTo: .footnote))
                 .foregroundStyle(isOn ? Palette.onAccent : Palette.accent)
-                .frame(maxWidth: .infinity, minHeight: 36)
+                .frame(maxWidth: .infinity, minHeight: 44)
                 .background(RoundedRectangle(cornerRadius: Radius.input, style: .continuous).fill(isOn ? Palette.accent : Palette.accentTint10))
                 .contentTransition(.symbolEffect(.replace))
             }
             .buttonStyle(PressableStyle())
+            .accessibilityLabel(Text(isOn ? "Добавлено: \(extra.name)" : "Добавить \(extra.name)"))
+            .accessibilityAddTraits(isOn ? .isSelected : [])
         }
         .padding(10)
-        .frame(width: 160)
+        .frame(width: min(cardWidth, 280))
         .background(RoundedRectangle(cornerRadius: Radius.card, style: .continuous).fill(Palette.surface))
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(isOn ? .isSelected : [])
+        .accessibilityElement(children: .contain)
     }
 }

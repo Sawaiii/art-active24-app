@@ -13,9 +13,9 @@ struct ConfiguratorProductView: View {
         let product = viewModel.product
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                GalleryPager(items: GalleryItem.from(product.media), badge: product.badge)
+                GalleryPager(items: GalleryItem.from(product.media), aspectRatio: MediaAspect.photo, badge: product.badge)
 
-                VStack(alignment: .leading, spacing: 26) {
+                VStack(alignment: .leading, spacing: 24) {
                     ProductTitleRow(product: product)
                     configuratorSteps
                     if let comment = viewModel.complect?.comment, !comment.isEmpty {
@@ -46,7 +46,7 @@ struct ConfiguratorProductView: View {
                     ManagerContactSection()
                         .padding(.horizontal, Spacing.gutterProduct)
                 }
-                .padding(.top, 36)
+                .padding(.top, 32)
                 .padding(.bottom, 24)
             }
         }

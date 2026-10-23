@@ -61,12 +61,15 @@ struct QtyStepper: View {
     }
 
     private func stepButton(systemName: String, label: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        let side: CGFloat = compact ? 30 : 36
+        // Зона нажатия расширена до 44pt без изменения вёрстки (HIG: минимум 44pt).
+        let hitInset = -max(0, (44 - side) / 2)
+        return Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(Palette.textStrong)
-                .frame(width: compact ? 30 : 36, height: compact ? 30 : 36)
-                .contentShape(Rectangle())
+                .frame(width: side, height: side)
+                .contentShape(Rectangle().inset(by: hitInset))
         }
         .buttonStyle(PressableStyle(scale: 0.85))
         .accessibilityLabel(Text(label))

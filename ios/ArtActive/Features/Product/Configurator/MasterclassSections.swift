@@ -22,11 +22,13 @@ struct MasterclassVenuesButton: View {
                                 .overlay(Circle().strokeBorder(Palette.surface, lineWidth: 2))
                         }
                     }
+                    .accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(masterclass.venueTitle ?? String(localized: "Где проходит"))
-                            .font(BrandFont.inter(14, .semibold))
+                            .font(BrandFont.inter(14, .semibold, relativeTo: .subheadline))
                             .foregroundStyle(Palette.textProduct)
-                        Text("\(venues.count) площадок")
+                            .multilineTextAlignment(.leading)
+                        Text(verbatim: RuPlural.venues(venues.count))
                             .font(.pStepLabel)
                             .foregroundStyle(Palette.textSecondary)
                     }
@@ -34,8 +36,10 @@ struct MasterclassVenuesButton: View {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(Palette.disabled)
+                        .accessibilityHidden(true)
                 }
                 .padding(12)
+                .frame(minHeight: 56)
                 .background(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).fill(Palette.surfaceMuted))
             }
             .buttonStyle(PressableStyle(scale: 0.98))
@@ -66,11 +70,12 @@ private struct MasterclassVenuesSheet: View {
                         VStack(alignment: .leading, spacing: 10) {
                             let photos = GalleryItem.from(urls: venue.images ?? [])
                             if !photos.isEmpty {
-                                GalleryPager(items: photos, aspectRatio: 4 / 3, cornerRadius: Radius.card, imageBackground: Palette.imagePlaceholder)
+                                GalleryPager(items: photos, aspectRatio: MediaAspect.photo, cornerRadius: Radius.card, imageBackground: Palette.imagePlaceholder)
                             }
                             Text(venue.name ?? "")
                                 .font(.pH3)
                                 .foregroundStyle(Palette.textProduct)
+                                .accessibilityAddTraits(.isHeader)
                             if let text = venue.text, !text.isEmpty {
                                 Text(text)
                                     .font(.pBody)
@@ -99,6 +104,7 @@ struct MasterclassInfoSection: View {
 
     enum Tab: Hashable { case steps, included }
     @State private var tab: Tab = .steps
+    @ScaledMetric(relativeTo: .footnote) private var stepBadge: CGFloat = 32
 
     private var tabs: [Tab] {
         var result: [Tab] = []
@@ -116,6 +122,7 @@ struct MasterclassInfoSection: View {
                     Text(title(for: tabs[0]))
                         .font(.pH3)
                         .foregroundStyle(Palette.textProduct)
+                        .accessibilityAddTraits(.isHeader)
                 }
                 switch tabs.count > 1 ? tab : tabs[0] {
                 case .steps:
@@ -123,14 +130,15 @@ struct MasterclassInfoSection: View {
                         ForEach(Array((masterclass.steps ?? []).enumerated()), id: \.offset) { index, step in
                             HStack(alignment: .top, spacing: 12) {
                                 Text(verbatim: String(format: "%02d", index + 1))
-                                    .font(BrandFont.inter(13, .bold))
+                                    .font(BrandFont.inter(13, .bold, relativeTo: .footnote))
                                     .foregroundStyle(Palette.accent)
-                                    .frame(width: 32, height: 32)
+                                    .frame(width: stepBadge, height: stepBadge)
                                     .background(Circle().fill(Palette.accentTint10))
+                                    .accessibilityLabel(Text("Шаг \(index + 1)"))
                                 VStack(alignment: .leading, spacing: 4) {
                                     if let title = step.title {
                                         Text(title)
-                                            .font(BrandFont.inter(15, .semibold))
+                                            .font(BrandFont.inter(15, .semibold, relativeTo: .subheadline))
                                             .foregroundStyle(Palette.textProduct)
                                     }
                                     if let text = step.text {
@@ -175,6 +183,7 @@ struct MasterclassRelatedSection: View {
                     Text("Мастер-классы по темам")
                         .font(.pH3)
                         .foregroundStyle(Palette.textProduct)
+                        .accessibilityAddTraits(.isHeader)
                     FlowLayout {
                         ForEach(tags) { tag in
                             ToggleChip(title: tag.name, isOn: false) {

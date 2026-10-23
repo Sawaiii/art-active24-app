@@ -72,14 +72,17 @@ struct CatalogView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Palette.catalogPage)
         .navigationTitle(Text("Каталог"))
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button { router.push(.search) } label: { Image(systemName: "magnifyingglass") }
                     .accessibilityLabel(Text("Поиск"))
             }
         }
-        .refreshable { await viewModel.load() }
+        .refreshable {
+            Haptics.play(.refresh)
+            await viewModel.load()
+        }
         .task { if viewModel.state.content == nil { await viewModel.load() } }
     }
 }
@@ -92,7 +95,7 @@ struct CatalogLevelView: View {
         CategoryList(nodes: node.childNodes, allNode: node)
             .background(Palette.catalogPage)
             .navigationTitle(Text(node.name))
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -111,6 +114,7 @@ private struct CategoryList: View {
                             .foregroundStyle(Palette.accent)
                             .frame(width: 36, height: 36)
                             .background(Circle().fill(Palette.accentTint10))
+                            .accessibilityHidden(true)
                         Text("Все: \(allNode.name)")
                             .font(BrandFont.golos(16, .semibold))
                             .foregroundStyle(Palette.accent)
@@ -163,6 +167,7 @@ private struct CategoryRow: View {
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
+        .accessibilityHint(node.kind == .landing || node.kind == .scenario ? Text("Откроется страница сайта") : Text(""))
     }
 }
 

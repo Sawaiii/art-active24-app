@@ -72,8 +72,10 @@ struct TabStack: View {
     var body: some View {
         NavigationStack(path: env.router.path(for: tab)) {
             root
+                .toolbar(.visible, for: .tabBar)
                 .navigationDestination(for: Route.self) { route in
                     RouteView(route: route)
+                        .toolbar(route.hidesTabBar ? .hidden : .visible, for: .tabBar)
                 }
         }
         .environment(\.zoomNamespace, zoomNamespace)
@@ -94,6 +96,16 @@ struct TabStack: View {
             FavoritesView()
         case .profile:
             ProfileView()
+        }
+    }
+}
+
+extension Route {
+    /// Как на сайте: на карточках, оформлении и деталях нижнее меню скрыто.
+    var hidesTabBar: Bool {
+        switch self {
+        case .product, .venue, .checkout, .order: return true
+        default: return false
         }
     }
 }

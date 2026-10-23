@@ -108,6 +108,7 @@ struct ToggleChip: View {
             .padding(.vertical, 9)
             .background(Capsule().fill(isOn ? Palette.accentTint10 : Palette.surfaceMuted))
             .overlay(Capsule().strokeBorder(isOn ? Palette.accent : .clear, lineWidth: 1))
+            .contentShape(Capsule().inset(by: -3))
         }
         .buttonStyle(PressableStyle(scale: 0.95))
         .accessibilityAddTraits(isOn ? .isSelected : [])

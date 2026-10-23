@@ -12,22 +12,35 @@ struct StickyCartBar: View {
     @State private var barWidth: CGFloat = 0
     @Environment(Router.self) private var router
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    /// Ширина кнопки действия; на accessibility-размерах бар складывается в колонку.
+    private var actionWidth: CGFloat? { typeSize.isAccessibilitySize ? nil : 150 }
 
     var body: some View {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10))
+            : AnyLayout(HStackLayout(alignment: .bottom, spacing: 10))
         VStack(alignment: .leading, spacing: 8) {
             if let error = viewModel.lastError {
-                Text(error)
-                    .font(.aaCaption)
-                    .foregroundStyle(Palette.error)
-                    .transition(.opacity)
+                Label {
+                    Text(error).fixedSize(horizontal: false, vertical: true)
+                } icon: {
+                    Image(systemName: "exclamationmark.circle.fill")
+                }
+                .font(.aaCaption)
+                .foregroundStyle(Palette.error)
+                .transition(.opacity)
             }
             GlassGroup(spacing: 10) {
-                HStack(alignment: .bottom, spacing: 10) {
+                layout {
                     priceBox
                     actionArea
                 }
             }
         }
+        // Бар липкий — не даём ему съесть экран на самых крупных размерах.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
         .padding(.horizontal, Spacing.gutterProduct)
         // Сверху место под жёлтый бейдж срока — он целиком внутри плотной подложки.
         .padding(.top, 20)
@@ -44,7 +57,7 @@ struct StickyCartBar: View {
             if flyVisible {
                 Image(systemName: "cart.fill")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Palette.onAccent)
                     .frame(width: 36, height: 36)
                     .background(Circle().fill(Palette.accent))
                     .padding(.trailing, Spacing.gutterProduct + 75 - 18)
@@ -60,6 +73,10 @@ struct StickyCartBar: View {
                 .presentationDragIndicator(.visible)
         }
         .onChange(of: viewModel.flyPulse) { _, _ in flyToCart() }
+        .onChange(of: viewModel.lastError) { _, error in
+            // Ошибка появляется вне фокуса VoiceOver — озвучиваем.
+            if let error { AccessibilityNotification.Announcement(error).post() }
+        }
         .animation(Motion.snappy(reduceMotion), value: viewModel.isInCart)
     }
 
@@ -78,14 +95,14 @@ struct StickyCartBar: View {
                 priceLine
                 if let hint = viewModel.hint {
                     Text(hint)
-                        .font(.pPriceHint)
+                        .font(.configHint)
                         .foregroundStyle(Palette.textSecondary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                         .contentTransition(.numericText())
                 } else if viewModel.isInCart, let total = viewModel.price?.total, viewModel.mode != .cateringMenu {
                     Text("Итого \(Money.rub(total))")
-                        .font(.pPriceHint)
+                        .font(.configHint)
                         .foregroundStyle(Palette.textSecondary)
                         .contentTransition(.numericText())
                 }
@@ -153,7 +170,11 @@ struct StickyCartBar: View {
                 Button {
                     router.selectedTab = .cart
                 } label: {
-                    Text("В корзине ›").font(BrandFont.inter(12, .semibold))
+                    Text("В корзине ›")
+                        .font(BrandFont.inter(12, .semibold, relativeTo: .caption))
+                        .frame(maxWidth: .infinity, minHeight: 32)
+                        // Визуально компактная ссылка, зона нажатия 44 pt по высоте.
+                        .contentShape(Rectangle().inset(by: -6))
                 }
                 .buttonStyle(LinkButtonStyle())
             }
@@ -166,7 +187,7 @@ struct StickyCartBar: View {
                 Label("В корзине", systemImage: "checkmark")
             }
             .buttonStyle(PrimaryButtonStyle(height: 54, radius: Radius.md, font: .pCartButton, shadow: false))
-            .frame(width: 150)
+            .frame(width: actionWidth)
         } else {
             Button {
                 viewModel.addToCart()
@@ -175,7 +196,7 @@ struct StickyCartBar: View {
             }
             .buttonStyle(PrimaryButtonStyle(height: 54, radius: Radius.md, font: .pCartButton))
             .accessibilityIdentifier("cartbar.add")
-            .frame(width: 150)
+            .frame(width: actionWidth)
             .onAppear { Haptics.prepare(.addedToCart) }
             .transition(.scale(scale: 0.9).combined(with: .opacity))
         }
@@ -183,7 +204,7 @@ struct StickyCartBar: View {
 
     /// «Полёт в таб»: значок корзины улетает к табу «Корзина» (центр таб-бара).
     private func flyToCart() {
-        guard !reduceMotion, barWidth > 0 else { return }
+        guard !reduceMotion, !typeSize.isAccessibilitySize, barWidth > 0 else { return }
         // Кнопка справа (ширина 150), таб «Корзина» — третий из пяти, т.е. по центру.
         let buttonMidX = barWidth - Spacing.gutterProduct - 75
         flyOffset = .zero
@@ -210,11 +231,11 @@ struct BreakdownSheet: View {
                         ForEach(section.rows) { row in
                             HStack(alignment: .firstTextBaseline) {
                                 Text(row.title)
-                                    .font(row.emphasized ? BrandFont.inter(17, .bold) : .pBody)
+                                    .font(row.emphasized ? BrandFont.inter(17, .bold, relativeTo: .headline) : .pBody)
                                     .foregroundStyle(row.emphasized ? Palette.textProduct : Palette.textSecondary)
                                 Spacer(minLength: 12)
                                 Text(row.value)
-                                    .font(row.emphasized ? BrandFont.inter(17, .bold) : BrandFont.inter(15, .medium))
+                                    .font(row.emphasized ? BrandFont.inter(17, .bold, relativeTo: .headline) : BrandFont.inter(15, .medium, relativeTo: .subheadline))
                                     .foregroundStyle(Palette.textProduct)
                                     .multilineTextAlignment(.trailing)
                                     .monospacedDigit()

@@ -155,6 +155,11 @@ struct LoginView: View {
             .onChange(of: viewModel.isDone) { _, done in
                 if done { dismiss() }
             }
+            .onChange(of: viewModel.errorMessage) { _, message in
+                // Ошибка появляется под полем — озвучиваем её для VoiceOver.
+                if let message { AccessibilityNotification.Announcement(message).post() }
+            }
+            .scrollDismissesKeyboard(.interactively)
         }
         .presentationDragIndicator(.visible)
         .interactiveDismissDisabled(viewModel.isLoading)
@@ -180,6 +185,7 @@ struct LoginView: View {
             }
             .buttonStyle(PrimaryButtonStyle(height: 54, radius: Radius.md, font: .aaSubmit))
             .disabled(!viewModel.canRequest)
+            .accessibilityLabel(Text("Получить код"))
             .accessibilityIdentifier("login.request")
         }
     }
@@ -226,24 +232,43 @@ struct LoginView: View {
                 ProgressView().tint(Palette.accent).frame(maxWidth: .infinity)
             }
 
-            HStack {
-                if viewModel.resendIn > 0 {
-                    Text("Повторно через \(viewModel.resendIn) с")
-                        .font(.aaBodySmall)
-                        .foregroundStyle(Palette.textSecondary)
-                        .contentTransition(.numericText(countsDown: true))
-                        .monospacedDigit()
-                } else {
-                    Button("Отправить код ещё раз") {
-                        Task { await viewModel.requestCode() }
-                    }
-                    .buttonStyle(LinkButtonStyle())
+            // На крупных размерах шрифта ссылки переносятся в колонку.
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    resendControl
+                    Spacer()
+                    changePhoneControl
                 }
-                Spacer()
-                Button("Изменить номер") { viewModel.changePhone() }
-                    .buttonStyle(LinkButtonStyle(font: .aaBodySmall))
+                VStack(alignment: .leading, spacing: 0) {
+                    resendControl
+                    changePhoneControl
+                }
             }
         }
+    }
+
+    @ViewBuilder
+    private var resendControl: some View {
+        if viewModel.resendIn > 0 {
+            Text("Повторно через \(viewModel.resendIn) с")
+                .font(.aaBodySmall)
+                .foregroundStyle(Palette.textSecondary)
+                .contentTransition(.numericText(countsDown: true))
+                .monospacedDigit()
+                .frame(minHeight: 44)
+        } else {
+            Button("Отправить код ещё раз") {
+                Task { await viewModel.requestCode() }
+            }
+            .buttonStyle(LinkButtonStyle())
+            .frame(minHeight: 44)
+        }
+    }
+
+    private var changePhoneControl: some View {
+        Button("Изменить номер") { viewModel.changePhone() }
+            .buttonStyle(LinkButtonStyle(font: .aaBodySmall))
+            .frame(minHeight: 44)
     }
 
     private func digit(at index: Int) -> String? {
