@@ -10,6 +10,8 @@ on:
     paths:
       - 'ios/**'
       - 'contract/**'
+      # Встроенный демо-набор попадает в бандл приложения.
+      - 'api/tests/fixtures/demo/**'
       - '.github/workflows/ios.yml'
   workflow_dispatch:
 
