@@ -4,10 +4,10 @@ import SwiftUI
 /// video, cards, steps, tiers, links.
 struct ContentBlocksView: View {
     let blocks: [ContentBlock]
-    /// «Заказать» у тарифа (tiers).
-    var onOrderTier: ((ContentBlockItem) -> Void)?
     /// Шаблон карточки — от него зависят пропорции исходников (программа: 900×600, видео 960×445).
     var template: ProductTemplate = .unknown
+    /// «Заказать» у тарифа (tiers); последним — чтобы передавать замыканием.
+    var onOrderTier: ((ContentBlockItem) -> Void)?
 
     private var galleryAspect: CGFloat { template == .program ? MediaAspect.wide : MediaAspect.photo }
     private var videoAspect: CGFloat { template == .program ? MediaAspect.programVideo : MediaAspect.photo }
