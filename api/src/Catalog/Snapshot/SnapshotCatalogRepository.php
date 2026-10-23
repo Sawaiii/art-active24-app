@@ -70,7 +70,16 @@ final class SnapshotCatalogRepository implements CatalogRepository
         if (!isset($this->products()[$id])) {
             return null;
         }
-        return $this->store->optional("products/{$id}.json");
+        $product = $this->store->optional("products/{$id}.json");
+        if ($product === null || !isset($product['extras'])) {
+            return $product;
+        }
+        // На сайте встречаются допы без data-id: их нельзя ни выбрать, ни посчитать.
+        $product['extras'] = array_values(array_filter(
+            $product['extras'],
+            static fn (array $extra): bool => isset($extra['id']),
+        ));
+        return $product;
     }
 
     public function summaries(array $ids): array

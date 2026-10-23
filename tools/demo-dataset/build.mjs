@@ -167,6 +167,8 @@ function main() {
     details.set(id, {
       ...d,
       similar: (d.similar ?? []).filter(inSet),
+      // Допы без id (так бывает на сайте) не выбрать и не посчитать — как и в API, отбрасываем.
+      ...(d.extras ? { extras: d.extras.filter((e) => e.id != null) } : {}),
       ...(d.masterclass ? { masterclass: { ...d.masterclass, related: (d.masterclass.related ?? []).filter(inSet) } } : {}),
     });
   }
