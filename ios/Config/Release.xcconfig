@@ -5,5 +5,8 @@
 API_BASE_URL = https:/$()/api.invalid/api/
 // Тестовые сборки с временным сервером: адрес конфига с актуальным адресом API (секрет CI).
 API_CONFIG_URL =
+// Демо-режим: встроенный каталог и бэкенд, без сервера (сборка для показа заказчику).
+// CI с секретом API_BASE_URL пишет DEMO_MODE = NO в Secrets.xcconfig.
+DEMO_MODE = YES
 
 #include? "Secrets.xcconfig"

@@ -22,6 +22,15 @@ enum AppConfig {
         guard let raw = Bundle.main.object(forInfoDictionaryKey: "APIConfigURL") as? String else { return nil }
         return APIBaseURLStore.validURL(raw)
     }()
+    /// Демо-режим: встроенный каталог и бэкенд (DemoBackend), без сервера. Включён, если в сборке
+    /// `DEMO_MODE = YES` (Release по умолчанию) или адрес API не задан и нет удалённого конфига.
+    static let isDemoMode: Bool = {
+        let flag = (Bundle.main.object(forInfoDictionaryKey: "DemoMode") as? String)?
+            .trimmingCharacters(in: .whitespaces).uppercased()
+        if flag == "YES" { return true }
+        return apiBaseURL.host == placeholderAPI.host && apiConfigURL == nil
+    }()
+
     static let siteURL = URL(string: "https://www.art-active24.ru")!
     static let siteHosts: Set<String> = ["art-active24.ru", "www.art-active24.ru"]
     static let urlScheme = "artactive24"

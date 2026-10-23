@@ -329,5 +329,11 @@
   "Данные изменились — обновите экран и попробуйте ещё раз.": "The data has changed — refresh the screen and try again.",
   "Заявку уже нельзя отменить — свяжитесь с менеджером.": "This request can no longer be cancelled — contact a manager.",
   "Неверный или устаревший код. Запросите новый.": "Invalid or expired code. Request a new one.",
-  "Недостаточно прав для этого действия.": "You don’t have permission for this action."
+  "Недостаточно прав для этого действия.": "You don’t have permission for this action.",
+  "Демо-код: %@": "Demo code: %@",
+  "Демо-режим: встроенный каталог, заказы хранятся на телефоне, статусы двигаются автоматически": "Demo mode: built-in catalog, orders are stored on this phone, statuses advance automatically",
+  "Заказы, корзина, избранное и вход на этом телефоне будут удалены.": "Orders, cart, favorites and sign-in on this phone will be deleted.",
+  "Заявка %@": "Request %@",
+  "Сбросить демо-данные": "Reset demo data",
+  "Сбросить демо-данные?": "Reset demo data?"
 }

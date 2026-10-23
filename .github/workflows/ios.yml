@@ -57,12 +57,14 @@ jobs:
         run: |
           set -eo pipefail
           if [ -z "$API_BASE_URL" ]; then
-            echo "::warning::Секрет API_BASE_URL не задан — Release собирается с плейсхолдером https://api.invalid/api/ (приложение не достучится до API)"
+            echo "::notice::Секрет API_BASE_URL не задан — Release собирается в демо-режиме (встроенный каталог и бэкенд, без сервера)"
             rm -f Config/Secrets.xcconfig
           else
             # В xcconfig «//» — начало комментария, поэтому экранируем как /$()/
             ESCAPED=$(printf '%s' "$API_BASE_URL" | sed 's#//#/$()/#g')
             printf 'API_BASE_URL = %s\n' "$ESCAPED" > Config/Secrets.xcconfig
+            # Есть боевой адрес — демо-режим (встроенный бэкенд) выключаем.
+            printf 'DEMO_MODE = NO\n' >> Config/Secrets.xcconfig
             if [ -n "$API_CONFIG_URL" ]; then
               printf 'API_CONFIG_URL = %s\n' "$(printf '%s' "$API_CONFIG_URL" | sed 's#//#/$()/#g')" >> Config/Secrets.xcconfig
               echo "API_CONFIG_URL задан из секрета (значение скрыто)"
@@ -149,8 +151,12 @@ jobs:
             exit 1
           fi
           plutil -p "$APP_PATH/Info.plist" | grep -E "CFBundleDisplayName|CFBundleIdentifier"
-          if plutil -p "$APP_PATH/Info.plist" | grep -q "api.invalid"; then
-            echo "::warning::В .ipa плейсхолдер API (секрет API_BASE_URL не задан)"
+          if plutil -p "$APP_PATH/Info.plist" | grep -q '"DemoMode" => "YES"'; then
+            echo "::notice::.ipa в демо-режиме: встроенный каталог и бэкенд, сервер не нужен"
+            if [ ! -f "$APP_PATH/DemoData/categories.json" ] && [ ! -f "$APP_PATH/demo/categories.json" ]; then
+              echo "::error::В бандле нет набора демо-данных (DemoData)"
+              exit 1
+            fi
           fi
           rm -rf Payload ArtActive.ipa
           mkdir -p Payload

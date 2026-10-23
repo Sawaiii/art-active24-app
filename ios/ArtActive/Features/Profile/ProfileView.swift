@@ -9,9 +9,13 @@ struct ProfileView: View {
     @Environment(InfoStore.self) private var info
     @Environment(FavoritesStore.self) private var favorites
     @State private var isSignOutConfirming = false
+    @State private var isDemoResetConfirming = false
 
     var body: some View {
         List {
+            if env.isDemoMode {
+                demoSection
+            }
             accountSection
             Section {
                 NavigationLink(value: Route.orders) {
@@ -76,8 +80,32 @@ struct ProfileView: View {
         } message: {
             Text("Корзина и избранное на этом устройстве будут очищены.")
         }
+        .confirmationDialog(Text("Сбросить демо-данные?"), isPresented: $isDemoResetConfirming, titleVisibility: .visible) {
+            Button("Сбросить", role: .destructive) {
+                Task { await env.resetDemoData() }
+            }
+        } message: {
+            Text("Заказы, корзина, избранное и вход на этом телефоне будут удалены.")
+        }
         .task {
             if auth.isLoggedIn, orders.status == .idle { await orders.load() }
+        }
+    }
+
+    /// Демо-режим: встроенный каталог, данные на телефоне, статусы двигаются сами.
+    private var demoSection: some View {
+        Section {
+            InfoNote(
+                title: String(localized: "Демо-режим: встроенный каталог, заказы хранятся на телефоне, статусы двигаются автоматически"),
+                systemImage: "sparkles"
+            )
+            .listRowInsets(EdgeInsets())
+            .listRowBackground(Color.clear)
+            Button(role: .destructive) {
+                isDemoResetConfirming = true
+            } label: {
+                Label("Сбросить демо-данные", systemImage: "arrow.counterclockwise")
+            }
         }
     }
 

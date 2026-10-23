@@ -19,6 +19,7 @@ final class AppEnvironment {
     let push: PushService
     let deepLinks: DeepLinkHandler
     private let client: APIClient?
+    @ObservationIgnored private var demoPollingTask: Task<Void, Never>?
 
     init(
         catalog: CatalogRepository,
@@ -52,7 +53,13 @@ final class AppEnvironment {
 
     static func live() -> AppEnvironment {
         let sessionManager = SessionManager()
-        let client = APIClient(sessionManager: sessionManager)
+        let client: APIClient
+        if AppConfig.isDemoMode, DemoBackend.shared != nil {
+            // Демо: все запросы API обслуживает встроенный бэкенд (картинки по-прежнему с сайта).
+            client = APIClient(baseURL: DemoBackend.baseURL, sessionManager: sessionManager, urlSession: DemoURLProtocol.makeSession())
+        } else {
+            client = APIClient(sessionManager: sessionManager)
+        }
         return AppEnvironment(
             catalog: LiveCatalogRepository(client: client),
             venues: LiveVenueRepository(client: client),
@@ -82,6 +89,38 @@ final class AppEnvironment {
             await favorites.refreshFromServer()
             await push.requestAuthorizationIfNeeded()
         }
+        if isDemoMode { startDemoOrderPolling() }
+    }
+
+    // MARK: - Демо-режим
+
+    var isDemoMode: Bool { AppConfig.isDemoMode && DemoBackend.shared != nil }
+
+    /// В демо статусы заявок двигаются по времени — периодически подтягиваем «Мои заказы»,
+    /// чтобы срабатывал бейдж изменений в профиле.
+    private func startDemoOrderPolling() {
+        guard demoPollingTask == nil else { return }
+        demoPollingTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(15))
+                guard let self else { return }
+                if self.auth.isLoggedIn, !self.orders.orders.isEmpty {
+                    await self.orders.load()
+                }
+            }
+        }
+    }
+
+    /// «Сбросить демо-данные»: выход, очистка встроенного бэкенда и локальных данных.
+    func resetDemoData() async {
+        guard isDemoMode else { return }
+        if auth.isLoggedIn { await auth.signOut() }
+        DemoBackend.shared?.reset()
+        orders.reset()
+        favorites.clearLocal()
+        cart.handleSignOut(explicit: true)
+        recent.clear()
+        searchHistory.clear()
     }
 
     private func wireHooks() {

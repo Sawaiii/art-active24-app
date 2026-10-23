@@ -192,6 +192,16 @@ struct LoginView: View {
             Text("Отправили на \(viewModel.phone)")
                 .font(.aaBodySmall)
                 .foregroundStyle(Palette.textSecondary)
+            if AppConfig.isDemoMode {
+                Label {
+                    Text("Демо-код: \(DemoBackend.demoCode)")
+                } icon: {
+                    Image(systemName: "key.fill")
+                }
+                .font(BrandFont.golos(14, .semibold, relativeTo: .subheadline))
+                .foregroundStyle(Palette.accent)
+                .accessibilityIdentifier("login.demoCode")
+            }
 
             ZStack {
                 HStack(spacing: 8) {

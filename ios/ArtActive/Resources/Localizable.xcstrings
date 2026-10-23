@@ -845,6 +845,26 @@
         }
       }
     },
+    "Демо-код: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demo code: %@"
+          }
+        }
+      }
+    },
+    "Демо-режим: встроенный каталог, заказы хранятся на телефоне, статусы двигаются автоматически": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demo mode: built-in catalog, orders are stored on this phone, statuses advance automatically"
+          }
+        }
+      }
+    },
     "до": {
       "localizations": {
         "en": {
@@ -1115,6 +1135,16 @@
         }
       }
     },
+    "Заказы, корзина, избранное и вход на этом телефоне будут удалены.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orders, cart, favorites and sign-in on this phone will be deleted."
+          }
+        }
+      }
+    },
     "Закрыть": {
       "localizations": {
         "en": {
@@ -1141,6 +1171,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Request"
+          }
+        }
+      }
+    },
+    "Заявка %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Request %@"
           }
         }
       }
@@ -2675,6 +2715,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reset"
+          }
+        }
+      }
+    },
+    "Сбросить демо-данные": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset demo data"
+          }
+        }
+      }
+    },
+    "Сбросить демо-данные?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset demo data?"
           }
         }
       }

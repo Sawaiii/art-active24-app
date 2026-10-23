@@ -34,6 +34,12 @@ targets:
       - path: ArtActive
         excludes:
           - "**/.DS_Store"
+      # Встроенный набор данных демо-режима (тот же, что у PHP-API в CI-скриншотах).
+      # Folder reference: в бандле — папка с JSON, DemoDataset ищет «DemoData» или «demo».
+      - path: ../api/tests/fixtures/demo
+        name: DemoData
+        type: folder
+        buildPhase: resources
     settings:
       base:
         PRODUCT_NAME: ArtActive
