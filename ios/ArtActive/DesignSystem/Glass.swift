@@ -59,14 +59,14 @@ extension View {
             LinearGradient(
                 stops: [
                     .init(color: color, location: 0),
-                    .init(color: color, location: 0.6),
+                    .init(color: color, location: 0.78),
                     .init(color: color.opacity(0), location: 1),
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
-            // 48 pt ниже безопасной зоны (ряд кнопок) + сама зона статус-бара.
-            .frame(height: 48)
+            // 52 pt ниже безопасной зоны (ряд кнопок) + сама зона статус-бара.
+            .frame(height: 52)
             .ignoresSafeArea(.container, edges: .top)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
