@@ -59,7 +59,22 @@ struct HomeView: View {
                 .background(.ultraThinMaterial)
                 .ignoresSafeArea(edges: .top)
         }
+        .background(alignment: .bottom) {
+            // Мягкий край вместо жёсткого среза: плитки и заголовки уходят под шапку плавно,
+            // а не обрезаются линией посреди текста.
+            LinearGradient(
+                colors: [Palette.catalogPage.opacity(0.96), Palette.catalogPage.opacity(0)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: Self.headerFadeHeight)
+            .offset(y: Self.headerFadeHeight)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+        }
     }
+
+    private static let headerFadeHeight: CGFloat = 14
 
     private func headerIcon(_ systemName: String) -> some View {
         Image(systemName: systemName)
@@ -405,8 +420,10 @@ private struct BenefitsList: View {
                             .foregroundStyle(Palette.accent)
                             .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 4) {
+                            // Без подзаголовка пункт — обычный текст списка: 8–12 жирных строк подряд
+                            // спорили с заголовком карточки и не давали иерархии.
                             Text(item.title ?? "")
-                                .font(.aaBlockTitle)
+                                .font(item.subtitle == nil ? Font.aaBody : Font.aaBlockTitle)
                                 .foregroundStyle(Palette.textProduct)
                             if let subtitle = item.subtitle {
                                 Text(subtitle)

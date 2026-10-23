@@ -152,7 +152,7 @@ struct SearchView: View {
                     )
                     FlowLayout {
                         ForEach(viewModel.history.queries, id: \.self) { query in
-                            ToggleChip(title: query, isOn: false) { viewModel.use(query) }
+                            ToggleChip(title: query, isOn: false, restingFill: Palette.surface) { viewModel.use(query) }
                         }
                     }
                 }
@@ -161,7 +161,7 @@ struct SearchView: View {
                 SectionHeader(title: String(localized: "Популярное"), font: .aaBlockTitle)
                 FlowLayout {
                     ForEach(SearchHistoryStore.popular, id: \.self) { query in
-                        ToggleChip(title: query, isOn: false) { viewModel.use(query) }
+                        ToggleChip(title: query, isOn: false, restingFill: Palette.surface) { viewModel.use(query) }
                     }
                 }
             }
@@ -181,7 +181,7 @@ struct SearchView: View {
                     SectionHeader(title: String(localized: "Разделы"), font: .aaBlockTitle)
                     FlowLayout {
                         ForEach(result.categories) { node in
-                            ToggleChip(title: node.name, isOn: false) {
+                            ToggleChip(title: node.name, isOn: false, restingFill: Palette.surface) {
                                 switch CatalogNavigation.route(for: node, preferChildren: false) {
                                 case let .route(route): router.push(route)
                                 case let .web(url): router.openWeb(url)

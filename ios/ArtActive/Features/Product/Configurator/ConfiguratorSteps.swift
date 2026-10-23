@@ -44,7 +44,12 @@ struct ComplectsStep: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            StepLabel(title: viewModel.configurator.complectsTitle())
+            // «Показать все N» — в строке заголовка шага: ссылка рядом с тем, что она раскрывает,
+            // без отдельной строки и пустоты под каруселью.
+            StepLabel(
+                title: viewModel.configurator.complectsTitle(),
+                trailing: complects.count > 2 ? AnyView(showAllButton) : nil
+            )
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 10) {
@@ -76,27 +81,6 @@ struct ComplectsStep: View {
                     withAnimation(.snappy) { proxy.scrollTo(id) }
                 }
             }
-            if complects.count > 2 {
-                HStack {
-                    Spacer()
-                    Button {
-                        Haptics.play(.selection)
-                        showAll = true
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text("Показать все \(complects.count)")
-                            Image(systemName: "chevron.down")
-                                .font(.system(size: 12, weight: .semibold))
-                                .accessibilityHidden(true)
-                        }
-                        // 44 pt зона нажатия при компактной визуальной ссылке.
-                        .frame(minHeight: 44)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(LinkButtonStyle(font: BrandFont.inter(14, .medium, relativeTo: .subheadline)))
-                    .accessibilityIdentifier("config.complects.all")
-                }
-            }
         }
         .sheet(isPresented: $showAll) {
             AllComplectsSheet(viewModel: viewModel)
@@ -108,6 +92,26 @@ struct ComplectsStep: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
+    }
+
+    private var showAllButton: some View {
+        Button {
+            Haptics.play(.selection)
+            showAll = true
+        } label: {
+            HStack(spacing: 4) {
+                Text("Показать все \(complects.count)")
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .accessibilityHidden(true)
+            }
+            // Зона нажатия 44 pt, но строку заголовка ссылка не раздувает.
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+            .padding(.vertical, -12)
+        }
+        .buttonStyle(LinkButtonStyle(font: BrandFont.inter(14, .medium, relativeTo: .subheadline)))
+        .accessibilityIdentifier("config.complects.all")
     }
 }
 
@@ -146,7 +150,8 @@ struct ComplectCard: View {
                             .lineLimit(typeSize.isAccessibilitySize ? 2 : 1)
                     }
                 }
-                .padding(.trailing, onInfo == nil ? 0 : 18)
+                // Кнопка «i» занимает 20 + 6 pt у правого края — текст не должен под неё заходить.
+                .padding(.trailing, onInfo == nil ? 4 : 24)
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
@@ -305,16 +310,19 @@ private struct ComplectInfoSheet: View {
 
 /// Список пунктов с маркерами («В комплекте», «Требования к помещению»).
 struct BulletList: View {
-    let title: String
+    /// nil — заголовок уже показан снаружи (например, вкладкой PillSegment).
+    let title: String?
     let items: [String]
     var systemImage = "checkmark"
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title)
-                .font(BrandFont.inter(15, .semibold, relativeTo: .subheadline))
-                .foregroundStyle(Palette.textProduct)
-                .accessibilityAddTraits(.isHeader)
+            if let title {
+                Text(title)
+                    .font(BrandFont.inter(15, .semibold, relativeTo: .subheadline))
+                    .foregroundStyle(Palette.textProduct)
+                    .accessibilityAddTraits(.isHeader)
+            }
             ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Image(systemName: systemImage)
@@ -370,9 +378,12 @@ struct SubsStep: View {
             if let state = viewModel.state {
                 StepLabel(title: viewModel.configurator.subsTitle(state))
             }
+            // Подзаголовок группы нужен, только когда групп несколько: единственная группа
+            // повторяет выбранный формат или название товара («Готовим на месте», «Батут…»).
+            let showsGroupTitles = viewModel.subGroups.count > 1
             ForEach(viewModel.subGroups) { group in
                 VStack(alignment: .leading, spacing: 10) {
-                    if let title = group.title, !title.isEmpty {
+                    if showsGroupTitles, let title = group.title, !title.isEmpty {
                         Text(title)
                             .font(BrandFont.inter(14, .semibold, relativeTo: .subheadline))
                             .foregroundStyle(Palette.textProduct)
@@ -465,10 +476,13 @@ private struct InstallOptionCard: View {
                             .foregroundStyle(Palette.textProduct)
                             .fixedSize(horizontal: false, vertical: true)
                         Spacer(minLength: 8)
-                        Text(surchargeText)
-                            .font(BrandFont.inter(13, .semibold, relativeTo: .footnote))
-                            .foregroundStyle(isSelected ? Palette.accent : Palette.textSecondary)
-                            .fixedSize()
+                        // «+0 ₽» — шум: базовый способ без надбавки цену не показывает.
+                        if let surchargeText {
+                            Text(surchargeText)
+                                .font(BrandFont.inter(13, .semibold, relativeTo: .footnote))
+                                .foregroundStyle(isSelected ? Palette.accent : Palette.textSecondary)
+                                .fixedSize()
+                        }
                     }
                     if let text = sub.text, !text.isEmpty {
                         Text(text)
@@ -498,9 +512,9 @@ private struct InstallOptionCard: View {
         .accessibilityIdentifier("config.sub.\(sub.id)")
     }
 
-    private var surchargeText: String {
+    private var surchargeText: String? {
         let flat = sub.flatSurcharge ?? 0
-        return flat > 0 ? "+" + Money.rub(flat) : "+" + Money.rub(0)
+        return flat > 0 ? "+" + Money.rub(flat) : nil
     }
 }
 
@@ -620,17 +634,22 @@ struct ExtraRow: View {
     let extra: Extra
     let viewModel: ConfiguratorViewModel
 
+    /// Высота миниатюры 60 pt при 4:3.
+    private static let thumbHeight: CGFloat = 45
+
     var body: some View {
         let isOn = viewModel.isSelected(extra: extra.id)
         // У счётной опции внутри свой степпер — его нельзя схлопывать в один элемент VoiceOver.
         let hasStepper = extra.isCountable && isOn
-        HStack(spacing: 12) {
+        // По верху, как у карточек способа установки: с длинной заметкой фото не «съезжает» вниз.
+        HStack(alignment: .top, spacing: 12) {
             if let image = extra.image?.resolvedURL {
                 AspectImage(url: image, aspect: MediaAspect.photo, cornerRadius: Radius.sm, maxPixel: 200)
                     .frame(width: 60)
             }
             VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 6) {
+                // Тег «обязательно» — на первой строке названия, а не по центру переноса.
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(extra.name)
                         .font(BrandFont.inter(14, .semibold, relativeTo: .subheadline))
                         .foregroundStyle(Palette.textProduct)
@@ -666,11 +685,14 @@ struct ExtraRow: View {
                     onRemove: { viewModel.setExtraQty(extra.id, 0) }
                 )
                 .accessibilityLabel(Text("Количество, \(extra.name)"))
+                .frame(minHeight: Self.thumbHeight)
             } else {
                 Image(systemName: isOn ? "checkmark.circle.fill" : "plus.circle")
                     .font(.system(size: 24))
                     .foregroundStyle(isOn ? Palette.accent : Palette.disabled)
                     .contentTransition(.symbolEffect(.replace))
+                    // Центр по высоте фото (60 × 4:3), раз ряд выровнен по верху.
+                    .frame(minHeight: Self.thumbHeight)
                     .accessibilityHidden(true)
             }
         }

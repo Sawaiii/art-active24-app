@@ -29,7 +29,6 @@ struct VenueDetailView: View {
         .background(Palette.page)
         .topScrollFade(Palette.page)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             if let url = viewModel.state.content?.shareURL {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -48,7 +47,8 @@ struct VenueDetailView: View {
     private func content(_ venue: Venue) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.sectionLarge) {
-                GalleryPager(items: GalleryItem.from(urls: venue.photos ?? []), aspectRatio: MediaAspect.photo)
+                // Подложка видна, пока грузится фото: без неё шапка — пустой белый прямоугольник.
+                GalleryPager(items: GalleryItem.from(urls: venue.photos ?? []), aspectRatio: MediaAspect.photo, imageBackground: Palette.imagePlaceholder)
 
                 VStack(alignment: .leading, spacing: 10) {
                     if let type = venue.type {
@@ -149,7 +149,7 @@ struct VenueDetailView: View {
     /// Градиентная форма «Заявка на расчёт» (как на сайте).
     private func requestCard(_ venue: Venue) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            PriceTagView(tag: venue.price, numberFont: BrandFont.golos(24, .bold), color: .white)
+            PriceTagView(tag: venue.price, numberFont: BrandFont.golos(24, .bold), color: .white, secondaryColor: .white.opacity(0.85))
             if let minHours = venue.minHours {
                 Text("Минимум — \(minHours) ч").font(.aaBodySmall).foregroundStyle(.white.opacity(0.9))
             }

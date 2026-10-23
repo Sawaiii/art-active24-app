@@ -75,8 +75,10 @@ struct ProductCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.cardInner) {
-            // Большая ава сайта 600×600 — квадрат с заполнением; если пришло фото 800×600 — целиком на подложке.
-            AspectImage(url: product.image?.resolvedURL, aspect: MediaAspect.square, cornerRadius: Radius.card, maxPixel: 520, fitMismatched: true)
+            // Большая ава сайта 600×600 — квадрат с заполнением; если пришло фото 800×600 / 377×215 — целиком
+            // на подложке. Подложка — белая (тёмная в Dark): предметка снята на белом, и серые полосы
+            // сверху/снизу вписанного фото читались как рамка; теперь все плитки сетки одного тона.
+            AspectImage(url: product.image?.resolvedURL, aspect: MediaAspect.square, cornerRadius: Radius.card, maxPixel: 520, placeholder: Palette.surface, fitMismatched: true)
                 .overlay(alignment: .topLeading) {
                     if let badge = product.badge {
                         BadgeView(badge).padding(8)

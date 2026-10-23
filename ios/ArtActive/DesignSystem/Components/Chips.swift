@@ -80,6 +80,9 @@ struct ToggleChip: View {
     var subtitle: String?
     var colorDot: Color?
     let isOn: Bool
+    /// Подложка невыбранной пилюли. По умолчанию — surfaceMuted (на белых листах/карточках);
+    /// на сером фоне страницы (catalogPage) передавайте Palette.surface, иначе пилюля сливается с фоном.
+    var restingFill: Color = Palette.surfaceMuted
     let action: () -> Void
 
     var body: some View {
@@ -106,7 +109,7 @@ struct ToggleChip: View {
             .foregroundStyle(isOn ? Palette.accent : Palette.text)
             .padding(.horizontal, 14)
             .padding(.vertical, 9)
-            .background(Capsule().fill(isOn ? Palette.accentTint10 : Palette.surfaceMuted))
+            .background(Capsule().fill(isOn ? Palette.accentTint10 : restingFill))
             .overlay(Capsule().strokeBorder(isOn ? Palette.accent : .clear, lineWidth: 1))
             .contentShape(Capsule().inset(by: -3))
         }

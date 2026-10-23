@@ -129,13 +129,15 @@ struct PriceTagView: View {
     let tag: PriceTag?
     var numberFont: Font = .aaCardPrice
     var color: Color = Palette.textStrong
+    /// Цвет «₽», единицы и «по запросу»; на градиенте/фото передаётся светлый (по умолчанию серые).
+    var secondaryColor: Color?
 
     var body: some View {
         if let tag {
             if tag.onRequest == true {
                 Text("по запросу")
                     .font(.aaCardPriceFrom)
-                    .foregroundStyle(Palette.textSecondary)
+                    .foregroundStyle(secondaryColor ?? Palette.textSecondary)
             } else if let amount = tag.amount {
                 HStack(alignment: .firstTextBaseline, spacing: 3) {
                     if tag.from == true {
@@ -147,9 +149,9 @@ struct PriceTagView: View {
                         .monospacedDigit()
                     Text(Money.currencySymbol)
                         .font(BrandFont.golos(18, .regular, relativeTo: .headline))
-                        .foregroundStyle(Palette.currency)
+                        .foregroundStyle(secondaryColor ?? Palette.currency)
                     if let unit = tag.unit, !unit.isEmpty {
-                        Text(unit).font(.aaCaption).foregroundStyle(Palette.textSecondary)
+                        Text(unit).font(.aaCaption).foregroundStyle(secondaryColor ?? Palette.textSecondary)
                     }
                 }
                 .accessibilityElement(children: .ignore)

@@ -230,7 +230,9 @@ struct CartView: View {
             .accessibilityIdentifier("cart.checkout")
         }
         .padding(16)
-        .background(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).fill(Palette.surfaceMuted))
+        // surface, а не surfaceMuted: в светлой теме surfaceMuted совпадает с фоном страницы
+        // и карточка итога пропадала (в тёмной была видна) — теперь одинаково в обеих темах.
+        .background(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).fill(Palette.surface))
     }
 }
 
@@ -273,7 +275,11 @@ private struct CartRow: View {
                     // Чип срока — только когда есть время аренды («Аренда, 3 д»).
                     if let timeLabel = line.timeLabel, !timeLabel.isEmpty {
                         let mode = [line.priceLabel, timeLabel].compactMap { $0 }.joined(separator: ", ")
-                        Label(mode, systemImage: "clock")
+                        // HStack, а не Label: в строке List у Label широкая колонка под иконку.
+                        HStack(spacing: 4) {
+                            Image(systemName: "clock").accessibilityHidden(true)
+                            Text(mode).lineLimit(1)
+                        }
                             .font(BrandFont.golos(12, .medium, relativeTo: .caption))
                             .foregroundStyle(Palette.accent)
                             .padding(.horizontal, 8)
@@ -314,8 +320,9 @@ private struct CartRow: View {
                                     .contentTransition(.numericText(value: Double(line.total)))
                                 if item.menu == nil {
                                     Text(verbatim: "\(Money.rub(line.unitPrice))/\(line.qtyUnit ?? String(localized: "ед"))")
-                                        .font(BrandFont.golos(11, relativeTo: .caption2))
-                                        .foregroundStyle(Palette.muted2)
+                                        // #999 на белом — 2.8:1; textSecondary — 5.1:1.
+                                        .font(BrandFont.golos(12, relativeTo: .caption2))
+                                        .foregroundStyle(Palette.textSecondary)
                                 }
                             }
                         }

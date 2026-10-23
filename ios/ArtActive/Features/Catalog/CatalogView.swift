@@ -153,12 +153,14 @@ private struct CategoryRow: View {
                 .foregroundStyle(Palette.text)
                 .multilineTextAlignment(.leading)
             Spacer(minLength: 8)
-            if node.hasChildren || node.kind == .venues {
-                Image(systemName: "chevron.right")
+            // Любой переход внутри приложения — шеврон (листовые разделы тоже открывают экран;
+            // без шеврона строки «Квизы», «Пуфы и мешки» выглядели неактивными). Сайт — стрелка наружу.
+            if node.kind == .landing || node.kind == .scenario {
+                Image(systemName: "arrow.up.right")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Palette.disabled)
-            } else if node.kind == .landing || node.kind == .scenario {
-                Image(systemName: "arrow.up.right")
+            } else {
+                Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(Palette.disabled)
             }

@@ -6,6 +6,8 @@ struct ContentBlocksView: View {
     let blocks: [ContentBlock]
     /// Шаблон карточки — от него зависят пропорции исходников (программа: 900×600, видео 960×445).
     var template: ProductTemplate = .unknown
+    /// Лид, уже показанный в шапке карточки: блоки lead/text с тем же текстом не повторяем.
+    var shownLead: String?
     /// «Заказать» у тарифа (tiers); последним — чтобы передавать замыканием.
     var onOrderTier: ((ContentBlockItem) -> Void)?
 
@@ -16,10 +18,20 @@ struct ContentBlocksView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sectionLarge) {
-            ForEach(Array(blocks.filter(Self.hasContent).enumerated()), id: \.offset) { _, block in
+            ForEach(Array(visibleBlocks.enumerated()), id: \.offset) { _, block in
                 blockView(block)
             }
         }
+    }
+
+    private var visibleBlocks: [ContentBlock] {
+        blocks.filter { Self.hasContent($0) && !repeatsLead($0) }
+    }
+
+    /// Блок lead/text, текст которого дословно повторяет лид из шапки (сайт кладёт его в 2–3 места).
+    private func repeatsLead(_ block: ContentBlock) -> Bool {
+        guard block.type == .lead || block.type == .text else { return false }
+        return LeadText.isSame(block.text, shownLead)
     }
 
     /// Пустые блоки не рендерим: иначе остаётся пустой отступ между секциями.
@@ -204,6 +216,25 @@ struct ContentBlocksView: View {
         } else {
             env.router.openWeb(url)
         }
+    }
+}
+
+/// Сравнение текстов «по смыслу»: без HTML-тегов, регистра, лишних пробелов и финальной пунктуации.
+enum LeadText {
+    static func isSame(_ text: String?, _ lead: String?) -> Bool {
+        guard let text, let lead else { return false }
+        let left = normalized(text)
+        return !left.isEmpty && left == normalized(lead)
+    }
+
+    static func normalized(_ value: String) -> String {
+        let plain = value
+            .replacingOccurrences(of: "<[^>]+>", with: " ", options: .regularExpression)
+            .replacingOccurrences(of: "&nbsp;", with: " ")
+            .replacingOccurrences(of: "\u{00A0}", with: " ")
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .lowercased()
+        return plain.trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
     }
 }
 

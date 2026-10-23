@@ -62,7 +62,7 @@ private struct ToggleTemplateBody: View {
                 }
 
                 if style == .showcase, let blocks = product.blocks, !blocks.isEmpty {
-                    ContentBlocksView(blocks: blocks, template: product.template)
+                    ContentBlocksView(blocks: blocks, template: product.template, shownLead: product.lead)
                 }
 
                 complectsSection
@@ -70,7 +70,10 @@ private struct ToggleTemplateBody: View {
 
                 VStack(alignment: .leading, spacing: 24) {
                     if let specs = product.specs, !specs.isEmpty { SpecsSection(specs: specs) }
-                    if let html = product.descriptionHtml, !html.isEmpty { DescriptionSection(html: html) }
+                    // Описание, совпадающее с лидом в шапке, — повтор: не показываем.
+                    if let html = product.descriptionHtml, !html.isEmpty, !LeadText.isSame(html, product.lead) {
+                        DescriptionSection(html: html)
+                    }
                 }
                 .padding(.horizontal, Spacing.gutterProduct)
 
@@ -309,7 +312,7 @@ private struct PromoHeader: View {
                     Text(lead).font(.aaBodySmall).foregroundStyle(.white.opacity(0.9))
                 }
                 FlowLayout(spacing: 10, lineSpacing: 6) {
-                    PriceTagView(tag: product.price, color: .white)
+                    PriceTagView(tag: product.price, color: .white, secondaryColor: .white.opacity(0.85))
                     if let art = product.art, !art.isEmpty { ArticleBadge(art: art) }
                 }
                 Button("Заказать", action: onOrder)
@@ -379,7 +382,7 @@ struct StaffProductView: View {
                         Text(lead).font(.aaBodySmall).foregroundStyle(.white.opacity(0.9))
                     }
                     FlowLayout(spacing: 10, lineSpacing: 6) {
-                        PriceTagView(tag: product.price, numberFont: .pPriceAmount, color: .white)
+                        PriceTagView(tag: product.price, numberFont: .pPriceAmount, color: .white, secondaryColor: .white.opacity(0.85))
                         if let art = product.art, !art.isEmpty { ArticleBadge(art: art) }
                     }
                 }
@@ -405,7 +408,9 @@ struct ProgramProductView: View {
     var body: some View {
         RequestTemplateBody(product: product) {
             if let video = product.media.first(where: { $0.type == .video })?.resolvedURL {
+                // Скруглённый постер — с полями, иначе углы упираются в края экрана.
                 InlineVideoCard(url: video, poster: product.media.first?.posterURL, title: product.name, aspect: MediaAspect.programVideo)
+                    .padding(.horizontal, Spacing.gutterProduct)
             } else {
                 // Фото программы — 900×600.
                 GalleryPager(items: GalleryItem.from(product.media), aspectRatio: MediaAspect.wide, badge: product.badge)
@@ -448,13 +453,15 @@ private struct RequestTemplateBody<Header: View>: View {
             VStack(alignment: .leading, spacing: Spacing.sectionLarge) {
                 header
                 if let blocks = product.blocks, !blocks.isEmpty {
-                    ContentBlocksView(blocks: blocks, template: product.template) { tier in
+                    ContentBlocksView(blocks: blocks, template: product.template, shownLead: product.lead) { tier in
                         order(title: [product.name, tier.title].compactMap { $0 }.joined(separator: " — "))
                     }
                 }
                 VStack(alignment: .leading, spacing: 24) {
                     if let specs = product.specs, !specs.isEmpty { SpecsSection(specs: specs) }
-                    if let html = product.descriptionHtml, !html.isEmpty { DescriptionSection(html: html) }
+                    if let html = product.descriptionHtml, !html.isEmpty, !LeadText.isSame(html, product.lead) {
+                        DescriptionSection(html: html)
+                    }
                 }
                 .padding(.horizontal, Spacing.gutterProduct)
                 if let similar = product.similar, !similar.isEmpty {

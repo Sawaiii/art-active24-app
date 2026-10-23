@@ -70,12 +70,16 @@ struct TabStack: View {
     @Namespace private var zoomNamespace
 
     var body: some View {
+        // Видимость таб-бара — из одного источника: верхнего экрана стека. Все уровни стека
+        // получают одно и то же значение, поэтому корень не перебивает карточку,
+        // а после «назад» (в т.ч. zoom-жестом) меню гарантированно возвращается.
+        let tabBar: Visibility = (env.router.paths[tab]?.last?.hidesTabBar ?? false) ? .hidden : .visible
         NavigationStack(path: env.router.path(for: tab)) {
             root
-                .toolbar(.visible, for: .tabBar)
+                .toolbar(tabBar, for: .tabBar)
                 .navigationDestination(for: Route.self) { route in
                     RouteView(route: route)
-                        .toolbar(route.hidesTabBar ? .hidden : .visible, for: .tabBar)
+                        .toolbar(tabBar, for: .tabBar)
                 }
         }
         .environment(\.zoomNamespace, zoomNamespace)

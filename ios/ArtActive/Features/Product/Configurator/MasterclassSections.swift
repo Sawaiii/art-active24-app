@@ -128,7 +128,8 @@ struct MasterclassInfoSection: View {
                 case .steps:
                     VStack(alignment: .leading, spacing: 14) {
                         ForEach(Array((masterclass.steps ?? []).enumerated()), id: \.offset) { index, step in
-                            HStack(alignment: .top, spacing: 12) {
+                            // Базовая линия: заголовок шага по центру кружка с номером, а не прижат к его верху.
+                            HStack(alignment: .firstTextBaseline, spacing: 12) {
                                 Text(verbatim: String(format: "%02d", index + 1))
                                     .font(BrandFont.inter(13, .bold, relativeTo: .footnote))
                                     .foregroundStyle(Palette.accent)
@@ -153,7 +154,8 @@ struct MasterclassInfoSection: View {
                         }
                     }
                 case .included:
-                    BulletList(title: masterclass.includedTitle ?? String(localized: "Что включено"), items: masterclass.included ?? [])
+                    // При двух вкладках заголовок уже на активной пилюле — не дублируем.
+                    BulletList(title: tabs.count > 1 ? nil : title(for: .included), items: masterclass.included ?? [])
                 }
             }
             .onAppear { if !tabs.contains(tab), let first = tabs.first { tab = first } }

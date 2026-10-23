@@ -32,12 +32,15 @@ struct OrderStatusChip: View {
     let label: String
 
     var body: some View {
-        Label {
-            // Локальная подпись по статусу; серверная — только для неизвестного статуса.
-            Text(status != .unknown || label.isEmpty ? status.title : label)
-        } icon: {
+        // HStack, а не Label: внутри List у Label фиксированная колонка под иконку,
+        // из-за чего между символом и словом появлялся пустой разрыв ~20 pt.
+        HStack(spacing: 5) {
             Image(systemName: OrderStatusStyle.symbol(status))
                 .foregroundStyle(OrderStatusStyle.color(status))
+                .accessibilityHidden(true)
+            // Локальная подпись по статусу; серверная — только для неизвестного статуса.
+            Text(status != .unknown || label.isEmpty ? status.title : label)
+                .lineLimit(1)
         }
         .font(BrandFont.golos(12, .semibold, relativeTo: .caption))
         // Текст — нейтральным цветом (контраст ≥ 4.5:1); цвет несут только иконка и подложка,
@@ -211,7 +214,6 @@ struct OrderDetailView: View {
         }
         .navigationTitle(Text(viewModel.state.content?.number ?? ""))
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .tabBar)
         .refreshable { await viewModel.load() }
         .task { await viewModel.load() }
         .confirmationDialog(Text("Отменить заявку?"), isPresented: $isCancelConfirming, titleVisibility: .visible) {
@@ -415,9 +417,14 @@ private struct StatusTimeline: View {
                             Text(DateText.dateTime(date)).font(.aaCaption).foregroundStyle(Palette.textSecondary)
                         }
                         if let comment = step.comment, !comment.isEmpty {
-                            Text(comment).font(.aaCaption).foregroundStyle(Palette.text)
+                            // Комментарий менеджера — главное сообщение шага; не обрезаем «…».
+                            Text(comment)
+                                .font(.aaCaption)
+                                .foregroundStyle(Palette.text)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.bottom, 12)
                 }
                 .accessibilityElement(children: .combine)

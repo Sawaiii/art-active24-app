@@ -42,8 +42,8 @@ struct StickyCartBar: View {
         // Бар липкий — не даём ему съесть экран на самых крупных размерах.
         .dynamicTypeSize(...DynamicTypeSize.accessibility2)
         .padding(.horizontal, Spacing.gutterProduct)
-        // Сверху место под жёлтый бейдж срока — он целиком внутри плотной подложки.
-        .padding(.top, 20)
+        // Бейдж срока теперь внутри ценового блока — сверху обычный отступ сетки.
+        .padding(.top, 12)
         .padding(.bottom, 8)
         .stickyBottomBarBackground()
         .background(
@@ -88,10 +88,19 @@ struct StickyCartBar: View {
             isBreakdownPresented = true
         } label: {
             VStack(alignment: .leading, spacing: 2) {
-                Text(viewModel.priceLabel)
-                    .font(.pPriceLabel)
-                    .foregroundStyle(Palette.textSecondary)
-                    .lineLimit(1)
+                // Бейдж срока — в строке лейбла («Аренда [3 дня]»), а не поверх него.
+                HStack(spacing: 6) {
+                    Text(viewModel.priceLabel)
+                        .font(.pPriceLabel)
+                        .foregroundStyle(Palette.textSecondary)
+                        .lineLimit(1)
+                    if let badge = viewModel.badge {
+                        DayBadge(text: badge)
+                            .lineLimit(1)
+                            .fixedSize()
+                            .animation(Motion.snappy(reduceMotion), value: badge)
+                    }
+                }
                 priceLine
                 if let hint = viewModel.hint {
                     Text(hint)
@@ -108,16 +117,9 @@ struct StickyCartBar: View {
                 }
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 4)
+            .padding(.vertical, 6)
             .frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
             .background(RoundedRectangle(cornerRadius: Radius.md, style: .continuous).fill(Palette.surfaceMuted))
-            .overlay(alignment: .topLeading) {
-                if let badge = viewModel.badge {
-                    DayBadge(text: badge)
-                        .offset(x: 2, y: -14)
-                        .animation(Motion.snappy(reduceMotion), value: badge)
-                }
-            }
         }
         .buttonStyle(PressableStyle(scale: 0.98))
         .accessibilityElement(children: .combine)

@@ -170,7 +170,6 @@ struct CheckoutView: View {
         }
         .navigationTitle(Text("Оформление"))
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar(.hidden, for: .tabBar)
         .toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()

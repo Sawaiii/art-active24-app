@@ -226,10 +226,19 @@ struct VenueTags: View {
     let metroDistance: Int?
 
     var body: some View {
+        // Узкая карточка («Похожие площадки») не вмещает три тега в строку — теги переносились
+        // на две строки. Тогда убираем «до метро»: расстояние и так есть в строке станции ниже.
+        ViewThatFits(in: .horizontal) {
+            tags(includeMetro: true)
+            tags(includeMetro: false)
+        }
+    }
+
+    private func tags(includeMetro: Bool) -> some View {
         HStack(spacing: 6) {
             if let area { tag("\(area) м²", "square.dashed") }
             if let capacity { tag(String(localized: "до \(capacity) чел."), "person.2") }
-            if let metroDistance { tag(String(localized: "\(metroDistance) м до метро"), "figure.walk") }
+            if includeMetro, let metroDistance { tag(String(localized: "\(metroDistance) м до метро"), "figure.walk") }
         }
     }
 
@@ -240,6 +249,7 @@ struct VenueTags: View {
             Image(systemName: symbol)
         }
         .labelStyle(.titleAndIcon)
+        .lineLimit(1)
         .font(BrandFont.golos(11, .semibold, relativeTo: .caption2))
         .foregroundStyle(Palette.textProduct)
         .padding(.horizontal, 8)
