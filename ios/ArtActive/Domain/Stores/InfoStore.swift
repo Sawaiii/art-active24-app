@@ -38,6 +38,13 @@ final class InfoStore {
         return digits.isEmpty ? nil : URL(string: "https://wa.me/\(digits)")
     }
 
+    /// Max: только готовая ссылка https (на сайте чат открывает JS-виджет, адреса в HTML нет).
+    var maxURL: URL? {
+        guard let raw = info.max?.trimmingCharacters(in: .whitespacesAndNewlines), !raw.isEmpty,
+              let url = URL(string: raw), let scheme = url.scheme?.lowercased(), scheme == "https" || scheme == "max" else { return nil }
+        return url
+    }
+
     var emailURL: URL? {
         guard let email = info.email, !email.isEmpty else { return nil }
         return URL(string: "mailto:\(email)")

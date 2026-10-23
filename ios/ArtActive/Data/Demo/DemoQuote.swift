@@ -248,7 +248,7 @@ private struct LineDraft {
             input: item,
             productName: product?.name ?? "Товар недоступен",
             productSlug: product?.slug,
-            image: product?.media.first?.url,
+            image: product?.image ?? product?.media.first?.url,
             art: product?.art,
             complectTitle: complectTitle,
             subTitle: subTitle,

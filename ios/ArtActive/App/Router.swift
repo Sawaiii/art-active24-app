@@ -24,6 +24,12 @@ enum Route: Hashable {
     case profileEdit
     case info(InfoPage)
     case checkout
+    /// «Примеры работ» — список кейсов (рубрика — фильтр).
+    case cases(categoryId: Int?)
+    /// Карточка кейса; title — заголовок до загрузки.
+    case caseStudy(slug: String, title: String?)
+    /// «Акции» — страница «Выгодные предложения».
+    case sale
 }
 
 struct WebPage: Identifiable, Hashable {

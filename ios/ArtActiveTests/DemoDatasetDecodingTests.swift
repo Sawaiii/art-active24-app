@@ -34,6 +34,30 @@ final class DemoDatasetDecodingTests: XCTestCase {
         XCTAssertTrue(failures.isEmpty, "Карточки не разбираются (\(failures.count)):\n" + failures.prefix(15).joined(separator: "\n"))
     }
 
+    func testEveryListedCaseHasDecodableCard() throws {
+        let dir = try datasetDirectory()
+        let listFile = dir.appendingPathComponent("cases.json")
+        guard FileManager.default.fileExists(atPath: listFile.path) else { throw XCTSkip("В наборе ещё нет кейсов") }
+        let decoder = JSONCoding.makeDecoder()
+        let list = try decoder.decode(CaseListPayload.self, from: Data(contentsOf: listFile))
+
+        var failures: [String] = []
+        for item in list.items ?? [] {
+            let file = dir.appendingPathComponent("cases/\(item.slug).json")
+            guard let data = try? Data(contentsOf: file) else {
+                failures.append("\(item.slug): нет файла карточки")
+                continue
+            }
+            do {
+                let study = try decoder.decode(CaseStudy.self, from: data)
+                XCTAssertEqual(study.slug, item.slug)
+            } catch {
+                failures.append("\(item.slug): \(error)")
+            }
+        }
+        XCTAssertTrue(failures.isEmpty, "Кейсы не разбираются (\(failures.count)):\n" + failures.prefix(15).joined(separator: "\n"))
+    }
+
     func testEveryListedVenueHasDecodableCard() throws {
         let dir = try datasetDirectory()
         let decoder = JSONCoding.makeDecoder()

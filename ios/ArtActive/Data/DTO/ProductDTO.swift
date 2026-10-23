@@ -214,6 +214,8 @@ struct Product: Codable, Hashable, Identifiable, Sendable {
     let categoryId: Int?
     let breadcrumbs: [Crumb]?
     let badge: Badge?
+    /// Ава товара из листинга — для избранного, «Вы смотрели», корзины.
+    let image: String?
     let media: [MediaItem]
     let price: PriceTag?
     let lead: String?
@@ -233,7 +235,8 @@ struct Product: Codable, Hashable, Identifiable, Sendable {
             id: id,
             slug: slug,
             name: name,
-            image: media.first(where: { $0.type == .image })?.url ?? media.first?.poster,
+            // Ава листинга (квадрат 600×600, как на сайте); галерея — только если авы нет.
+            image: image ?? media.first(where: { $0.type == .image })?.url ?? media.first?.poster,
             price: price,
             badge: badge,
             template: template

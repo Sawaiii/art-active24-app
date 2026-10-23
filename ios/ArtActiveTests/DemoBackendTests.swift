@@ -102,6 +102,41 @@ final class DemoBackendTests: XCTestCase {
         XCTAssertEqual(Set(names).count, names.count, "без дублей")
     }
 
+    // MARK: - Акции и кейсы
+
+    func testSaleAlwaysAnswers() throws {
+        let sale = try decode(SalePayload.self, call("GET", "v1/sale"))
+        XCTAssertFalse((sale.title ?? "").isEmpty, "без sale.json — заголовок по умолчанию и пустой список")
+        XCTAssertEqual(call("POST", "v1/sale").status, 404)
+    }
+
+    func testCasesListDetailAndHomeTiles() throws {
+        guard backend.dataset.raw("cases.json") != nil else { throw XCTSkip("В наборе DemoData ещё нет кейсов") }
+        let list = try decode(CaseListPayload.self, call("GET", "v1/cases"))
+        let first = try XCTUnwrap(list.items?.first, "список кейсов не пуст")
+        let study = try decode(CaseStudy.self, call("GET", "v1/cases/\(first.slug)"))
+        XCTAssertEqual(study.slug, first.slug)
+        XCTAssertFalse(study.media?.isEmpty ?? true, "у кейса есть фото")
+        XCTAssertEqual(call("GET", "v1/cases/no-such-case-404").status, 404)
+        XCTAssertEqual(call("GET", "v1/cases?category=abc").status, 422)
+
+        if let categoryId = list.categories?.first?.id {
+            let filtered = try decode(CaseListPayload.self, call("GET", "v1/cases?category=\(categoryId)"))
+            XCTAssertTrue(filtered.items?.allSatisfy { $0.categoryId == categoryId } ?? false)
+        }
+
+        // Плитка кейса со slug на главной открывается в приложении.
+        let home = try decode(HomePayload.self, call("GET", "v1/home"))
+        for item in home.sections?.first(where: { $0.type == .cases })?.items ?? [] {
+            guard let slug = item.slug else { continue }
+            XCTAssertEqual(call("GET", "v1/cases/\(slug)").status, 200, slug)
+        }
+
+        let resolved = try decode(ResolvePayload.self, call("GET", "v1/resolve?path=/cases/\(first.slug)/"))
+        XCTAssertEqual(resolved.type, .caseStudy)
+        XCTAssertEqual(resolved.slug, first.slug)
+    }
+
     func testProductAndMissingProduct() throws {
         let product = try decode(Product.self, call("GET", "v1/products/7138"))
         XCTAssertEqual(product.id, 7138)

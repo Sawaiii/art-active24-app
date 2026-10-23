@@ -1,0 +1,11 @@
+{
+ "title": "Кейсы",
+ "categories": [
+  { "id": 2, "name": "Кейтеринг", "count": 1 },
+  { "id": 1, "name": "Мероприятия", "count": 1 }
+ ],
+ "items": [
+  { "slug": "keytering-ng", "title": "Новогодний кейтеринг", "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/keys-ng-keytering-10.webp", "budget": "300 000 ₽", "budgetAmount": 300000, "guests": 100, "categoryId": 2 },
+  { "slug": "serpuhov", "title": "Серпухов", "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/dsc06922.webp", "budget": "по запросу", "categoryId": 1 }
+ ]
+}

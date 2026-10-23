@@ -5,7 +5,9 @@
   "products": 385,
   "productFiles": 385,
   "venues": 40,
-  "venueFiles": 40
+  "venueFiles": 40,
+  "cases": 40,
+  "saleOffers": 8
  },
  "productFiles": [
   "7138 stol-viktoriya-180 configurator/standard",

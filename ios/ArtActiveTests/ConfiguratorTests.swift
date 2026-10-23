@@ -99,7 +99,7 @@ final class ConfiguratorTests: XCTestCase {
         )
         let product = Product(
             id: 1, slug: "box", art: nil, name: "Боксы", template: .configurator, configuratorMode: .cateringMenu,
-            orderMode: .cart, categoryId: nil, breadcrumbs: nil, badge: nil, media: [], price: nil, lead: nil,
+            orderMode: .cart, categoryId: nil, breadcrumbs: nil, badge: nil, image: nil, media: [], price: nil, lead: nil,
             specs: nil, descriptionHtml: nil, complectsLabel: nil, complects: [complect], extras: [],
             similar: nil, variantLinks: nil, masterclass: nil, blocks: nil, shareUrl: nil
         )

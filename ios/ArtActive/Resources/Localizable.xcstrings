@@ -313,6 +313,36 @@
         }
       }
     },
+    "Акции": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Promotions"
+          }
+        }
+      }
+    },
+    "Акция": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Promotion"
+          }
+        }
+      }
+    },
+    "Акция «%@»": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Promotion “%@”"
+          }
+        }
+      }
+    },
     "Аренда": {
       "localizations": {
         "en": {
@@ -389,6 +419,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bonus unlocked"
+          }
+        }
+      }
+    },
+    "бюджет": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "budget"
           }
         }
       }
@@ -564,6 +604,16 @@
         }
       }
     },
+    "Возможно, он есть на сайте": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It may still be available on the website"
+          }
+        }
+      }
+    },
     "Войдите по номеру телефона": {
       "localizations": {
         "en": {
@@ -604,6 +654,16 @@
         }
       }
     },
+    "Воспользоваться предложением": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Get this offer"
+          }
+        }
+      }
+    },
     "Время": {
       "localizations": {
         "en": {
@@ -640,6 +700,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "All"
+          }
+        }
+      }
+    },
+    "Все акции": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All promotions"
+          }
+        }
+      }
+    },
+    "Все кейсы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All cases"
           }
         }
       }
@@ -700,6 +780,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Select at least one option"
+          }
+        }
+      }
+    },
+    "Выгодные предложения": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Special offers"
           }
         }
       }
@@ -771,6 +861,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "guests"
+          }
+        }
+      }
+    },
+    "Гостей: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guests: %@"
           }
         }
       }
@@ -1085,6 +1185,16 @@
         }
       }
     },
+    "Загляните позже — мы регулярно добавляем выгодные предложения": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check back later — we add new offers regularly"
+          }
+        }
+      }
+    },
     "Загрузка": {
       "localizations": {
         "en": {
@@ -1333,6 +1443,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "The catalog is empty for now"
+          }
+        }
+      }
+    },
+    "Кейс «%@»": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Case “%@”"
+          }
+        }
+      }
+    },
+    "Кейс не найден": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Case not found"
+          }
+        }
+      }
+    },
+    "Кейсов пока нет": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No cases yet"
+          }
+        }
+      }
+    },
+    "Кейсы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cases"
           }
         }
       }
@@ -1788,6 +1938,16 @@
         }
       }
     },
+    "направление": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "category"
+          }
+        }
+      }
+    },
     "Начало": {
       "localizations": {
         "en": {
@@ -2138,6 +2298,16 @@
         }
       }
     },
+    "Открыть на сайте": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open on website"
+          }
+        }
+      }
+    },
     "Открыть товар": {
       "localizations": {
         "en": {
@@ -2438,6 +2608,16 @@
         }
       }
     },
+    "Подробнее об акции": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows promotion details"
+          }
+        }
+      }
+    },
     "Подтверждён": {
       "localizations": {
         "en": {
@@ -2608,6 +2788,16 @@
         }
       }
     },
+    "Похожие кейсы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Similar cases"
+          }
+        }
+      }
+    },
     "Похожие мастер-классы": {
       "localizations": {
         "en": {
@@ -2674,6 +2864,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apply"
+          }
+        }
+      }
+    },
+    "Примеры работ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Our work"
           }
         }
       }
@@ -2745,6 +2945,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sections"
+          }
+        }
+      }
+    },
+    "Расскажите о вашем мероприятии — менеджер подберёт программу и рассчитает бюджет.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tell us about your event — a manager will put together a program and estimate the budget."
           }
         }
       }
@@ -2835,6 +3045,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Contact us"
+          }
+        }
+      }
+    },
+    "Сейчас акций нет": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No promotions right now"
           }
         }
       }
@@ -3339,6 +3559,46 @@
         }
       }
     },
+    "Хотите так же?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Want the same?"
+          }
+        }
+      }
+    },
+    "Хочу воспользоваться акцией «%@»": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I would like to use the promotion “%@”"
+          }
+        }
+      }
+    },
+    "Хочу так же": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I want the same"
+          }
+        }
+      }
+    },
+    "Хочу так же, как в кейсе «%@»": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I want the same as in the case “%@”"
+          }
+        }
+      }
+    },
     "Цвет": {
       "localizations": {
         "en": {
@@ -3415,6 +3675,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Some items are priced on request."
+          }
+        }
+      }
+    },
+    "Что было на мероприятии": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What was at the event"
           }
         }
       }

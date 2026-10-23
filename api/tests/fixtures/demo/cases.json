@@ -1,0 +1,376 @@
+{
+ "title": "Кейсы",
+ "categories": [
+  {
+   "id": 2,
+   "name": "Кейтеринг",
+   "count": 36
+  },
+  {
+   "id": 4,
+   "name": "Шатры и сцены",
+   "count": 2
+  },
+  {
+   "id": 5,
+   "name": "Тимбилдинг",
+   "count": 2
+  }
+ ],
+ "items": [
+  {
+   "slug": "keytering-ng",
+   "title": "Новогодний кейтеринг",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/keys-ng-keytering-10.webp",
+   "budget": "300 000 ₽",
+   "budgetAmount": 300000,
+   "guests": 100,
+   "categoryId": 2
+  },
+  {
+   "slug": "ng-korneri-s-pitaniem",
+   "title": "Новогодние корнеры и кулинарные станции",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/keys-i-korneri-ng-10.webp",
+   "categoryId": 2
+  },
+  {
+   "slug": "pitanie-sportsmenam-2024",
+   "title": "Кейтеринг спортсменам в Лужниках",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/keyss-2024-lyjniki-11.webp",
+   "budget": "4 700 000 ₽",
+   "budgetAmount": 4700000,
+   "guests": 2000,
+   "categoryId": 2
+  },
+  {
+   "slug": "tmx-sport",
+   "title": "ТМХ - Лужники",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/zhshdshnlgonkek.webp",
+   "budget": "6 200 000 ₽",
+   "budgetAmount": 6200000,
+   "guests": 1500,
+   "categoryId": 2
+  },
+  {
+   "slug": "keytering-v-pole",
+   "title": "Фуршет и бар прямо в поле",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/keys-keytering-9.webp",
+   "budget": "358 000 ₽",
+   "budgetAmount": 358000,
+   "guests": 50,
+   "categoryId": 2
+  },
+  {
+   "slug": "keytering-na-krishe",
+   "title": "Стрит-фуд и бар на крышу",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/keysss-9.webp",
+   "budget": "340 000 ₽",
+   "budgetAmount": 340000,
+   "guests": 50,
+   "categoryId": 2
+  },
+  {
+   "slug": "fydtrack-v-klin",
+   "title": "Фудтрак и сладости в Клин",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/morogka-10.webp",
+   "budget": "296 000 ₽",
+   "budgetAmount": 296000,
+   "guests": 50,
+   "categoryId": 2
+  },
+  {
+   "slug": "organizatsiya-gril-pati",
+   "title": "Организация гриль пати",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/news-keitiring-bbq-1_1.webp",
+   "budget": "150 000 ₽",
+   "budgetAmount": 150000,
+   "guests": 300,
+   "categoryId": 2
+  },
+  {
+   "slug": "vyezdnoy-keytering-s-shashlykom-i-plovom",
+   "title": "Выездной кейтеринг с шашлыком и пловом",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/frame-207.webp",
+   "budget": "81 000 ₽",
+   "budgetAmount": 81000,
+   "guests": 50,
+   "categoryId": 2
+  },
+  {
+   "slug": "furshet-na-otkrytie-vystavki-v-muzee",
+   "title": "Фуршет на открытие выставки в музее",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/frame-219.webp",
+   "budget": "65 000 ₽",
+   "budgetAmount": 65000,
+   "guests": 40,
+   "categoryId": 2
+  },
+  {
+   "slug": "kofe-na-peske-1",
+   "title": "Кофе на песке",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/kofe-na-peske-6.webp",
+   "budget": "95 200 ₽",
+   "budgetAmount": 95200,
+   "guests": 40,
+   "categoryId": 2
+  },
+  {
+   "slug": "shokolad-i-aktivnosti",
+   "title": "Шоколад и активности",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/shokoladnii-fontan-5.webp",
+   "budget": "168 000 ₽",
+   "budgetAmount": 168000,
+   "guests": 60,
+   "categoryId": 2
+  },
+  {
+   "slug": "den-stoitelya",
+   "title": "День строителя",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/den-stroitelya-9.webp",
+   "budget": "621 000 ₽",
+   "budgetAmount": 621000,
+   "guests": 150,
+   "categoryId": 2
+  },
+  {
+   "slug": "master-klass-po-plovy",
+   "title": "Мастер-класс по приготовлению плова",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/keys-mk-plov-2024-6.webp",
+   "budget": "1 400 000 ₽",
+   "budgetAmount": 1400000,
+   "guests": 1000,
+   "categoryId": 2
+  },
+  {
+   "slug": "keitering-2024",
+   "title": "Кейтеринг на корпоратив",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/df.webp",
+   "budget": "265 000 ₽",
+   "budgetAmount": 265000,
+   "guests": 70,
+   "categoryId": 2
+  },
+  {
+   "slug": "maslenichnye-gulyanya",
+   "title": "Масленичные гулянья",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/v_1.webp",
+   "budget": "166 000 ₽",
+   "budgetAmount": 166000,
+   "guests": 115,
+   "categoryId": 2
+  },
+  {
+   "slug": "maslenitsa-v-odintsovo",
+   "title": "Масленица в Одинцово",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/zhzhzhl.webp",
+   "budget": "75 000 ₽",
+   "budgetAmount": 75000,
+   "guests": 20,
+   "categoryId": 2
+  },
+  {
+   "slug": "chaynaya-ceremoniya-1",
+   "title": "Чайная церемония в Международный Женский День",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/chai.webp",
+   "budget": "89 000 ₽",
+   "budgetAmount": 89000,
+   "guests": 10,
+   "categoryId": 2
+  },
+  {
+   "slug": "kendy-bar-1",
+   "title": "Кэнди-бар на 8 марта",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/kendi_1.webp",
+   "budget": "126 000 ₽",
+   "budgetAmount": 126000,
+   "guests": 50,
+   "categoryId": 2
+  },
+  {
+   "slug": "sssr-bufet-1",
+   "title": "Буфет в стиле СССР на выставку",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/aaaa.webp",
+   "budget": "110 000 ₽",
+   "budgetAmount": 110000,
+   "guests": 210,
+   "categoryId": 2
+  },
+  {
+   "slug": "velkom-zona-1",
+   "title": "Велком-зона и шатер для \"Центра Управления Аэромобильностью\"",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/55.webp",
+   "budget": "700 000 ₽",
+   "budgetAmount": 700000,
+   "guests": 25,
+   "categoryId": 2
+  },
+  {
+   "slug": "23-fevralya-v-ofis-2",
+   "title": "Полевая кухня для компании \"РосСети\"",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/icuicu.webp",
+   "budget": "100 000 ₽",
+   "budgetAmount": 100000,
+   "guests": 200,
+   "categoryId": 2
+  },
+  {
+   "slug": "kazino-myasnoe-1",
+   "title": "Мясное казино",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/afsf.webp",
+   "budget": "65 000 ₽",
+   "budgetAmount": 65000,
+   "guests": 60,
+   "categoryId": 2
+  },
+  {
+   "slug": "myasnoe-kazino-2",
+   "title": "Мясное казино в Одинцово",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/ggggs.webp",
+   "budget": "55 000 ₽",
+   "budgetAmount": 55000,
+   "guests": 25,
+   "categoryId": 2
+  },
+  {
+   "slug": "vdnx-vip",
+   "title": "Кейтеринг для ВИП-гостей ВДНХ",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/a.webp",
+   "budget": "326 000 ₽",
+   "budgetAmount": 326000,
+   "guests": 100,
+   "categoryId": 2
+  },
+  {
+   "slug": "polevaya-v-ofis-9",
+   "title": "Полевая кухня в офис на День Победы",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/asdasf.webp",
+   "budget": "80 000 ₽",
+   "budgetAmount": 80000,
+   "guests": 120,
+   "categoryId": 2
+  },
+  {
+   "slug": "23-fevryalya-dlya-mygchin",
+   "title": "Мероприятие на 23 февраля в офис",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/keys-23-fev-11.webp",
+   "budget": "250 000 ₽",
+   "budgetAmount": 250000,
+   "guests": 100,
+   "categoryId": 2
+  },
+  {
+   "slug": "traditsionnye-provody-zimy",
+   "title": "Традиционные проводы зимы",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/news-6-3-blin1_1.webp",
+   "budget": "350 000 ₽",
+   "budgetAmount": 350000,
+   "guests": 1000,
+   "categoryId": 2
+  },
+  {
+   "slug": "keytering-s-komandnymi-igrami",
+   "title": "Кейтеринг с командными играми",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/news-timb-keit-07_1.webp",
+   "budget": "250 000 ₽",
+   "budgetAmount": 250000,
+   "guests": 80,
+   "categoryId": 2
+  },
+  {
+   "slug": "den-rojdeniya-rebenka-s-razvlecheniyami-i-furshetom",
+   "title": "День рождения ребенка с развлечениями и фуршетом",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/news-dr-niki-01_1.webp",
+   "budget": "140 000 ₽",
+   "budgetAmount": 140000,
+   "guests": 50,
+   "categoryId": 2
+  },
+  {
+   "slug": "tematicheskoe-meropriyatie-s-vyezdnym-pitaniem",
+   "title": "Тематическое мероприятие с выездным питанием",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/news-plov-sssr-10_1_2.webp",
+   "budget": "240 000 ₽",
+   "budgetAmount": 240000,
+   "guests": 60,
+   "categoryId": 2
+  },
+  {
+   "slug": "korporativ-s-vyezdnym-keyteringom-i-attraktsionami",
+   "title": "Корпоратив с выездным кейтерингом и аттракционами",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/new-corp-01_1.webp",
+   "budget": "280 000 ₽",
+   "budgetAmount": 280000,
+   "guests": 100,
+   "categoryId": 2
+  },
+  {
+   "slug": "novogodniy-korporativ",
+   "title": "Новогодний корпоратив",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/vr-schlem-01_1.webp",
+   "budget": "150 000 ₽",
+   "budgetAmount": 150000,
+   "guests": 110,
+   "categoryId": 2
+  },
+  {
+   "slug": "plov-na-den-rogdenie",
+   "title": "Плов на день рождение",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/keys-keitering-6.webp",
+   "budget": "170 000 ₽",
+   "budgetAmount": 170000,
+   "guests": 20,
+   "categoryId": 2
+  },
+  {
+   "slug": "vyezdnye-stantsii-s-pitaniem-na-tematicheskoe-meropriyatie",
+   "title": "Выездные станции с питанием на тематическое мероприятие",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/news-temat-stanc-1_1.webp",
+   "budget": "250 000 ₽",
+   "budgetAmount": 250000,
+   "guests": 300,
+   "categoryId": 2
+  },
+  {
+   "slug": "vyezdnoy-banket-s-barbekyu-na-svadbu",
+   "title": "Выездной банкет с барбекю на свадьбу",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/news-svadba-keit-1_1.webp",
+   "budget": "300 000 ₽",
+   "budgetAmount": 300000,
+   "guests": 80,
+   "categoryId": 2
+  },
+  {
+   "slug": "shatri-v-piter-2024",
+   "title": "Шатры и ничего больше в Питер",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/hater-keys-16.webp",
+   "budget": "3 006 700 ₽",
+   "budgetAmount": 3006700,
+   "guests": 1500,
+   "categoryId": 4
+  },
+  {
+   "slug": "den-indii-2024",
+   "title": "День Индии",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/den-indii-24.webp",
+   "budget": "5 300 000 ₽",
+   "budgetAmount": 5300000,
+   "guests": 20000,
+   "categoryId": 4
+  },
+  {
+   "slug": "serpuhov",
+   "title": "Серпухов",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/dsc06922.webp",
+   "budget": "20 000 000 ₽",
+   "budgetAmount": 20000000,
+   "guests": 105300,
+   "categoryId": 5
+  },
+  {
+   "slug": "promo-ng",
+   "title": "Промо НОВЫЙ ГОД",
+   "image": "https://www.art-active24.ru/images/upload/cases26/b720x405/100-k-1-gallery-3_1.webp",
+   "categoryId": 5
+  }
+ ]
+}

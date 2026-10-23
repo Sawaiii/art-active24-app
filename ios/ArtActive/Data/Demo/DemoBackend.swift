@@ -76,6 +76,9 @@ final class DemoBackend: @unchecked Sendable {
         case ("GET", 2, "products"): return try product(path[1])
         case ("GET", 1, "resolve"): return try resolve(request)
         case ("GET", 1, "search"): return try search(request)
+        case ("GET", 1, "sale"): return DemoJSON.ok(catalog.sale())
+        case ("GET", 1, "cases"): return try cases(request)
+        case ("GET", 2, "cases"): return try caseStudy(path[1])
         case ("GET", 1, "venues"): return venues(request)
         case ("GET", 2, "venues") where path[1] == "filters": return DemoJSON.ok(dataset.raw("venue-filters.json") ?? [String: Any]())
         case ("GET", 2, "venues"): return try venue(path[1])
@@ -132,6 +135,12 @@ final class DemoBackend: @unchecked Sendable {
         let path = URLComponents(string: rawPath)?.path ?? rawPath
         let segments = path.split(separator: "/").map(String.init).filter { !$0.isEmpty }
         guard !segments.isEmpty, segments.count <= 4 else { throw DemoError.notFound("Страница") }
+        if segments == ["sale"] { return DemoJSON.ok(["type": "sale"]) }
+        if segments == ["cases"] { return DemoJSON.ok(["type": "cases"]) }
+        if segments[0] == "cases", segments.count == 2, catalog.caseStudy(slug: segments[1].lowercased()) != nil {
+            let payload: [String: Any] = ["type": "case", "slug": segments[1].lowercased()]
+            return DemoJSON.ok(payload)
+        }
         if segments[0] == "arenda-ploshchadki", segments.count > 1, let venueId = catalog.venueId(slug: segments[1]) {
             let payload: [String: Any] = ["type": "venue", "id": venueId]
             return DemoJSON.ok(payload)
@@ -141,6 +150,26 @@ final class DemoBackend: @unchecked Sendable {
         }
         let web: [String: Any] = ["type": "web", "url": "https://www.art-active24.ru/" + segments.joined(separator: "/") + "/"]
         return DemoJSON.ok(web)
+    }
+
+    // MARK: - Кейсы
+
+    private func cases(_ request: DemoRequest) throws -> DemoResponse {
+        var categoryId: Int?
+        if let raw = request.query["category"], !raw.isEmpty {
+            guard raw.count <= 6, raw.allSatisfy(\.isASCII), let value = Int(raw), value >= 0 else {
+                throw DemoError.validation(["category": "Неизвестная рубрика"])
+            }
+            categoryId = value
+        }
+        let list = catalog.cases(categoryId: categoryId)
+        let total = (list["items"] as? [Any])?.count ?? 0
+        return DemoJSON.ok(list, meta: ["total": total])
+    }
+
+    private func caseStudy(_ rawSlug: String) throws -> DemoResponse {
+        guard let study = catalog.caseStudy(slug: rawSlug.lowercased()) else { throw DemoError.notFound("Кейс") }
+        return DemoJSON.ok(study)
     }
 
     private func search(_ request: DemoRequest) throws -> DemoResponse {

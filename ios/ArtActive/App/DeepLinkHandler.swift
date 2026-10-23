@@ -67,6 +67,16 @@ final class DeepLinkHandler {
             router.push(.category(id: id, title: nil), in: .catalog)
         case let (.venue?, id?):
             router.push(.venue(id: id), in: .catalog)
+        case (.caseStudy?, _):
+            guard let slug = target.slug, !slug.isEmpty else {
+                router.openWeb(original)
+                return
+            }
+            router.push(.caseStudy(slug: slug, title: nil), in: .home)
+        case (.cases?, _):
+            router.push(.cases(categoryId: nil), in: .home)
+        case (.sale?, _):
+            router.push(.sale, in: .home)
         default:
             router.openWeb(target.url?.resolvedURL ?? original)
         }

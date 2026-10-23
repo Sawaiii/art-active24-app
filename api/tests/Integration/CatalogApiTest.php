@@ -59,6 +59,15 @@ final class CatalogApiTest extends ApiTestCase
         $this->assertSame(404, $this->call('GET', '/v1/products/1')['status']);
     }
 
+    public function testProductCarriesListingImagesAndOnlySelectableExtras(): void
+    {
+        $product = $this->call('GET', '/v1/products/7138')['body']['data'];
+
+        $this->assertSame('https://www.art-active24.ru/images/upload/stol-viktoriya-180.jpg', $product['image'], 'ава листинга, а не галерея');
+        $this->assertSame('https://www.art-active24.ru/images/upload/stol-chernyy.jpg', $product['similar'][0]['image']);
+        $this->assertSame([], array_filter($product['extras'], static fn (array $e): bool => !isset($e['id'])), 'допы без id отброшены');
+    }
+
     public function testResolveProductVariantVenueAndWebFallback(): void
     {
         $variant = $this->call('GET', '/v1/resolve?path=' . rawurlencode('/plov/plov-s-kuricey/'))['body']['data'];

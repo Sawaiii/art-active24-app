@@ -52,6 +52,8 @@ struct SectionHeader: View {
     var font: Font = .aaSectionTitle
     var actionTitle: String?
     var action: (() -> Void)?
+    /// accessibilityIdentifier ссылки «Все …» (UI-тесты).
+    var actionIdentifier: String?
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
@@ -69,6 +71,7 @@ struct SectionHeader: View {
                     }
                 }
                 .buttonStyle(LinkButtonStyle())
+                .accessibilityIdentifier(actionIdentifier ?? "section.action")
             }
         }
     }

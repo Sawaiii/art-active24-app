@@ -287,6 +287,11 @@ struct DemoCatalog: Sendable {
         guard let raw = data.raw("home.json") as? [String: Any],
               let sections = raw["sections"] as? [[String: Any]] else { return ["sections": [Any]()] }
         let built = sections.map { section -> [String: Any] in
+            if section["type"] as? String == "cases" {
+                var copy = section
+                copy["items"] = (section["items"] as? [[String: Any]] ?? []).map(withCaseSlug)
+                return copy
+            }
             guard section["type"] as? String == "products" else { return section }
             var copy = section
             let ids = (section["productIds"] as? [Any] ?? []).compactMap { ($0 as? NSNumber)?.intValue }

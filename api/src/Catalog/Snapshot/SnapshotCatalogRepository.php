@@ -71,14 +71,30 @@ final class SnapshotCatalogRepository implements CatalogRepository
             return null;
         }
         $product = $this->store->optional("products/{$id}.json");
-        if ($product === null || !isset($product['extras'])) {
-            return $product;
+        if ($product === null) {
+            return null;
+        }
+        // Ава листинга (а не первое фото галереи) — для избранного, «Вы смотрели», корзины.
+        $image = $this->products()[$id]['image'] ?? null;
+        if ($image !== null) {
+            $product['image'] = $image;
+        }
+        // «Похожие» — с теми же авами, что и в листинге.
+        if (isset($product['similar'])) {
+            $product['similar'] = array_map(
+                fn (array $item): array => isset($this->products()[$item['id'] ?? 0]['image'])
+                    ? ['image' => $this->products()[$item['id']]['image']] + $item
+                    : $item,
+                $product['similar'],
+            );
         }
         // На сайте встречаются допы без data-id: их нельзя ни выбрать, ни посчитать.
-        $product['extras'] = array_values(array_filter(
-            $product['extras'],
-            static fn (array $extra): bool => isset($extra['id']),
-        ));
+        if (isset($product['extras'])) {
+            $product['extras'] = array_values(array_filter(
+                $product['extras'],
+                static fn (array $extra): bool => isset($extra['id']),
+            ));
+        }
         return $product;
     }
 

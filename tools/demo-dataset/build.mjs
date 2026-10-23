@@ -18,6 +18,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const MAX_PRODUCTS = 400;
 const MAX_PRODUCT_FILES = 60;
 const MAX_VENUES = 40;
+/** Кейсы: сначала те, что на главной, затем первые из списка /cases/. */
+const MAX_CASES = 40;
 const SEO_LIMIT = 600;
 const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
 
@@ -49,7 +51,7 @@ const SEARCH_LIMIT = 24;
 const ALLOWED_HOSTS = new Set([
   'www.art-active24.ru', 'art-active24.ru', 'storage.yandexcloud.net',
   'www.youtube.com', 'youtube.com', 'youtu.be', 'rutube.ru',
-  't.me', 'vk.com', 'api.whatsapp.com', 'wa.me',
+  't.me', 'vk.com', 'api.whatsapp.com', 'wa.me', 'max.ru',
 ]);
 const FORBIDDEN_PATTERNS = [
   [/\.php\b/i, 'ссылка на PHP-скрипт'],
@@ -163,13 +165,17 @@ function main() {
   }
   // Ссылки только внутри набора: «Похожие» и связанные МК не ведут на отсутствующие товары.
   const inSet = (s) => picked.has(s.id);
+  // Ава листинга — в карточку (для избранного/«Вы смотрели») и в «Похожие», как делает API.
+  const listImage = new Map(products.map((p) => [p.id, p.image]));
+  const withAva = (s) => (listImage.get(s.id) ? { ...s, image: listImage.get(s.id) } : s);
   for (const [id, d] of details) {
     details.set(id, {
       ...d,
-      similar: (d.similar ?? []).filter(inSet),
+      ...(listImage.get(id) ? { image: listImage.get(id) } : {}),
+      similar: (d.similar ?? []).filter(inSet).map(withAva),
       // Допы без id (так бывает на сайте) не выбрать и не посчитать — как и в API, отбрасываем.
       ...(d.extras ? { extras: d.extras.filter((e) => e.id != null) } : {}),
-      ...(d.masterclass ? { masterclass: { ...d.masterclass, related: (d.masterclass.related ?? []).filter(inSet) } } : {}),
+      ...(d.masterclass ? { masterclass: { ...d.masterclass, related: (d.masterclass.related ?? []).filter(inSet).map(withAva) } } : {}),
     });
   }
 
@@ -191,6 +197,10 @@ function main() {
     venueDetails.set(id, { ...d, similar: (d.similar ?? []).filter((s) => venueDetails.has(s.id)) });
   }
 
+  // ── Кейсы и «Акции» ──
+  const { list: caseList, details: caseDetails } = pickCases(home, picked);
+  const sale = readOptional('sale.json');
+
   // ── Сборка и проверка ──
   const files = new Map();
   const put = (rel, data, pretty = false) => {
@@ -210,6 +220,11 @@ function main() {
   put('venue-filters.json', venueFilters, true);
   put('home.json', home, true);
   put('info.json', info, true);
+  if (sale) put('sale.json', sale, true);
+  if (caseList) {
+    put('cases.json', caseList, true);
+    for (const d of caseDetails) put(`cases/${d.slug}.json`, d);
+  }
   put('manifest.json', {
     note: 'Демо-набор для CI-скриншотов iOS. Собран tools/demo-dataset/build.mjs из публичного каталога сайта.',
     counts: {
@@ -218,6 +233,8 @@ function main() {
       productFiles: details.size,
       venues: venueList.length,
       venueFiles: venueDetails.size,
+      cases: caseDetails.length,
+      saleOffers: sale?.items?.length ?? 0,
     },
     productFiles: [...details.values()].map((d) => `${d.id} ${d.slug} ${d.template}${d.configuratorMode ? '/' + d.configuratorMode : ''}`),
   }, true);
@@ -240,6 +257,37 @@ function main() {
   console.log(`  «${SEARCH_WORD}» в названии: ${productList.filter((p) => p.name.toLowerCase().includes(SEARCH_WORD)).length}`);
   for (const [id] of SECTIONS) console.log(`  раздел ${id}: ${productList.filter((p) => p.categoryIds.includes(id)).length} товаров`);
   if (missingHome.length) console.warn(`  ВНИМАНИЕ: нет товаров «Новинок»: ${missingHome.join(', ')}`);
+}
+
+/**
+ * Кейсы набора: кейсы главной + первые из списка (до MAX_CASES), только с файлом-карточкой.
+ * Товары кейса и «Похожие кейсы» — только внутри набора: что видно, то открывается.
+ */
+function pickCases(home, picked) {
+  const list = readOptional('cases.json');
+  if (!list) return { list: null, details: [] };
+  const slugOfUrl = (url) => (String(url ?? '').match(/\/cases\/([a-z0-9_-]+)\/?$/i) ?? [])[1]?.toLowerCase();
+  const homeSlugs = (home.sections ?? []).filter((s) => s.type === 'cases').flatMap((s) => s.items ?? []).map((it) => slugOfUrl(it.url));
+  const order = [...new Set([...homeSlugs, ...(list.items ?? []).map((s) => s.slug)])].filter(Boolean);
+
+  const raw = new Map();
+  for (const slug of order) {
+    if (raw.size >= MAX_CASES) break;
+    const d = readOptional(`cases/${slug}.json`);
+    if (d) raw.set(slug, d);
+  }
+  const details = [...raw.values()].map((d) => ({
+    ...d,
+    productIds: (d.productIds ?? []).filter((id) => picked.has(id)),
+    similar: (d.similar ?? []).filter((s) => raw.has(s.slug)),
+  }));
+  const items = (list.items ?? []).filter((s) => raw.has(s.slug));
+  const counts = new Map();
+  for (const s of items) if (s.categoryId != null) counts.set(s.categoryId, (counts.get(s.categoryId) ?? 0) + 1);
+  const categories = (list.categories ?? [])
+    .map((c) => ({ ...c, count: counts.get(c.id) ?? 0 }))
+    .filter((c) => c.count > 0);
+  return { list: { ...list, categories, items }, details };
 }
 
 /** Публичный контент: только разрешённые хосты, без внутренних эндпоинтов и похожего на секреты. */

@@ -24,6 +24,8 @@ tags:
   - name: orders
   - name: manager
   - name: info
+  - name: content
+    description: «Акции» и кейсы («Примеры работ»)
 
 paths:
   /v1/home:
@@ -406,6 +408,33 @@ paths:
       responses:
         '200': { $ref: '#/components/responses/Info' }
 
+  /v1/sale:
+    get:
+      tags: [content]
+      summary: «Акции» — страница /sale/ сайта («Выгодные предложения»)
+      responses:
+        '200': { $ref: '#/components/responses/Sale' }
+
+  /v1/cases:
+    get:
+      tags: [content]
+      summary: Кейсы («Примеры работ», /cases/) — все сразу, с рубриками; meta.total — число кейсов
+      parameters:
+        - { name: category, in: query, description: 'Рубрика кейсов (CaseCategory.id)', schema: { type: integer } }
+      responses:
+        '200': { $ref: '#/components/responses/CaseList' }
+        '422': { $ref: '#/components/responses/Error' }
+
+  /v1/cases/{slug}:
+    get:
+      tags: [content]
+      summary: Карточка кейса — галерея, факты, задача и решение, товары «Что было на мероприятии», похожие
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string, pattern: '^[a-z0-9][a-z0-9_-]{0,99}$', example: keytering-ng } }
+      responses:
+        '200': { $ref: '#/components/responses/Case' }
+        '404': { $ref: '#/components/responses/Error' }
+
 components:
   securitySchemes:
     bearer: { type: http, scheme: bearer }
@@ -729,6 +758,7 @@ components:
         categoryId: { type: integer }
         breadcrumbs: { type: array, items: { $ref: '#/components/schemas/Crumb' } }
         badge: { $ref: '#/components/schemas/Badge' }
+        image: { type: string, format: uri, description: 'Ава листинга (квадрат 600×600) — для избранного, «Вы смотрели», корзины; галерея — в media' }
         media: { type: array, items: { $ref: '#/components/schemas/Media' } }
         price: { $ref: '#/components/schemas/PriceTag' }
         lead: { type: string }
@@ -988,25 +1018,88 @@ components:
         color: { type: string }
         count: { type: integer }
 
+    HomeItem:
+      type: object
+      description: |
+        Плитка секции главной или предложение «Акций». В секции offers и в Sale:
+        subtitle — текст предложения, badge — метка («Бонус», «Скидка»); своей страницы у предложения нет.
+      properties:
+        title: { type: string }
+        subtitle: { type: string }
+        image: { type: string, format: uri }
+        video: { type: string, format: uri }
+        badge: { type: string }
+        categoryId: { type: integer }
+        url: { type: string }
+        slug: { type: string, description: 'Секция cases — кейс есть в API (/v1/cases/{slug}); без slug плитка ведёт на url сайта' }
+
     HomeSection:
       type: object
       required: [type]
       properties:
-        type: { type: string, enum: [hero, promoTiles, directions, products, cases, benefits, recentlyViewed] }
+        type: { type: string, enum: [hero, promoTiles, directions, products, cases, benefits, offers, recentlyViewed] }
         title: { type: string }
-        items:
-          type: array
-          items:
-            type: object
-            properties:
-              title: { type: string }
-              subtitle: { type: string }
-              image: { type: string, format: uri }
-              video: { type: string, format: uri }
-              badge: { type: string }
-              categoryId: { type: integer }
-              url: { type: string }
+        items: { type: array, items: { $ref: '#/components/schemas/HomeItem' } }
         products: { type: array, items: { $ref: '#/components/schemas/ProductSummary' } }
+
+    Sale:
+      type: object
+      required: [title, items]
+      properties:
+        title: { type: string, example: Выгодные предложения }
+        url: { type: string, format: uri, description: Страница сайта /sale/ }
+        items: { type: array, items: { $ref: '#/components/schemas/HomeItem' } }
+
+    CaseCategory:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: integer }
+        name: { type: string, example: Кейтеринг }
+        count: { type: integer }
+
+    CaseSummary:
+      type: object
+      required: [slug, title]
+      properties:
+        slug: { type: string, example: keytering-ng }
+        title: { type: string }
+        image: { type: string, format: uri, description: 'Обложка 16:9 (720×405)' }
+        budget: { type: string, example: '300 000 ₽', description: 'Как на сайте, в т.ч. «по запросу»' }
+        budgetAmount: { $ref: '#/components/schemas/Money' }
+        guests: { type: integer }
+        categoryId: { type: integer }
+
+    CaseLink:
+      type: object
+      description: Позиция «Что было на мероприятии», которой нет среди товаров (раздел или страница сайта)
+      required: [title, url]
+      properties:
+        title: { type: string }
+        image: { type: string, format: uri }
+        categoryId: { type: integer }
+        url: { type: string, format: uri }
+
+    Case:
+      allOf:
+        - $ref: '#/components/schemas/CaseSummary'
+        - type: object
+          properties:
+            url: { type: string, format: uri }
+            description: { type: string }
+            category: { $ref: '#/components/schemas/CaseCategory' }
+            media: { type: array, description: 'Фото 4:3 (800×600) и видео', items: { $ref: '#/components/schemas/Media' } }
+            sections:
+              type: array
+              items:
+                type: object
+                required: [title, html]
+                properties:
+                  title: { type: string, example: Задача }
+                  html: { type: string }
+            products: { type: array, items: { $ref: '#/components/schemas/ProductSummary' } }
+            links: { type: array, items: { $ref: '#/components/schemas/CaseLink' } }
+            similar: { type: array, items: { $ref: '#/components/schemas/CaseSummary' } }
 
     Info:
       type: object
@@ -1020,6 +1113,7 @@ components:
         geo: { type: object, properties: { lat: { type: number }, lng: { type: number } } }
         telegram: { type: string }
         whatsapp: { type: string }
+        max: { type: string, description: 'Ссылка на чат в мессенджере Max; нет поля — кнопки Max нет' }
         socials: { type: array, items: { type: object, properties: { name: { type: string }, url: { type: string } } } }
         deliveryHtml: { type: string }
         rentalTermsHtml: { type: string }
@@ -1047,7 +1141,7 @@ components:
       content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/Product' } } } ] } } }
     Resolve:
       description: OK
-      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: object, properties: { type: { type: string, enum: [product, category, venue, web] }, id: { type: integer }, complectId: { type: integer }, subId: { type: string }, priceType: { type: string }, url: { type: string } } } } } ] } } }
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: object, properties: { type: { type: string, enum: [product, category, venue, case, cases, sale, web] }, id: { type: integer }, slug: { type: string, description: 'type=case' }, complectId: { type: integer }, subId: { type: string }, priceType: { type: string }, url: { type: string } } } } } ] } } }
     Search:
       description: OK
       content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: object, properties: { products: { type: array, items: { $ref: '#/components/schemas/ProductSummary' } }, categories: { type: array, items: { $ref: '#/components/schemas/CategoryNode' } }, correctedQuery: { type: string } } } } } ] } } }
@@ -1078,3 +1172,12 @@ components:
     Info:
       description: OK
       content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/Info' } } } ] } } }
+    Sale:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/Sale' } } } ] } } }
+    CaseList:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: object, properties: { title: { type: string }, categories: { type: array, items: { $ref: '#/components/schemas/CaseCategory' } }, items: { type: array, items: { $ref: '#/components/schemas/CaseSummary' } } } } } } ] } } }
+    Case:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/Case' } } } ] } } }

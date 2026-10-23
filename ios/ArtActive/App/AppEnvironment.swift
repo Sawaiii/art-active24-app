@@ -7,6 +7,7 @@ import Observation
 final class AppEnvironment {
     let catalog: CatalogRepository
     let venues: VenueRepository
+    let content: ContentRepository
     let router: Router
     let auth: AuthStore
     let cart: CartStore
@@ -24,6 +25,7 @@ final class AppEnvironment {
     init(
         catalog: CatalogRepository,
         venues: VenueRepository,
+        content: ContentRepository,
         cartRepository: CartRepository,
         authRepository: AuthRepository,
         profileRepository: ProfileRepository,
@@ -34,6 +36,7 @@ final class AppEnvironment {
     ) {
         self.catalog = catalog
         self.venues = venues
+        self.content = content
         self.client = client
         let router = Router()
         self.router = router
@@ -63,6 +66,7 @@ final class AppEnvironment {
         return AppEnvironment(
             catalog: LiveCatalogRepository(client: client),
             venues: LiveVenueRepository(client: client),
+            content: LiveContentRepository(client: client),
             cartRepository: LiveCartRepository(client: client),
             authRepository: LiveAuthRepository(client: client),
             profileRepository: LiveProfileRepository(client: client),

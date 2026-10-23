@@ -1,0 +1,18 @@
+{
+ "title": "Выгодные предложения",
+ "url": "https://www.art-active24.ru/sale/",
+ "items": [
+  {
+   "title": "Скидка 20% на всю мебель",
+   "subtitle": "Заказывая кейтеринг, вы экономите на аренде мебели.",
+   "image": "https://www.art-active24.ru/images/upload/ochered-20-skidka-new-art-2026-1-1.jpg",
+   "badge": "Скидка"
+  },
+  {
+   "title": "Бесплатная доставка!",
+   "subtitle": "При заказе с воскресенья по четверг от 35 000 рублей доставка газелью 15 м2 бесплатно.",
+   "image": "https://www.art-active24.ru/images/upload/mashina-1-1-art-2026.jpg",
+   "badge": "Бонус"
+  }
+ ]
+}

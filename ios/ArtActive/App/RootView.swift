@@ -108,7 +108,7 @@ extension Route {
     /// Как на сайте: на карточках, оформлении и деталях нижнее меню скрыто.
     var hidesTabBar: Bool {
         switch self {
-        case .product, .venue, .checkout, .order: return true
+        case .product, .venue, .caseStudy, .checkout, .order: return true
         default: return false
         }
     }
@@ -145,6 +145,12 @@ struct RouteView: View {
             InfoPageView(page: page)
         case .checkout:
             CheckoutView(viewModel: CheckoutViewModel(cart: env.cart, orders: env.orders, auth: env.auth))
+        case let .cases(categoryId):
+            CasesView(viewModel: CasesViewModel(categoryId: categoryId, repository: env.content))
+        case let .caseStudy(slug, title):
+            CaseDetailView(viewModel: CaseDetailViewModel(slug: slug, initialTitle: title, repository: env.content))
+        case .sale:
+            SaleView(viewModel: SaleViewModel(repository: env.content))
         }
     }
 }

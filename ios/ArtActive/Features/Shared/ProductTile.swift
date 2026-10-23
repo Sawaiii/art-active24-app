@@ -70,7 +70,12 @@ struct ProductGridView: View {
     }
 }
 
-/// «Связь с нами»: звонок, Telegram, WhatsApp, почта (как меню шапки сайта).
+/// Логотип мессенджера Max (из шапки сайта, «Написать в Max») — шаблонный вектор в Assets.
+enum MaxIcon {
+    static let assetName = "IconMax"
+}
+
+/// «Связь с нами»: звонок, Telegram, WhatsApp, Max, почта (как меню шапки сайта).
 struct ContactMenuButton<LabelContent: View>: View {
     @Environment(InfoStore.self) private var info
     @ViewBuilder let label: LabelContent
@@ -92,6 +97,16 @@ struct ContactMenuButton<LabelContent: View>: View {
                     Label("WhatsApp", systemImage: "message")
                 }
             }
+            if let max = info.maxURL {
+                Button { info.open(max) } label: {
+                    Label {
+                        Text(verbatim: "Max")
+                    } icon: {
+                        Image(MaxIcon.assetName)
+                    }
+                }
+                .accessibilityIdentifier("contact.max")
+            }
             if let email = info.emailURL {
                 Button { info.open(email) } label: {
                     Label("Написать на почту", systemImage: "envelope")
@@ -107,6 +122,7 @@ struct ContactMenuButton<LabelContent: View>: View {
 /// Кнопки связи в строку (карточка товара, заказ, профиль).
 struct ContactButtonsRow: View {
     @Environment(InfoStore.self) private var info
+    @ScaledMetric(relativeTo: .body) private var iconSize: CGFloat = 19
 
     var body: some View {
         HStack(spacing: 10) {
@@ -117,18 +133,35 @@ struct ContactButtonsRow: View {
                 contactButton("Telegram", systemImage: "paperplane.fill") { info.open(telegram) }
             }
             if let whatsapp = info.whatsappURL {
-                contactButton("WhatsApp", systemImage: "message.fill") { info.open(whatsapp) }
+                contactButton("WhatsApp", icon: Image(systemName: "message.fill")) { info.open(whatsapp) }
+            }
+            if let max = info.maxURL {
+                contactButton("Max", icon: Image(MaxIcon.assetName), iconIsAsset: true) { info.open(max) }
+                    .accessibilityIdentifier("contact.max")
             }
         }
     }
 
     private func contactButton(_ title: String, systemImage: String, action: @escaping () -> Void) -> some View {
+        contactButton(title, icon: Image(systemName: systemImage), action: action)
+    }
+
+    private func contactButton(_ title: String, icon: Image, iconIsAsset: Bool = false, action: @escaping () -> Void) -> some View {
         Button {
             Haptics.play(.selection)
             action()
         } label: {
             VStack(spacing: 6) {
-                Image(systemName: systemImage).font(.system(size: 17, weight: .semibold))
+                if iconIsAsset {
+                    // Вектор из Assets не масштабируется шрифтом — размер как у символа 17 pt.
+                    icon
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: iconSize, height: iconSize)
+                } else {
+                    icon.font(.system(size: 17, weight: .semibold))
+                }
                 Text(title).font(.aaCaption).lineLimit(1)
             }
             .foregroundStyle(Palette.accent)

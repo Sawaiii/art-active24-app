@@ -7,6 +7,7 @@ namespace App;
 use App\Http\Controller\AuthController;
 use App\Http\Controller\CartController;
 use App\Http\Controller\CatalogController;
+use App\Http\Controller\ContentController;
 use App\Http\Controller\MeController;
 use App\Http\Controller\OrderController;
 use App\Http\Controller\VenueController;
@@ -74,6 +75,11 @@ final class Kernel
         $r->add('GET', '/v1/products/{id}', $catalog->product(...));
         $r->add('GET', '/v1/resolve', $catalog->resolve(...));
         $r->add('GET', '/v1/search', $catalog->search(...), $heavy('search'));
+
+        $content = new ContentController($c->content);
+        $r->add('GET', '/v1/sale', $content->sale(...));
+        $r->add('GET', '/v1/cases', $content->cases(...));
+        $r->add('GET', '/v1/cases/{slug}', $content->caseStudy(...));
 
         $venues = new VenueController($c->venues);
         $r->add('GET', '/v1/venues', $venues->list(...));

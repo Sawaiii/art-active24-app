@@ -72,6 +72,18 @@ final class CatalogController
         if ($segments === [] || count($segments) > 4) {
             throw HttpError::notFound('Страница');
         }
+        if ($segments === ['sale']) {
+            return Response::ok(['type' => 'sale']);
+        }
+        if ($segments === ['cases']) {
+            return Response::ok(['type' => 'cases']);
+        }
+        if ($segments[0] === 'cases' && count($segments) === 2) {
+            $slug = strtolower($segments[1]);
+            if ($this->content->caseStudy($slug) !== null) {
+                return Response::ok(['type' => 'case', 'slug' => $slug]);
+            }
+        }
         if ($segments[0] === self::VENUES_PREFIX && isset($segments[1])) {
             $venueId = $this->venues->idBySlug($segments[1]);
             if ($venueId !== null) {

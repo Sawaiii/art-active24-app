@@ -106,6 +106,19 @@ private struct CategoryList: View {
 
     var body: some View {
         List {
+            if allNode == nil {
+                // Как ссылки шапки сайта «Акции» и «Кейсы» — над разделами каталога.
+                Section {
+                    Button { openShortcut(.sale) } label: {
+                        ShortcutRow(title: String(localized: "Акции"), systemImage: "tag.fill")
+                    }
+                    .accessibilityIdentifier("catalog.sale")
+                    Button { openShortcut(.cases(categoryId: nil)) } label: {
+                        ShortcutRow(title: String(localized: "Примеры работ"), systemImage: "photo.on.rectangle.angled")
+                    }
+                    .accessibilityIdentifier("catalog.cases")
+                }
+            }
             if let allNode {
                 Button { open(allNode, preferChildren: false) } label: {
                     HStack(spacing: 14) {
@@ -133,12 +146,44 @@ private struct CategoryList: View {
         .scrollContentBackground(.hidden)
     }
 
+    private func openShortcut(_ route: Route) {
+        Haptics.play(.selection)
+        router.push(route)
+    }
+
     private func open(_ node: CategoryNode, preferChildren: Bool) {
         Haptics.play(.selection)
         switch CatalogNavigation.route(for: node, preferChildren: preferChildren) {
         case let .route(route): router.push(route)
         case let .web(url): router.openWeb(url)
         }
+    }
+}
+
+/// Строка-ярлык над разделами («Акции», «Примеры работ»): акцентная иконка в круге и шеврон.
+private struct ShortcutRow: View {
+    let title: String
+    let systemImage: String
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: systemImage)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundStyle(Palette.accent)
+                .frame(width: 36, height: 36)
+                .background(Circle().fill(Palette.accentTint10))
+                .accessibilityHidden(true)
+            Text(title)
+                .font(BrandFont.golos(16, .semibold))
+                .foregroundStyle(Palette.text)
+            Spacer(minLength: 8)
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Palette.disabled)
+                .accessibilityHidden(true)
+        }
+        .padding(.vertical, 2)
+        .contentShape(Rectangle())
     }
 }
 

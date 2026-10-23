@@ -9,6 +9,39 @@
    "type": "products",
    "title": "Новинки",
    "productIds": []
+  },
+  {
+   "type": "cases",
+   "title": "Пример работ нашей Команды",
+   "items": [
+    {
+     "title": "Серпухов",
+     "image": "https://www.art-active24.ru/images/upload/dsc06922.jpg",
+     "url": "https://www.art-active24.ru/cases/serpuhov/"
+    },
+    {
+     "title": "День Индии",
+     "image": "https://www.art-active24.ru/images/upload/den-indii-24.jpg",
+     "url": "https://www.art-active24.ru/cases/den-indii-2024/"
+    }
+   ]
+  },
+  {
+   "type": "offers",
+   "title": "Выгодные предложения",
+   "items": [
+    {
+     "title": "Акция 1+1=3",
+     "subtitle": "Каждую третью порцию мы добавим бесплатно",
+     "image": "https://www.art-active24.ru/images/upload/strit-1-1-3-new-art-2026-1-1.jpg"
+    },
+    {
+     "title": "Доставка бесплатно",
+     "subtitle": "При заказе от 35 000 рублей",
+     "image": "https://www.art-active24.ru/images/upload/free-dostavka-new-new-art-2026-1.jpg",
+     "badge": "Бонус"
+    }
+   ]
   }
  ]
 }

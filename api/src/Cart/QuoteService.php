@@ -54,7 +54,8 @@ final class QuoteService
             'input' => $item->toArray(),
             'productName' => $product['name'] ?? 'Товар недоступен',
             'productSlug' => $product['slug'] ?? null,
-            'image' => $product['media'][0]['url'] ?? null,
+            // Ава товара (квадрат листинга); первое фото галереи — только если авы нет.
+            'image' => $product['image'] ?? $product['media'][0]['url'] ?? null,
             'art' => $product['art'] ?? null,
             'complectTitle' => '',
             'subTitle' => null,

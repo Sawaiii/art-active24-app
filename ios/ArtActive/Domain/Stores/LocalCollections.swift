@@ -43,6 +43,13 @@ final class FavoritesStore {
         scheduleSync()
     }
 
+    /// Свежие данные открытой карточки (ава, цена, бейдж) — на месте, без смены порядка.
+    func refresh(_ product: ProductSummary) {
+        guard let index = items.firstIndex(where: { $0.id == product.id }), items[index] != product else { return }
+        items = items.enumerated().map { $0.offset == index ? product : $0.element }
+        persist()
+    }
+
     /// Слияние после входа: серверные + локальные.
     func mergeAfterSignIn() async {
         do {

@@ -207,6 +207,10 @@ enum MediaAspect {
     static let programVideo: CGFloat = 960.0 / 445.0
     /// Сезонные плитки главной — 535×305.
     static let promo: CGFloat = 535.0 / 305.0
+    /// «Выгодные предложения» (акции) — 710×446.
+    static let offer: CGFloat = 710.0 / 446.0
+    /// Обложки кейсов в списке — 720×405 (16:9).
+    static let caseCover: CGFloat = 720.0 / 405.0
     /// Плитки «Наши возможности» — низкая 305×175 и высокая 305×364.
     static let directionShort: CGFloat = 305.0 / 175.0
     static let directionTall: CGFloat = 305.0 / 364.0

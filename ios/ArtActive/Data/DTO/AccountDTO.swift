@@ -73,6 +73,8 @@ struct InfoPayload: Codable, Hashable, Sendable {
     let geo: GeoPoint?
     let telegram: String?
     let whatsapp: String?
+    /// Чат в мессенджере Max; нет — кнопки Max нет.
+    let max: String?
     let socials: [SocialLink]?
     let deliveryHtml: String?
     let rentalTermsHtml: String?
@@ -90,6 +92,7 @@ struct InfoPayload: Codable, Hashable, Sendable {
         geo: nil,
         telegram: nil,
         whatsapp: nil,
+        max: nil,
         socials: nil,
         deliveryHtml: nil,
         rentalTermsHtml: nil,

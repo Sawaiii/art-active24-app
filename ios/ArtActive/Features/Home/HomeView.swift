@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @State private var viewModel: HomeViewModel
+    @State private var offer: OfferSelection?
     @Environment(AppEnvironment.self) private var env
     @Environment(RecentlyViewedStore.self) private var recent
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -26,6 +27,7 @@ struct HomeView: View {
             Haptics.play(.refresh)
             await viewModel.load()
         }
+        .offerSheet($offer)
         .task { if viewModel.state.content == nil { await viewModel.load() } }
     }
 
@@ -150,9 +152,37 @@ struct HomeView: View {
             }
         case .cases:
             VStack(alignment: .leading, spacing: 14) {
-                SectionHeader(title: section.title ?? String(localized: "Наши кейсы"))
+                SectionHeader(
+                    title: section.title ?? String(localized: "Наши кейсы"),
+                    actionTitle: String(localized: "Все кейсы"),
+                    action: {
+                        Haptics.play(.selection)
+                        env.router.push(.cases(categoryId: nil))
+                    },
+                    actionIdentifier: "home.cases.all"
+                )
+                .padding(.horizontal, Spacing.gutter)
+                CasesRow(items: section.items ?? []) { openCase($0) }
+            }
+        case .offers:
+            if let items = section.items, !items.isEmpty {
+                VStack(alignment: .leading, spacing: 14) {
+                    SectionHeader(
+                        title: section.title ?? String(localized: "Выгодные предложения"),
+                        actionTitle: String(localized: "Все акции"),
+                        action: {
+                            Haptics.play(.selection)
+                            env.router.push(.sale)
+                        },
+                        actionIdentifier: "home.offers.all"
+                    )
                     .padding(.horizontal, Spacing.gutter)
-                CasesRow(items: section.items ?? []) { open($0) }
+                    OffersRail(items: items) { index, item in
+                        offer = OfferSelection(index: index, item: item)
+                    }
+                }
+                .accessibilityElement(children: .contain)
+                .accessibilityIdentifier("home.offers")
             }
         case .benefits:
             BenefitsList(title: section.title ?? String(localized: "Почему мы"), items: section.items ?? [])
@@ -175,6 +205,16 @@ struct HomeView: View {
             )
             .padding(.horizontal, Spacing.gutter)
             ProductRail(products: recent.items)
+        }
+    }
+
+    /// Кейс с данными в API — карточка в приложении; иначе — страница сайта.
+    private func openCase(_ item: HomeItem) {
+        if let slug = item.slug, !slug.isEmpty {
+            Haptics.play(.selection)
+            env.router.push(.caseStudy(slug: slug, title: item.title))
+        } else {
+            open(item)
         }
     }
 
@@ -396,6 +436,30 @@ private struct CasesRow: View {
                         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                     }
                     .buttonStyle(PressableStyle())
+                    // Кейс без карточки в API открывается на сайте — VoiceOver предупреждает.
+                    .accessibilityHint(item.slug == nil ? Text("Откроется страница сайта") : Text(""))
+                    .accessibilityIdentifier("home.case.\(item.slug ?? "web")")
+                }
+            }
+            .scrollTargetLayout()
+            .padding(.horizontal, Spacing.gutter)
+        }
+        .scrollTargetBehavior(.viewAligned)
+    }
+}
+
+/// «Выгодные предложения»: лента карточек акций; тап — подробности в шите.
+private struct OffersRail: View {
+    let items: [HomeItem]
+    let action: (Int, HomeItem) -> Void
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            LazyHStack(alignment: .top, spacing: 12) {
+                ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                    OfferCard(item: item, placement: .rail) { action(index, item) }
+                        .frame(width: 280)
+                        .accessibilityIdentifier("home.offer.\(index)")
                 }
             }
             .scrollTargetLayout()

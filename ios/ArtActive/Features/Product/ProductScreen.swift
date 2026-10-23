@@ -50,7 +50,11 @@ struct ProductScreen: View {
             }
         }
         .zoomTransitionDestination(id: ZoomID.product(viewModel.productId))
-        .task { if viewModel.product == nil { await viewModel.load(recent: recent) } }
+        .task {
+            if viewModel.product == nil { await viewModel.load(recent: recent) }
+            // Избранное хранит снимок товара — обновляем аву и цену свежими данными карточки.
+            if let product = viewModel.product { favorites.refresh(product.summary) }
+        }
     }
 
     @ViewBuilder

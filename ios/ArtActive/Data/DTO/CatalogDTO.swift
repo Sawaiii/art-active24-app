@@ -80,6 +80,9 @@ struct SearchPayload: Codable, Hashable, Sendable {
 
 enum ResolveTarget: String, ResilientEnum {
     case product, category, venue, web, unknown
+    /// Кейс (`slug`), список кейсов, «Акции».
+    case caseStudy = "case"
+    case cases, sale
     static var unknownCase: ResolveTarget { .unknown }
 }
 
@@ -91,13 +94,17 @@ struct ResolvePayload: Codable, Hashable, Sendable {
     let subId: String?
     let priceType: String?
     let url: String?
+    /// type = case. `var` с умолчанием: декодируется, а memberwise-init остаётся прежним.
+    var slug: String? = nil
 }
 
 enum HomeSectionType: String, ResilientEnum {
-    case hero, promoTiles, directions, products, cases, benefits, recentlyViewed, unknown
+    case hero, promoTiles, directions, products, cases, benefits, offers, recentlyViewed, unknown
     static var unknownCase: HomeSectionType { .unknown }
 }
 
+/// Плитка секции главной. В «Выгодных предложениях» (offers, /v1/sale): subtitle — текст
+/// предложения, badge — метка «Бонус»/«Скидка». В кейсах: slug — карточка кейса есть в API.
 struct HomeItem: Codable, Hashable, Sendable {
     let title: String?
     let subtitle: String?
@@ -106,6 +113,7 @@ struct HomeItem: Codable, Hashable, Sendable {
     let badge: String?
     let categoryId: Int?
     let url: String?
+    let slug: String?
 }
 
 struct HomeSection: Codable, Hashable, Sendable {

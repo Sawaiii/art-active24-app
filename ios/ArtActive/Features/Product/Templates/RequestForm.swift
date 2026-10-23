@@ -12,6 +12,8 @@ struct RequestSubject: Identifiable, Hashable {
     var eventTypes: [String] = []
     var requiresDate = false
     var minHoursNote: String?
+    /// Готовый комментарий для менеджера (кейс «Хочу так же», акция) — пользователь может изменить.
+    var comment: String?
 
     var id: String { "\(kind.rawValue)-\(productId ?? 0)-\(complectId ?? 0)-\(venueId ?? 0)" }
 }
@@ -38,6 +40,7 @@ final class RequestFormViewModel {
         self.subject = subject
         self.orders = orders
         hasDate = subject.requiresDate
+        comment = subject.comment ?? ""
     }
 
     var guestsValue: Int? {
