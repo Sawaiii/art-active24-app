@@ -41,6 +41,9 @@ final class CheckoutViewModel {
     var itemsCount: Int { cart.count }
     var total: Int? { cart.quote?.total }
     var hasOnRequest: Bool { cart.quote?.hasOnRequest == true }
+    /// Скидка постоянного клиента (из серверного quote).
+    var discount: PriceDiscount? { cart.quote?.discount }
+    var subtotal: Int? { cart.quote?.subtotal }
 
     func submit() async {
         guard validate() else {
@@ -275,6 +278,10 @@ struct CheckoutView: View {
     /// Нижняя панель: «Позиций N», итог и «Отправить заявку» — всегда видна (таб-бар скрыт).
     private var submitBar: some View {
         VStack(spacing: 10) {
+            if let discount = viewModel.discount, let total = viewModel.total {
+                DiscountSummaryRows(subtotal: viewModel.subtotal ?? total + discount.amount, discount: discount)
+                    .accessibilityIdentifier("checkout.discount")
+            }
             HStack(alignment: .firstTextBaseline) {
                 Text("Позиций: \(viewModel.itemsCount)")
                     .font(.aaBodySmall)

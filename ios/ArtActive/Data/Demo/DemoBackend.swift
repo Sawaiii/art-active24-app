@@ -82,8 +82,7 @@ final class DemoBackend: @unchecked Sendable {
         case ("GET", 1, "venues"): return venues(request)
         case ("GET", 2, "venues") where path[1] == "filters": return DemoJSON.ok(dataset.raw("venue-filters.json") ?? [String: Any]())
         case ("GET", 2, "venues"): return try venue(path[1])
-        case ("POST", 2, "cart") where path[1] == "quote":
-            return DemoJSON.ok(DemoJSON.object(quotes.quote(try quotes.items(from: request.json["items"]))))
+        case ("POST", 2, "cart") where path[1] == "quote": return try cartQuote(request)
         case ("GET", 1, "cart"): return try cartGet(request)
         case ("PUT", 1, "cart"): return try cartPut(request)
         case ("POST", 2, "auth"): return try auth(path[1], request)
@@ -92,6 +91,9 @@ final class DemoBackend: @unchecked Sendable {
         case ("POST", 1, "orders"): return try checkout(request)
         case ("GET", 2, "orders"): return try orderShow(path[1], request)
         case ("POST", 3, "orders") where path[2] == "cancel": return try orderCancel(path[1], request)
+        case ("GET", 3, "orders"): return try orderFeature(path[1], path[2], request)
+        case ("POST", 3, "orders") where path[2] == "review": return try submitReview(path[1], request)
+        case ("POST", 3, "orders") where path[2] == "claims": return try submitClaim(path[1], request)
         case ("POST", 1, "requests"): return try createRequest(request)
         default: throw DemoError.notFound()
         }
@@ -211,9 +213,16 @@ final class DemoBackend: @unchecked Sendable {
 
     // MARK: - Корзина
 
+    /// Гость — без скидки; с действующим токеном — скидка постоянного клиента (как /v1/cart).
+    private func cartQuote(_ request: DemoRequest) throws -> DemoResponse {
+        let quote = quotes.quote(try quotes.items(from: request.json["items"]))
+        guard let user = try? authenticate(request) else { return DemoJSON.ok(DemoJSON.object(quote)) }
+        return DemoJSON.ok(DemoJSON.object(discounted(quote, userId: user.id)))
+    }
+
     private func cartGet(_ request: DemoRequest) throws -> DemoResponse {
         let user = try authenticate(request)
-        return DemoJSON.ok(DemoJSON.object(quotes.quote(state.carts[String(user.id)] ?? [])))
+        return DemoJSON.ok(DemoJSON.object(discounted(quotes.quote(state.carts[String(user.id)] ?? []), userId: user.id)))
     }
 
     private func cartPut(_ request: DemoRequest) throws -> DemoResponse {
@@ -221,7 +230,18 @@ final class DemoBackend: @unchecked Sendable {
         let items = quotes.merged(try quotes.items(from: request.json["items"]))
         state.carts[String(user.id)] = items
         persist()
-        return DemoJSON.ok(DemoJSON.object(quotes.quote(items)))
+        return DemoJSON.ok(DemoJSON.object(discounted(quotes.quote(items), userId: user.id)))
+    }
+
+    private func discounted(_ quote: Quote, userId: Int) -> Quote {
+        DemoLoyalty.apply(quote, percent: loyalty(userId: userId, now: clock()).percent)
+    }
+
+    /// Сумма завершённых заказов (+ демо-«история на сайте») → уровень скидки.
+    private func loyalty(userId: Int, now: Date) -> Loyalty {
+        let completed = state.orders.filter { $0.userId == userId && DemoOrderTimeline.status(of: $0, now: now) == .completed }
+        let spent = DemoLoyalty.baselineSpent + completed.reduce(0) { $0 + $1.total }
+        return DemoLoyalty.summary(spent: spent, completedOrders: DemoLoyalty.baselineOrders + completed.count)
     }
 
     // MARK: - Вход
@@ -306,6 +326,8 @@ final class DemoBackend: @unchecked Sendable {
             return DemoJSON.ok(DemoJSON.object(user.dto))
         case ("PATCH", ""):
             return DemoJSON.ok(DemoJSON.object(try updateUser(user, request.json)))
+        case ("GET", "loyalty"):
+            return DemoJSON.ok(DemoJSON.object(loyalty(userId: user.id, now: clock())))
         case ("GET", "favorites"):
             return favoritesResponse(userId: user.id)
         case ("PUT", "favorites"):
@@ -368,7 +390,7 @@ final class DemoBackend: @unchecked Sendable {
         let limit = request.int("limit", default: 24, range: 1...60)
         let now = clock()
         let mine = state.orders.filter { $0.userId == user.id }.sorted { $0.id > $1.id }
-        let slice = mine.dropFirst((page - 1) * limit).prefix(limit).map { DemoOrderTimeline.present($0, now: now) }
+        let slice = mine.dropFirst((page - 1) * limit).prefix(limit).map { presentOrder($0, now: now) }
         return DemoJSON.ok(DemoJSON.object(Array(slice)), meta: DemoJSON.pageMeta(total: mine.count, page: page, limit: limit))
     }
 
@@ -377,7 +399,7 @@ final class DemoBackend: @unchecked Sendable {
         guard let id = Self.id(rawId), let order = state.orders.first(where: { $0.id == id && $0.userId == user.id }) else {
             throw DemoError.notFound("Заказ")
         }
-        return DemoJSON.ok(DemoJSON.object(DemoOrderTimeline.present(order, now: clock())))
+        return DemoJSON.ok(DemoJSON.object(presentOrder(order, now: clock())))
     }
 
     private func orderCancel(_ rawId: String, _ request: DemoRequest) throws -> DemoResponse {
@@ -392,7 +414,7 @@ final class DemoBackend: @unchecked Sendable {
         state.orders[index].cancelledAt = now
         persist()
         notifier?.cancelStatusChanges(orderId: id)
-        return DemoJSON.ok(DemoJSON.object(DemoOrderTimeline.present(state.orders[index], now: now)))
+        return DemoJSON.ok(DemoJSON.object(presentOrder(state.orders[index], now: now)))
     }
 
     private func checkout(_ request: DemoRequest) throws -> DemoResponse {
@@ -418,15 +440,20 @@ final class DemoBackend: @unchecked Sendable {
                 unitPrice: line.unitPrice, total: line.total, onRequest: line.onRequest, input: line.input
             )
         }
+        // Скидка постоянного клиента — после итогов строк, на момент оформления.
+        let subtotal = min(quote.total, Pricing.maxTotal)
+        let percent = loyalty(userId: user.id, now: clock()).percent
+        let discount = DemoLoyalty.discount(subtotal: subtotal, percent: percent)
         let order = createOrder(
             userId: user.id, key: key, kind: .cart, eventDate: eventDate, eventDateTo: eventDateTo,
             delivery: deliveryInfo, contact: contactInfo, comment: comment, subject: nil,
-            lines: lines, total: min(quote.total, Pricing.maxTotal), hasOnRequest: quote.hasOnRequest == true
+            lines: lines, total: subtotal - (discount?.amount ?? 0), hasOnRequest: quote.hasOnRequest == true,
+            subtotal: discount == nil ? nil : subtotal, discountPercent: discount == nil ? nil : percent
         )
         state.carts[String(user.id)] = []
         persist()
         notifier?.scheduleStatusChanges(for: order)
-        return DemoJSON.ok(DemoJSON.object(DemoOrderTimeline.present(order, now: clock())), status: 201)
+        return DemoJSON.ok(DemoJSON.object(presentOrder(order, now: clock())), status: 201)
     }
 
     private func createRequest(_ request: DemoRequest) throws -> DemoResponse {
@@ -471,7 +498,7 @@ final class DemoBackend: @unchecked Sendable {
         )
         persist()
         notifier?.scheduleStatusChanges(for: order)
-        return DemoJSON.ok(DemoJSON.object(DemoOrderTimeline.present(order, now: clock())), status: 201)
+        return DemoJSON.ok(DemoJSON.object(presentOrder(order, now: clock())), status: 201)
     }
 
     private func productSubject(_ body: [String: Any]) throws -> String {
@@ -493,7 +520,7 @@ final class DemoBackend: @unchecked Sendable {
     private func createOrder(
         userId: Int, key: String, kind: OrderKind, eventDate: String?, eventDateTo: String?,
         delivery: OrderDelivery?, contact: (name: String?, phone: String), comment: String?, subject: String?,
-        lines: [OrderLine], total: Int, hasOnRequest: Bool
+        lines: [OrderLine], total: Int, hasOnRequest: Bool, subtotal: Int? = nil, discountPercent: Int? = nil
     ) -> DemoOrder {
         let id = state.nextOrderId
         state.nextOrderId += 1
@@ -501,10 +528,130 @@ final class DemoBackend: @unchecked Sendable {
             id: id, userId: userId, number: String(format: "AA-%06d", id), kind: kind, idempotencyKey: key,
             createdAt: clock(), cancelledAt: nil, eventDate: eventDate, eventDateTo: eventDateTo, delivery: delivery,
             contactName: contact.name, contactPhone: contact.phone, comment: comment, subject: subject,
-            lines: lines, total: total, hasOnRequest: hasOnRequest
+            lines: lines, total: total, hasOnRequest: hasOnRequest, subtotal: subtotal, discountPercent: discountPercent
         )
         state.orders.append(order)
         return order
+    }
+
+    /// Order контракта + личный кабинет: скидка, машина, отзыв, претензии.
+    private func presentOrder(_ order: DemoOrder, now: Date) -> Order {
+        var result = DemoOrderTimeline.present(order, now: now)
+        let status = result.status
+        result.userId = order.userId
+        if let percent = order.discountPercent, percent > 0, let subtotal = order.subtotal, subtotal > order.total {
+            result.subtotal = subtotal
+            result.discount = PriceDiscount(kind: .loyalty, title: DemoLoyalty.title(percent), percent: percent, amount: subtotal - order.total)
+        }
+        result.tracking = status == .delivering
+        let review = state.reviews[String(order.id)]
+        result.review = review.map { DemoFeedback.present($0, now: now) }
+        result.canReview = DemoFeedback.canReview(status: status, review: review, now: now)
+        result.canClaim = DemoFeedback.canClaim(order: order, status: status, now: now)
+        result.claims = claims(of: order, now: now)
+        return result
+    }
+
+    private func claims(of order: DemoOrder, now: Date) -> [OrderClaim] {
+        state.claims
+            .filter { $0.orderId == order.id }
+            .sorted { $0.id > $1.id }
+            .map { DemoFeedback.present($0, orderNumber: order.number, now: now) }
+    }
+
+    // MARK: - Личный кабинет заказа
+
+    private func ownedOrder(_ rawId: String, _ user: DemoUser) throws -> DemoOrder {
+        guard let id = Self.id(rawId), let order = state.orders.first(where: { $0.id == id && $0.userId == user.id }) else {
+            throw DemoError.notFound("Заказ")
+        }
+        return order
+    }
+
+    /// GET /v1/orders/{id}/composition | vehicle | documents | claims
+    private func orderFeature(_ rawId: String, _ feature: String, _ request: DemoRequest) throws -> DemoResponse {
+        guard ["composition", "vehicle", "documents", "claims"].contains(feature) else { throw DemoError.notFound() }
+        let user = try authenticate(request)
+        let order = try ownedOrder(rawId, user)
+        let now = clock()
+        let history = DemoOrderTimeline.history(of: order, now: now)
+        switch feature {
+        case "composition":
+            return DemoJSON.ok(DemoJSON.object(DemoComposition.build(order: order, history: history, dataset: dataset)))
+        case "vehicle":
+            guard history.last?.status == .delivering else {
+                throw DemoError(status: 409, code: "tracking_unavailable", message: "Машина появится на карте, когда заказ будет в пути")
+            }
+            let offset = DemoOrderTimeline.steps.first { $0.status == .delivering }?.offset ?? 240
+            let location = DemoVehicle.location(
+                orderId: order.id, startedAt: order.createdAt.addingTimeInterval(offset), now: now, warehouse: warehouse()
+            )
+            return DemoJSON.ok(DemoJSON.object(location))
+        case "documents":
+            return DemoJSON.ok(DemoJSON.object(DemoDocuments.list(order: order, history: history)))
+        default:
+            return DemoJSON.ok(DemoJSON.object(claims(of: order, now: now)))
+        }
+    }
+
+    /// Склад — координаты из info.json набора (самовывоз), иначе запасная точка.
+    private func warehouse() -> DemoCoordinate {
+        guard let info = dataset.raw("info.json") as? [String: Any], let geo = info["geo"] as? [String: Any],
+              let lat = (geo["lat"] as? NSNumber)?.doubleValue, let lng = (geo["lng"] as? NSNumber)?.doubleValue else {
+            return DemoVehicle.fallbackWarehouse
+        }
+        return DemoCoordinate(lat: lat, lng: lng)
+    }
+
+    private func submitReview(_ rawId: String, _ request: DemoRequest) throws -> DemoResponse {
+        let user = try authenticate(request)
+        let order = try ownedOrder(rawId, user)
+        let now = clock()
+        guard DemoOrderTimeline.status(of: order, now: now) == .completed else {
+            throw DemoError(status: 409, code: "review_unavailable", message: "Оценить мероприятие можно после завершения заказа")
+        }
+        let input = try DemoFeedback.parseReview(request.json)
+        let key = String(order.id)
+        if var review = state.reviews[key] {
+            guard now < review.createdAt.addingTimeInterval(DemoFeedback.reviewEditWindow) else {
+                throw DemoError(status: 409, code: "review_locked", message: "Отзыв можно изменить в течение 7 дней")
+            }
+            review.rating = input.rating
+            review.text = input.text
+            review.updatedAt = now
+            state.reviews[key] = review
+            persist()
+            return DemoJSON.ok(DemoJSON.object(DemoFeedback.present(review, now: now)))
+        }
+        let review = DemoReview(orderId: order.id, rating: input.rating, text: input.text, createdAt: now, updatedAt: nil)
+        state.reviews[key] = review
+        persist()
+        return DemoJSON.ok(DemoJSON.object(DemoFeedback.present(review, now: now)), status: 201)
+    }
+
+    private func submitClaim(_ rawId: String, _ request: DemoRequest) throws -> DemoResponse {
+        let user = try authenticate(request)
+        let order = try ownedOrder(rawId, user)
+        let now = clock()
+        guard DemoFeedback.canClaim(order: order, status: DemoOrderTimeline.status(of: order, now: now), now: now) else {
+            throw DemoError(
+                status: 409, code: "claim_unavailable",
+                message: "Претензию можно оставить с начала мероприятия и в течение 14 дней после завершения"
+            )
+        }
+        let draft = try DemoFeedback.parseClaim(request.json)
+        let openCount = state.claims.filter { $0.orderId == order.id && DemoFeedback.status(of: $0, now: now).isOpen }.count
+        guard openCount < DemoFeedback.maxOpenClaims else {
+            throw DemoError(status: 409, code: "claim_limit", message: "По заказу уже есть открытые претензии — менеджер с ними работает")
+        }
+        let claim = DemoClaim(
+            id: state.nextClaimId, orderId: order.id, userId: user.id, category: draft.category,
+            description: draft.description, contactPreference: draft.contactPreference, photos: draft.photos, createdAt: now
+        )
+        state.nextClaimId += 1
+        state.claims.append(claim)
+        persist()
+        return DemoJSON.ok(DemoJSON.object(DemoFeedback.present(claim, orderNumber: order.number, now: now)), status: 201)
     }
 
     /// Повтор с тем же Idempotency-Key возвращает ранее созданную заявку того же типа.
@@ -513,7 +660,7 @@ final class DemoBackend: @unchecked Sendable {
         guard kinds.contains(found.kind) else {
             throw DemoError(status: 422, code: "idempotency_key_reused", message: "Ключ Idempotency-Key уже использован для другой заявки")
         }
-        return DemoJSON.ok(DemoJSON.object(DemoOrderTimeline.present(found, now: clock())), status: 201)
+        return DemoJSON.ok(DemoJSON.object(presentOrder(found, now: clock())), status: 201)
     }
 
     private func idempotencyKey(_ request: DemoRequest) throws -> String {

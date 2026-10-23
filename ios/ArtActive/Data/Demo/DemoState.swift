@@ -34,8 +34,35 @@ struct DemoOrder: Codable, Sendable {
     let comment: String?
     let subject: String?
     let lines: [OrderLine]
+    /// Итог к оплате (после скидки постоянного клиента).
     let total: Int
     let hasOnRequest: Bool
+    // Необязательные — старый файл состояния без них читается (decodeIfPresent синтезированного Codable).
+    /// Сумма позиций до скидки (только если скидка была).
+    var subtotal: Int?
+    /// Скидка постоянного клиента на момент оформления, %.
+    var discountPercent: Int?
+}
+
+/// Отзыв клиента о мероприятии (один на заказ, правка — 7 дней).
+struct DemoReview: Codable, Sendable {
+    let orderId: Int
+    var rating: Int
+    var text: String?
+    let createdAt: Date
+    var updatedAt: Date?
+}
+
+/// Претензия «Что-то пошло не так»: статус вычисляется по времени (симуляция менеджера).
+struct DemoClaim: Codable, Sendable {
+    let id: Int
+    let orderId: Int
+    let userId: Int
+    let category: ClaimCategory
+    let description: String
+    let contactPreference: ContactPreference
+    let photos: [ClaimPhoto]
+    let createdAt: Date
 }
 
 /// Всё, что демо-бэкенд хранит на телефоне (Application Support/demo-backend.json).
@@ -47,6 +74,32 @@ struct DemoState: Codable, Sendable {
     var orders: [DemoOrder] = []
     var nextUserId = 1
     var nextOrderId = 1
+    /// Отзывы по id заказа (строкой — ключ JSON).
+    var reviews: [String: DemoReview] = [:]
+    var claims: [DemoClaim] = []
+    var nextClaimId = 1
+
+    enum CodingKeys: String, CodingKey {
+        case users, sessions, carts, favorites, orders, nextUserId, nextOrderId, reviews, claims, nextClaimId
+    }
+}
+
+extension DemoState {
+    /// Файл, сохранённый прошлой версией приложения (без отзывов и претензий), читается без потерь.
+    init(from decoder: Decoder) throws {
+        self.init()
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        users = try container.decodeIfPresent([DemoUser].self, forKey: .users) ?? []
+        sessions = try container.decodeIfPresent([DemoSession].self, forKey: .sessions) ?? []
+        carts = try container.decodeIfPresent([String: [CartItemInput]].self, forKey: .carts) ?? [:]
+        favorites = try container.decodeIfPresent([String: [Int]].self, forKey: .favorites) ?? [:]
+        orders = try container.decodeIfPresent([DemoOrder].self, forKey: .orders) ?? []
+        nextUserId = try container.decodeIfPresent(Int.self, forKey: .nextUserId) ?? 1
+        nextOrderId = try container.decodeIfPresent(Int.self, forKey: .nextOrderId) ?? 1
+        reviews = try container.decodeIfPresent([String: DemoReview].self, forKey: .reviews) ?? [:]
+        claims = try container.decodeIfPresent([DemoClaim].self, forKey: .claims) ?? []
+        nextClaimId = try container.decodeIfPresent(Int.self, forKey: .nextClaimId) ?? 1
+    }
 }
 
 /// Чтение и запись состояния (атомарно, только из-под блокировки бэкенда).

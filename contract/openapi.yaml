@@ -23,6 +23,8 @@ tags:
   - name: me
   - name: orders
   - name: manager
+  - name: driver
+    description: Приложение водителя — точки машины по токену заказа
   - name: info
   - name: content
     description: «Акции» и кейсы («Примеры работ»)
@@ -136,6 +138,8 @@ paths:
     post:
       tags: [cart]
       summary: Пересчитать корзину на сервере (гость и авторизованный)
+      description: Bearer-токен необязателен; с ним в расчёт входит скидка постоянного клиента (`Quote.discount`).
+      security: [ {}, { bearer: [] } ]
       requestBody: { $ref: '#/components/requestBodies/CartItems' }
       responses:
         '200': { $ref: '#/components/responses/Quote' }
@@ -400,6 +404,259 @@ paths:
       responses:
         '200': { $ref: '#/components/responses/Order' }
         '409': { $ref: '#/components/responses/Error' }
+
+  # --- Личный кабинет: состав, машина, отзыв, претензия, документы, скидка ---
+
+  /v1/orders/{id}/composition:
+    get:
+      tags: [orders]
+      security: [ { bearer: [] } ]
+      summary: Состав заказа по разделам (из «Программы КП», от менеджера или из позиций корзины)
+      description: |
+        Источники по приоритету: «Программа КП» (если подключена и у заказа есть номер сделки) →
+        состав, приложенный менеджером → позиции корзины заказа (`source: cart`). Заявка без корзины
+        и без КП — `source: none`, `sections: []`.
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/Composition' }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /v1/orders/{id}/vehicle:
+    get:
+      tags: [orders]
+      security: [ { bearer: [] } ]
+      summary: Где машина с заказом (только пока статус «В пути»)
+      description: |
+        Последняя достоверная точка от телефона водителя или GPS-трекера. Нет точки — `status: unknown`
+        без координат. Точка старше 10 минут — `status: unknown` с последними координатами.
+        Клиент опрашивает раз в ~15 с, пока экран открыт.
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/Vehicle' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { description: 'tracking_unavailable — заказ не в пути', $ref: '#/components/responses/Error' }
+
+  /v1/orders/{id}/review:
+    post:
+      tags: [orders]
+      security: [ { bearer: [] } ]
+      summary: Оценка мероприятия (после «Завершён»); один отзыв на заказ, править можно 7 дней
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReviewInput' }
+      responses:
+        '200': { description: 'Отзыв изменён', $ref: '#/components/responses/Review' }
+        '201': { description: 'Отзыв создан', $ref: '#/components/responses/Review' }
+        '409': { description: 'review_unavailable — заказ не завершён; review_locked — прошло 7 дней', $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+
+  /v1/orders/{id}/claims:
+    get:
+      tags: [orders]
+      security: [ { bearer: [] } ]
+      summary: Претензии по заказу
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/ClaimList' }
+    post:
+      tags: [orders]
+      security: [ { bearer: [] } ]
+      summary: «Что-то пошло не так» — претензия (с «Мероприятие идёт» до 14 дней после «Завершён»)
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClaimInput' }
+      responses:
+        '201': { $ref: '#/components/responses/Claim' }
+        '409': { description: 'claim_unavailable — вне окна; claim_limit — уже 3 открытые претензии', $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '429': { $ref: '#/components/responses/Error' }
+
+  /v1/orders/{id}/documents:
+    get:
+      tags: [orders]
+      security: [ { bearer: [] } ]
+      summary: Документы заказа (договор, акты, счета, КП) из CRM, Вызов Чата и от менеджера
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/DocumentList' }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /v1/me/loyalty:
+    get:
+      tags: [me]
+      security: [ { bearer: [] } ]
+      summary: Скидка постоянного клиента — уровень по сумме завершённых заказов
+      responses:
+        '200': { $ref: '#/components/responses/Loyalty' }
+
+  /v1/driver/orders/{id}/location:
+    post:
+      tags: [driver]
+      summary: Точка от телефона водителя (токен водителя по заказу, выдаёт менеджер)
+      description: |
+        `Authorization: Bearer <токен водителя>`. Сервер отбрасывает подозрительные точки
+        (точность хуже 500 м, скачок быстрее 150 км/ч, вне Москвы и области, известные точки
+        GPS-подмены) — ответ 200 с `accepted: false` и причиной, хранится последняя достоверная точка.
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DriverLocationInput' }
+      responses:
+        '200': { $ref: '#/components/responses/DriverLocationResult' }
+        '401': { $ref: '#/components/responses/Error' }
+        '409': { description: 'tracking_closed — заказ уже не едет', $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+
+  /v1/manager/orders/{id}/composition:
+    put:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      summary: Приложить / заменить состав заказа (JSON из «Программы КП»); версия растёт
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CompositionInput' }
+      responses:
+        '200': { $ref: '#/components/responses/Composition' }
+        '422': { $ref: '#/components/responses/Error' }
+    delete:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      summary: Убрать приложенный состав (клиент снова видит КП или позиции корзины)
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '204': { description: Удалено }
+
+  /v1/manager/orders/{id}/documents:
+    post:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      summary: Приложить ссылку на документ
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DocumentInput' }
+      responses:
+        '201': { $ref: '#/components/responses/Document' }
+        '422': { $ref: '#/components/responses/Error' }
+
+  /v1/manager/orders/{id}/documents/{docId}:
+    delete:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      summary: Убрать документ, приложенный менеджером (id вида `m-12`)
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+        - { name: docId, in: path, required: true, schema: { type: string, pattern: '^m-\d{1,10}$' } }
+      responses:
+        '204': { description: Удалено }
+        '404': { $ref: '#/components/responses/Error' }
+
+  /v1/manager/orders/{id}/driver:
+    post:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      summary: Назначить машину и выдать токен водителя (повторный вызов отзывает прежний токен)
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DriverAssignmentInput' }
+      responses:
+        '201': { $ref: '#/components/responses/DriverAssignment' }
+
+  /v1/manager/orders/{id}/links:
+    put:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      summary: Связать заказ со сделкой CRM / «Программы КП» и мероприятием Вызов Чата
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OrderLinks' }
+      responses:
+        '200': { $ref: '#/components/responses/OrderLinks' }
+        '422': { $ref: '#/components/responses/Error' }
+
+  /v1/manager/claims:
+    get:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      summary: Претензии клиентов
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/ClaimStatus' } }
+        - { $ref: '#/components/parameters/Page' }
+        - { $ref: '#/components/parameters/Limit' }
+      responses:
+        '200': { $ref: '#/components/responses/ClaimList' }
+
+  /v1/manager/claims/{id}:
+    patch:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      summary: Принять / решить / отклонить претензию
+      description: |
+        submitted → accepted | rejected; accepted → resolved. При accepted клиенту выдаётся ссылка на
+        чат «Жалобы» в Вызов Чате: `chatUrl` из запроса или от интеграции Вызов Чата
+        (по умолчанию — VYZOVCHAT_BASE_URL).
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [accepted, resolved, rejected] }
+                comment: { type: string, maxLength: 1000, description: 'Видит клиент' }
+                chatUrl: { type: string, format: uri, description: 'https-ссылка на чат (иначе — от интеграции)' }
+      responses:
+        '200': { $ref: '#/components/responses/Claim' }
+        '409': { $ref: '#/components/responses/Error' }
+
+  /v1/manager/users/{id}/loyalty:
+    get:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/Loyalty' }
+        '404': { $ref: '#/components/responses/Error' }
+    put:
+      tags: [manager]
+      security: [ { bearer: [] } ]
+      summary: Персональная скидка клиента (перекрывает уровень); percent = null — снять
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [percent]
+              properties:
+                percent: { type: [integer, 'null'], minimum: 0, maximum: 50 }
+                note: { type: string, maxLength: 200 }
+      responses:
+        '200': { $ref: '#/components/responses/Loyalty' }
+        '404': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
 
   /v1/info:
     get:
@@ -841,11 +1098,29 @@ components:
     Quote:
       type: object
       required: [lines, total]
+      description: |
+        Без скидки `total` = Σ total доступных строк, `subtotal` и `discount` отсутствуют.
+        Со скидкой постоянного клиента: `subtotal` = Σ строк, `total` = subtotal − discount.amount.
+        Цены строк скидка не меняет (векторы pricing-vectors.json те же).
       properties:
         lines: { type: array, items: { $ref: '#/components/schemas/QuoteLine' } }
+        subtotal: { $ref: '#/components/schemas/Money' }
+        discount: { $ref: '#/components/schemas/Discount' }
         total: { $ref: '#/components/schemas/Money' }
         hasOnRequest: { type: boolean }
         count: { type: integer }
+
+    Discount:
+      type: object
+      required: [kind, title, amount]
+      description: |
+        Скидка к сумме позиций. Скидка постоянного клиента: amount = floor(subtotal × percent / 100 + 0.5)
+        (целые рубли, половина — вверх), считается после итогов строк.
+      properties:
+        kind: { type: string, enum: [loyalty, promo, manual] }
+        title: { type: string, example: 'Скидка постоянного клиента −5%' }
+        percent: { type: integer, minimum: 0, maximum: 100 }
+        amount: { $ref: '#/components/schemas/Money' }
 
     User:
       type: object
@@ -965,10 +1240,286 @@ components:
             complectId: { type: integer }
             venueId: { type: integer }
         lines: { type: array, items: { $ref: '#/components/schemas/OrderLine' } }
-        total: { type: integer }
+        subtotal: { type: integer, description: 'Сумма позиций до скидки (есть, только если была скидка)' }
+        discount: { $ref: '#/components/schemas/Discount' }
+        total: { type: integer, description: 'Итог к оплате (после скидки; менеджер может переопределить)' }
         hasOnRequest: { type: boolean }
         canCancel: { type: boolean }
         history: { type: array, items: { $ref: '#/components/schemas/StatusEvent' } }
+        userId: { type: integer }
+        tracking: { type: boolean, description: 'Доступно GET /v1/orders/{id}/vehicle (статус «В пути»)' }
+        canReview: { type: boolean, description: 'Можно оставить или изменить отзыв сейчас' }
+        review: { $ref: '#/components/schemas/OrderReview' }
+        canClaim: { type: boolean, description: 'Доступна кнопка «Что-то пошло не так?»' }
+        claims: { type: array, items: { $ref: '#/components/schemas/OrderClaim' } }
+
+    OrderComposition:
+      type: object
+      required: [source, version, sections, subtotal, total]
+      description: |
+        Состав заказа независимо от корзины: разделы (Мебель, Кейтеринг, Персонал, Логистика…) со
+        строками и итогами. Версионируется: номер и дата КП, `version` растёт при каждой замене.
+      properties:
+        source: { type: string, enum: [kp, manager, cart, none] }
+        kpNumber: { type: string, example: 'КП-2026-0417' }
+        kpDate: { type: string, format: date }
+        version: { type: integer, minimum: 1 }
+        updatedAt: { type: string, format: date-time }
+        title: { type: string }
+        sections: { type: array, items: { $ref: '#/components/schemas/CompositionSection' } }
+        subtotal: { $ref: '#/components/schemas/Money' }
+        discounts: { type: array, items: { $ref: '#/components/schemas/Discount' } }
+        delivery: { $ref: '#/components/schemas/Money', description: 'Нет поля — стоимость доставки рассчитает менеджер' }
+        deliveryNote: { type: string }
+        total: { $ref: '#/components/schemas/Money' }
+        vatNote: { type: string, example: 'Без НДС (УСН)' }
+        hasOnRequest: { type: boolean }
+
+    CompositionSection:
+      type: object
+      required: [id, title, lines, subtotal]
+      properties:
+        id: { type: string }
+        title: { type: string, example: Мебель }
+        lines: { type: array, items: { $ref: '#/components/schemas/CompositionLine' } }
+        subtotal: { $ref: '#/components/schemas/Money' }
+
+    CompositionLine:
+      type: object
+      required: [name, qty, unit, price, sum]
+      properties:
+        name: { type: string }
+        art: { type: string }
+        qty: { type: number, minimum: 0 }
+        unit: { type: string, example: шт }
+        days: { type: integer, minimum: 1, description: 'Срок аренды, дней' }
+        price: { $ref: '#/components/schemas/Money' }
+        sum: { $ref: '#/components/schemas/Money' }
+        note: { type: string }
+        onRequest: { type: boolean }
+
+    CompositionInput:
+      type: object
+      required: [sections]
+      description: |
+        Состав от менеджера. `sum` строки не указан — price × qty × (days ?? 1); итоги разделов и
+        `subtotal` сервер считает сам; `total` не указан — subtotal − Σ discounts + delivery.
+        До 20 разделов и 200 строк.
+      properties:
+        kpNumber: { type: string, maxLength: 50 }
+        kpDate: { type: string, format: date }
+        title: { type: string, maxLength: 200 }
+        sections:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            type: object
+            required: [title, lines]
+            properties:
+              title: { type: string, maxLength: 100 }
+              lines:
+                type: array
+                minItems: 1
+                items:
+                  type: object
+                  required: [name, qty, price]
+                  properties:
+                    name: { type: string, maxLength: 300 }
+                    art: { type: string, maxLength: 30 }
+                    qty: { type: number, minimum: 0, maximum: 100000 }
+                    unit: { type: string, maxLength: 20, default: шт }
+                    days: { type: integer, minimum: 1, maximum: 365 }
+                    price: { $ref: '#/components/schemas/Money' }
+                    sum: { $ref: '#/components/schemas/Money' }
+                    note: { type: string, maxLength: 300 }
+        discounts:
+          type: array
+          maxItems: 5
+          items:
+            type: object
+            required: [title, amount]
+            properties:
+              kind: { type: string, enum: [loyalty, promo, manual], default: manual }
+              title: { type: string, maxLength: 100 }
+              percent: { type: integer, minimum: 0, maximum: 100 }
+              amount: { $ref: '#/components/schemas/Money' }
+        delivery: { $ref: '#/components/schemas/Money' }
+        deliveryNote: { type: string, maxLength: 200 }
+        total: { $ref: '#/components/schemas/Money' }
+        vatNote: { type: string, maxLength: 200 }
+
+    VehicleLocation:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [enRoute, arrived, unknown] }
+        lat: { type: number }
+        lng: { type: number }
+        accuracy: { type: number, description: 'Радиус точности, м' }
+        heading: { type: number, description: 'Курс, градусы 0–359' }
+        updatedAt: { type: string, format: date-time, description: 'Время точки' }
+        eta: { type: string, format: date-time, description: 'Ожидаемое прибытие' }
+        source: { type: string, enum: [driver, tracker] }
+        vehicle: { type: string, example: 'Газель · А123ВС 777' }
+        driverName: { type: string }
+
+    DriverLocationInput:
+      type: object
+      required: [lat, lng, accuracy]
+      properties:
+        lat: { type: number, minimum: -90, maximum: 90 }
+        lng: { type: number, minimum: -180, maximum: 180 }
+        accuracy: { type: number, exclusiveMinimum: 0, description: 'м' }
+        heading: { type: number, minimum: 0, maximum: 360 }
+        speed: { type: number, minimum: 0, description: 'м/с, справочно' }
+        recordedAt: { type: string, format: date-time, description: 'Время фикса на телефоне; нет — время приёма' }
+        etaMinutes: { type: integer, minimum: 0, maximum: 1440, description: 'Оценка навигатора' }
+        arrived: { type: boolean }
+
+    DriverLocationResult:
+      type: object
+      required: [accepted]
+      properties:
+        accepted: { type: boolean }
+        reason:
+          type: string
+          enum: [low_accuracy, out_of_region, spoof_point, implausible_speed, stale, clock_skew]
+
+    DriverAssignmentInput:
+      type: object
+      properties:
+        driverName: { type: string, maxLength: 100 }
+        vehicle: { type: string, maxLength: 100, example: 'Газель · А123ВС 777' }
+        trackerDeviceId: { type: string, maxLength: 64, description: 'Id устройства в Wialon/Traccar (если подключён)' }
+
+    DriverAssignment:
+      type: object
+      required: [token, expiresAt, locationPath]
+      properties:
+        token: { type: string, description: 'Показывается один раз; на сервере хранится хеш' }
+        expiresAt: { type: string, format: date-time }
+        locationPath: { type: string, example: '/v1/driver/orders/12/location' }
+
+    OrderLinks:
+      type: object
+      properties:
+        crmDealId: { type: [string, 'null'], maxLength: 50, description: 'Номер сделки CRM / «Программы КП»' }
+        vyzovchatEventId: { type: [integer, 'null'], description: 'Мероприятие в Вызов Чате' }
+
+    ReviewInput:
+      type: object
+      required: [rating]
+      properties:
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        text: { type: string, maxLength: 2000 }
+
+    OrderReview:
+      type: object
+      required: [rating, createdAt]
+      properties:
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        text: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        editableUntil: { type: string, format: date-time }
+        canEdit: { type: boolean }
+
+    ClaimStatus:
+      type: string
+      enum: [submitted, accepted, resolved, rejected]
+      description: submitted — «Отправлена», accepted — «Принята, открыт чат», resolved — «Решена», rejected — «Отклонена»
+
+    ClaimInput:
+      type: object
+      required: [category, description]
+      properties:
+        category: { type: string, enum: [late, quality, incomplete, staff, other], description: 'опоздание, качество, комплектность, персонал, другое' }
+        description: { type: string, minLength: 10, maxLength: 2000 }
+        contactPreference: { type: string, enum: [call, messenger, email], default: call }
+        photos:
+          type: array
+          maxItems: 10
+          description: 'Ссылки https на уже загруженные фото (загрузка — позже)'
+          items: { type: object, required: [url], properties: { url: { type: string, format: uri } } }
+
+    OrderClaim:
+      type: object
+      required: [id, orderId, category, description, status, createdAt]
+      properties:
+        id: { type: integer }
+        orderId: { type: integer }
+        orderNumber: { type: string }
+        category: { type: string, enum: [late, quality, incomplete, staff, other] }
+        categoryLabel: { type: string }
+        description: { type: string }
+        contactPreference: { type: string, enum: [call, messenger, email] }
+        photos: { type: array, items: { type: object, properties: { url: { type: string, format: uri } } } }
+        status: { $ref: '#/components/schemas/ClaimStatus' }
+        statusLabel: { type: string }
+        managerComment: { type: string }
+        chatUrl: { type: string, format: uri, description: 'Чат «Жалобы» в Вызов Чате (https)' }
+        chatAppUrl: { type: string, description: 'Та же ссылка для приложения: vyzovchat://join/<token>' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    OrderDocument:
+      type: object
+      required: [id, title, kind, source, url]
+      properties:
+        id: { type: string, example: m-12 }
+        title: { type: string }
+        kind: { type: string, enum: [contract, act, invoice, kp, other] }
+        source: { type: string, enum: [crm, vyzovchat, manager] }
+        date: { type: string, format: date }
+        url: { type: string, format: uri }
+        size: { type: integer, description: 'Байт' }
+        mime: { type: string, example: application/pdf }
+
+    DocumentInput:
+      type: object
+      required: [title, kind, url]
+      properties:
+        title: { type: string, maxLength: 200 }
+        kind: { type: string, enum: [contract, act, invoice, kp, other] }
+        url: { type: string, format: uri, maxLength: 1000, description: 'Только https' }
+        date: { type: string, format: date }
+        size: { type: integer, minimum: 0 }
+        mime: { type: string, maxLength: 100 }
+
+    LoyaltyTier:
+      type: object
+      required: [threshold, percent]
+      properties:
+        level: { type: integer, minimum: 1 }
+        threshold: { $ref: '#/components/schemas/Money' }
+        percent: { type: integer }
+
+    Loyalty:
+      type: object
+      required: [percent, tier, spent, tiers]
+      description: |
+        Уровень — по сумме `total` всех завершённых заказов (за всё время). Пороги настраиваются
+        (LOYALTY_TIERS). Персональная скидка менеджера (`override`) важнее уровня.
+      properties:
+        percent: { type: integer, description: 'Действующая скидка' }
+        source: { type: string, enum: [tier, override] }
+        tier: { $ref: '#/components/schemas/LoyaltyTier' }
+        spent: { $ref: '#/components/schemas/Money' }
+        completedOrders: { type: integer }
+        nextTier:
+          type: object
+          properties:
+            level: { type: integer }
+            percent: { type: integer }
+            threshold: { $ref: '#/components/schemas/Money' }
+            remaining: { $ref: '#/components/schemas/Money' }
+        tiers: { type: array, items: { $ref: '#/components/schemas/LoyaltyTier' } }
+        override:
+          type: object
+          properties:
+            percent: { type: integer }
+            note: { type: string }
 
     VenueSummary:
       type: object
@@ -1169,6 +1720,39 @@ components:
     OrderList:
       description: OK
       content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: array, items: { $ref: '#/components/schemas/Order' } } } } ] } } }
+    Composition:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/OrderComposition' } } } ] } } }
+    Vehicle:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/VehicleLocation' } } } ] } } }
+    DriverLocationResult:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/DriverLocationResult' } } } ] } } }
+    DriverAssignment:
+      description: Создано
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/DriverAssignment' } } } ] } } }
+    OrderLinks:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/OrderLinks' } } } ] } } }
+    Review:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/OrderReview' } } } ] } } }
+    Claim:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/OrderClaim' } } } ] } } }
+    ClaimList:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: array, items: { $ref: '#/components/schemas/OrderClaim' } } } } ] } } }
+    Document:
+      description: Создано
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/OrderDocument' } } } ] } } }
+    DocumentList:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { type: array, items: { $ref: '#/components/schemas/OrderDocument' } } } } ] } } }
+    Loyalty:
+      description: OK
+      content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/Loyalty' } } } ] } } }
     Info:
       description: OK
       content: { application/json: { schema: { allOf: [ { $ref: '#/components/schemas/Envelope' }, { properties: { data: { $ref: '#/components/schemas/Info' } } } ] } } }

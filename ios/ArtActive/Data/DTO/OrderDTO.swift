@@ -123,6 +123,17 @@ struct Order: Codable, Hashable, Identifiable, Sendable {
     let hasOnRequest: Bool?
     let canCancel: Bool?
     let history: [StatusEvent]
+    // Личный кабинет (необязательные поля контракта; старый сервер их не присылает).
+    var userId: Int?
+    /// Сумма позиций до скидки (есть, только если была скидка).
+    var subtotal: Int?
+    var discount: PriceDiscount?
+    /// Доступна машина на карте (`GET /v1/orders/{id}/vehicle`).
+    var tracking: Bool?
+    var canReview: Bool?
+    var review: OrderReview?
+    var canClaim: Bool?
+    var claims: [OrderClaim]?
 
     /// Позиции, которые можно положить в корзину повторно.
     var repeatableItems: [CartItemInput] { lines.compactMap(\.input) }

@@ -50,6 +50,7 @@
 	<array>
 		<string>tg</string>
 		<string>whatsapp</string>
+		<string>vyzovchat</string>
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>

@@ -8,11 +8,15 @@ use App\Http\Controller\AuthController;
 use App\Http\Controller\CartController;
 use App\Http\Controller\CatalogController;
 use App\Http\Controller\ContentController;
+use App\Http\Controller\DriverController;
+use App\Http\Controller\ManagerCabinetController;
 use App\Http\Controller\MeController;
+use App\Http\Controller\OrderCabinetController;
 use App\Http\Controller\OrderController;
 use App\Http\Controller\VenueController;
 use App\Http\HttpError;
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\OptionalAuthenticate;
 use App\Http\Middleware\Throttle;
 use App\Http\Request;
 use App\Http\Response;
@@ -86,8 +90,9 @@ final class Kernel
         $r->add('GET', '/v1/venues/filters', $venues->filters(...));
         $r->add('GET', '/v1/venues/{id}', $venues->show(...));
 
-        $cart = new CartController($c->quotes, $c->carts);
-        $r->add('POST', '/v1/cart/quote', $cart->quote(...), $heavy('quote'));
+        $optionalAuth = new OptionalAuthenticate($c->sessions, $c->users, $c->managers);
+        $cart = new CartController($c->quotes, $c->carts, $c->loyalty);
+        $r->add('POST', '/v1/cart/quote', $cart->quote(...), [...$heavy('quote'), $optionalAuth]);
         $r->add('GET', '/v1/cart', $cart->get(...), $auth);
         $r->add('PUT', '/v1/cart', $cart->put(...), $auth);
 
@@ -114,6 +119,31 @@ final class Kernel
         $r->add('GET', '/v1/manager/orders', $orders->managerList(...), $manager);
         $r->add('GET', '/v1/manager/orders/{id}', $orders->show(...), $manager);
         $r->add('PATCH', '/v1/manager/orders/{id}', $orders->managerUpdate(...), $manager);
+
+        // Личный кабинет заказа
+        $cabinet = new OrderCabinetController($c->orders, $c->composition, $c->vehicles, $c->reviews, $c->claims, $c->documents, $c->loyalty);
+        $r->add('GET', '/v1/orders/{id}/composition', $cabinet->composition(...), $auth);
+        $r->add('GET', '/v1/orders/{id}/vehicle', $cabinet->vehicle(...), $auth);
+        $r->add('POST', '/v1/orders/{id}/review', $cabinet->review(...), $auth);
+        $r->add('GET', '/v1/orders/{id}/claims', $cabinet->claims(...), $auth);
+        $r->add('POST', '/v1/orders/{id}/claims', $cabinet->createClaim(...), $auth);
+        $r->add('GET', '/v1/orders/{id}/documents', $cabinet->documents(...), $auth);
+        $r->add('GET', '/v1/me/loyalty', $cabinet->loyalty(...), $auth);
+
+        $driver = new DriverController($c->vehicles);
+        $r->add('POST', '/v1/driver/orders/{id}/location', $driver->location(...), $heavy('driver'));
+
+        $mc = new ManagerCabinetController($c->orders, $c->composition, $c->managerDocuments, $c->vehicles, $c->claims, $c->loyalty);
+        $r->add('PUT', '/v1/manager/orders/{id}/composition', $mc->putComposition(...), $manager);
+        $r->add('DELETE', '/v1/manager/orders/{id}/composition', $mc->deleteComposition(...), $manager);
+        $r->add('POST', '/v1/manager/orders/{id}/documents', $mc->addDocument(...), $manager);
+        $r->add('DELETE', '/v1/manager/orders/{id}/documents/{docId}', $mc->deleteDocument(...), $manager);
+        $r->add('POST', '/v1/manager/orders/{id}/driver', $mc->assignDriver(...), $manager);
+        $r->add('PUT', '/v1/manager/orders/{id}/links', $mc->links(...), $manager);
+        $r->add('GET', '/v1/manager/claims', $mc->claims(...), $manager);
+        $r->add('PATCH', '/v1/manager/claims/{id}', $mc->updateClaim(...), $manager);
+        $r->add('GET', '/v1/manager/users/{id}/loyalty', $mc->loyalty(...), $manager);
+        $r->add('PUT', '/v1/manager/users/{id}/loyalty', $mc->setLoyalty(...), $manager);
 
         return $r;
     }

@@ -76,6 +76,23 @@ double, напр. 64000 × 1.11719). Применяется к `unit` после
 Строка-опция (шаблоны simple/showcase, orderMode=toggle): без `complectId`, только допы — цена = Σ допов × qty, обязательные допы не добавляются (на сайте это add-cart с item_type=option).
 Награда `every_nth` в данных сайта не встречена — до получения схемы БД считается как «без награды».
 
+### Скидка постоянного клиента (после итогов строк)
+
+Строки считаются формулой выше без изменений (векторы `pricing-vectors.json` те же). Скидка — к сумме
+доступных строк, только у вошедшего пользователя:
+
+```
+subtotal = Σ total доступных строк
+percent  = override менеджера ?? уровень(Σ total всех заказов пользователя в статусе completed)
+discount = floor(subtotal · percent / 100 + 0.5)        целые рубли, половина — вверх
+total    = subtotal − discount
+```
+Без скидки (`percent = 0` или гость) в `Quote` нет `subtotal`/`discount`, `total` прежний. Уровни по
+умолчанию: 0 → 0 %, 50 000 → 2 %, 150 000 → 3 %, 300 000 → 5 %, 500 000 → 7 %, 1 000 000 → 10 %,
+2 000 000 → 15 %, 5 000 000 → 20 %, 10 000 000 → 25 % (`LOYALTY_TIERS`). Заказ хранит `subtotal`,
+`discount_percent`, `discount_amount` на момент оформления. Демо-режим iOS считает так же
+(`DemoLoyalty`, плюс демо-«история на сайте» 120 000 ₽).
+
 API не отдаёт `null`: ключ с пустым значением опускается. Все поля, не перечисленные в `required`
 схемы контракта, клиенты обязаны считать необязательными.
 
@@ -88,3 +105,7 @@ API не отдаёт `null`: ключ с пустым значением опу
 ## Свои таблицы приложения
 `app_users`, `app_auth_codes`, `app_sessions`, `app_orders`, `app_order_items`, `app_order_status_log`,
 `app_favorites`, `app_carts`, `app_devices` — `api/migrations/{mysql,sqlite}/`.
+Личный кабинет заказа (`002_order_cabinet.sql`): `app_order_compositions` (состав от менеджера, версия),
+`app_order_vehicles` (токен водителя — хеш, последняя достоверная точка), `app_order_reviews`,
+`app_order_claims`, `app_order_documents`; в `app_orders` — скидка и связи `crm_deal_id`,
+`vyzovchat_event_id`; в `app_users` — персональная скидка `loyalty_override_*`.

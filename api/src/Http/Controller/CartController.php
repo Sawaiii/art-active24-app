@@ -9,6 +9,7 @@ use App\Cart\QuoteService;
 use App\Http\HttpError;
 use App\Http\Request;
 use App\Http\Response;
+use App\Loyalty\LoyaltyService;
 use App\Pricing\CartItem;
 
 final class CartController
@@ -18,18 +19,19 @@ final class CartController
     public function __construct(
         private readonly QuoteService $quotes,
         private readonly CartRepository $carts,
+        private readonly LoyaltyService $loyalty,
     ) {
     }
 
     public function quote(Request $request): Response
     {
-        return Response::ok($this->quotes->quote($this->items($request)));
+        return Response::ok($this->priced($request, $this->items($request)));
     }
 
     public function get(Request $request): Response
     {
         $user = $request->attribute('user');
-        return Response::ok($this->quotes->quote($this->carts->load((int) $user['id'])));
+        return Response::ok($this->priced($request, $this->carts->load((int) $user['id'])));
     }
 
     public function put(Request $request): Response
@@ -37,7 +39,20 @@ final class CartController
         $user = $request->attribute('user');
         $items = $this->merge($this->items($request));
         $this->carts->save((int) $user['id'], $items);
-        return Response::ok($this->quotes->quote($items));
+        return Response::ok($this->priced($request, $items));
+    }
+
+    /**
+     * Расчёт + скидка постоянного клиента, если пользователь вошёл (гостю — без скидки).
+     *
+     * @param list<CartItem> $items
+     * @return array<string, mixed> Quote
+     */
+    private function priced(Request $request, array $items): array
+    {
+        $quote = $this->quotes->quote($items);
+        $user = $request->attribute('user');
+        return $user === null ? $quote : $this->loyalty->applyToQuote($quote, $this->loyalty->percentFor((int) $user['id']));
     }
 
     /** @return list<CartItem> */

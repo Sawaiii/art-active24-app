@@ -10,6 +10,7 @@ struct ProfileView: View {
     @Environment(FavoritesStore.self) private var favorites
     @State private var isSignOutConfirming = false
     @State private var isDemoResetConfirming = false
+    @State private var isLoyaltyPresented = false
 
     var body: some View {
         List {
@@ -17,6 +18,9 @@ struct ProfileView: View {
                 demoSection
             }
             accountSection
+            if auth.isLoggedIn {
+                loyaltySection
+            }
             Section {
                 NavigationLink(value: Route.orders) {
                     row(
@@ -78,6 +82,7 @@ struct ProfileView: View {
             Haptics.play(.refresh)
             await auth.refreshUser()
             await orders.load()
+            if auth.isLoggedIn { await env.loyalty.load() }
         }
         .confirmationDialog(Text("Выйти из аккаунта?"), isPresented: $isSignOutConfirming, titleVisibility: .visible) {
             Button("Выйти", role: .destructive) {
@@ -95,6 +100,12 @@ struct ProfileView: View {
         }
         .task {
             if auth.isLoggedIn, orders.status == .idle { await orders.load() }
+            if auth.isLoggedIn, env.loyalty.status == .idle { await env.loyalty.load() }
+        }
+        .sheet(isPresented: $isLoyaltyPresented) {
+            if let loyalty = env.loyalty.loyalty {
+                LoyaltyLadderSheet(loyalty: loyalty)
+            }
         }
     }
 
@@ -111,6 +122,27 @@ struct ProfileView: View {
                 isDemoResetConfirming = true
             } label: {
                 Label("Сбросить демо-данные", systemImage: "arrow.counterclockwise")
+            }
+        }
+    }
+
+    /// «Скидка постоянного клиента»: процент и прогресс; тап — лестница уровней.
+    @ViewBuilder
+    private var loyaltySection: some View {
+        if let loyalty = env.loyalty.loyalty {
+            Section {
+                Button {
+                    Haptics.play(.selection)
+                    isLoyaltyPresented = true
+                } label: {
+                    LoyaltyCard(loyalty: loyalty)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("profile.loyalty")
+            }
+        } else if env.loyalty.status == .loading || env.loyalty.status == .idle {
+            Section {
+                LoyaltyCardSkeleton()
             }
         }
     }

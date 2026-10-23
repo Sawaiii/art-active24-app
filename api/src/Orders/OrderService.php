@@ -11,6 +11,7 @@ use App\Catalog\CatalogRepository;
 use App\Catalog\VenueRepository;
 use App\Db\Database;
 use App\Http\HttpError;
+use App\Loyalty\LoyaltyService;
 use App\Pricing\CartItem;
 use App\Pricing\PriceCalculator;
 use App\Push\PushSender;
@@ -39,7 +40,42 @@ final class OrderService
         private readonly RateLimiter $limiter,
         private readonly Logger $logger,
         private readonly Clock $clock,
+        private readonly LoyaltyService $loyalty,
     ) {
+    }
+
+    /**
+     * Заказ, доступный пользователю (свой или любой для менеджера), со связями для интеграций.
+     *
+     * @param array<string, mixed> $user
+     * @return array<string, mixed> Order + crmDealId, vyzovchatEventId
+     */
+    public function context(array $user, int $id): array
+    {
+        return $this->get($user, $id) + $this->orders->links($id);
+    }
+
+    /**
+     * Связь заказа со сделкой CRM / «Программы КП» и мероприятием Вызов Чата.
+     *
+     * @param array<string, mixed> $body
+     * @return array{crmDealId: ?string, vyzovchatEventId: ?int}
+     */
+    public function setLinks(int $id, array $body): array
+    {
+        $this->orders->row($id) ?? throw HttpError::notFound('Заказ');
+        $current = $this->orders->links($id);
+        $deal = array_key_exists('crmDealId', $body) ? $body['crmDealId'] : $current['crmDealId'];
+        $event = array_key_exists('vyzovchatEventId', $body) ? $body['vyzovchatEventId'] : $current['vyzovchatEventId'];
+        if ($deal !== null && (!is_string($deal) || !preg_match('/^[\w\-\/.]{1,50}$/u', trim($deal)))) {
+            throw HttpError::validation(['crmDealId' => 'Номер сделки: до 50 букв, цифр, «-», «/», «.»']);
+        }
+        if ($event !== null && (!is_int($event) || $event <= 0)) {
+            throw HttpError::validation(['vyzovchatEventId' => 'Ожидается числовой id мероприятия']);
+        }
+        $deal = is_string($deal) ? trim($deal) : null;
+        $this->orders->setLinks($id, $deal === '' ? null : $deal, $event);
+        return $this->orders->links($id);
     }
 
     /**
@@ -65,6 +101,10 @@ final class OrderService
             $first = reset($unavailable);
             throw new HttpError(409, 'cart_changed', "«{$first['productName']}»: {$first['warning']}. Обновите корзину");
         }
+        // Скидка постоянного клиента — после итогов строк, по уровню на момент оформления.
+        $percent = $this->loyalty->percentFor((int) $user['id']);
+        $quote = $this->loyalty->applyToQuote($quote, $percent);
+        $discount = $quote['discount'] ?? null;
 
         $id = $this->create($user, $idempotencyKey, [
             'kind' => 'cart',
@@ -79,6 +119,9 @@ final class OrderService
             'details_json' => null,
             'total' => min($quote['total'], PriceCalculator::MAX_TOTAL),
             'has_on_request' => $quote['hasOnRequest'] ? 1 : 0,
+            'subtotal' => $discount === null ? null : min((int) $quote['subtotal'], PriceCalculator::MAX_TOTAL),
+            'discount_percent' => $discount === null ? 0 : (int) $discount['percent'],
+            'discount_amount' => $discount === null ? 0 : (int) $discount['amount'],
         ], $quote['lines'], 'Заявка принята. Менеджер свяжется с вами для подтверждения');
 
         $this->carts->clear((int) $user['id']);

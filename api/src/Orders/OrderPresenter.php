@@ -4,15 +4,23 @@ declare(strict_types=1);
 
 namespace App\Orders;
 
+use App\Loyalty\LoyaltyService;
+use App\Orders\Feedback\FeedbackPresenter;
+use App\Orders\Feedback\FeedbackRepository;
+use App\Support\Clock;
 use App\Support\Time;
 
 /**
- * Собирает Order (форма контракта) из строк БД. Списки — пачкой (OrderRepository::load).
+ * Собирает Order (форма контракта) из строк БД. Списки — пачкой (OrderRepository::load + отзывы
+ * и претензии одним запросом на страницу).
  */
 final class OrderPresenter
 {
-    public function __construct(private readonly OrderRepository $orders)
-    {
+    public function __construct(
+        private readonly OrderRepository $orders,
+        private readonly FeedbackRepository $feedback,
+        private readonly Clock $clock,
+    ) {
     }
 
     /** @return array<string, mixed>|null */
@@ -27,9 +35,19 @@ final class OrderPresenter
      */
     public function presentMany(array $ids): array
     {
+        $loaded = $this->orders->load($ids);
+        $loadedIds = array_map(static fn (array $l) => (int) $l['order']['id'], $loaded);
+        $reviews = $this->feedback->reviewsFor($loadedIds);
+        $claims = $this->feedback->claimsFor($loadedIds);
         return array_map(
-            fn (array $loaded) => $this->order($loaded['order'], $loaded['items'], $loaded['history']),
-            $this->orders->load($ids),
+            fn (array $l) => $this->order(
+                $l['order'],
+                $l['items'],
+                $l['history'],
+                $reviews[(int) $l['order']['id']] ?? null,
+                $claims[(int) $l['order']['id']] ?? [],
+            ),
+            $loaded,
         );
     }
 
@@ -37,11 +55,17 @@ final class OrderPresenter
      * @param array<string, mixed> $row
      * @param list<array<string, mixed>> $items
      * @param list<array<string, mixed>> $history
+     * @param array<string, mixed>|null $review
+     * @param list<array<string, mixed>> $claims
      * @return array<string, mixed>
      */
-    private function order(array $row, array $items, array $history): array
+    private function order(array $row, array $items, array $history, ?array $review, array $claims): array
     {
         $status = OrderStatus::from((string) $row['status']);
+        $now = $this->clock->now();
+        $reviewCreatedAt = $review === null ? null : new \DateTimeImmutable((string) $review['created_at'], new \DateTimeZone('UTC'));
+        $discountAmount = (int) ($row['discount_amount'] ?? 0);
+        $discountPercent = (int) ($row['discount_percent'] ?? 0);
         return [
             'id' => (int) $row['id'],
             'number' => (string) $row['number'],
@@ -62,6 +86,13 @@ final class OrderPresenter
             'subject' => $row['subject'],
             'details' => $this->details($row['details_json'] ?? null),
             'lines' => array_map($this->line(...), $items),
+            'subtotal' => $discountAmount > 0 ? (int) $row['subtotal'] : null,
+            'discount' => $discountAmount > 0 ? [
+                'kind' => LoyaltyService::KIND,
+                'title' => LoyaltyService::title($discountPercent),
+                'percent' => $discountPercent,
+                'amount' => $discountAmount,
+            ] : null,
             'total' => (int) $row['total'],
             'hasOnRequest' => (bool) $row['has_on_request'],
             'canCancel' => $status->customerCanCancel(),
@@ -74,7 +105,25 @@ final class OrderPresenter
                     'comment' => $event['comment'],
                 ];
             }, $history),
+            'userId' => (int) $row['user_id'],
+            'tracking' => $status === OrderStatus::Delivering,
+            'canReview' => OrderWindows::canReview($status, $reviewCreatedAt, $now),
+            'review' => $review === null ? null : FeedbackPresenter::review($review, $status, $now),
+            'canClaim' => OrderWindows::canClaim($status, $this->completedAt($history), $now),
+            'claims' => $claims === [] ? null : array_map(FeedbackPresenter::claim(...), $claims),
         ];
+    }
+
+    /** @param list<array<string, mixed>> $history */
+    private function completedAt(array $history): ?\DateTimeImmutable
+    {
+        $at = null;
+        foreach ($history as $event) {
+            if ($event['status'] === OrderStatus::Completed->value) {
+                $at = (string) $event['created_at'];
+            }
+        }
+        return $at === null ? null : new \DateTimeImmutable($at, new \DateTimeZone('UTC'));
     }
 
     /** @return array<string, int|string>|null eventType, guests, productId, complectId, venueId */

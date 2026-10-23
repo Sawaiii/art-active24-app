@@ -90,7 +90,12 @@ struct QuoteLine: Codable, Hashable, Identifiable, Sendable {
 
 struct Quote: Codable, Hashable, Sendable {
     let lines: [QuoteLine]
+    /// Итог к оплате (после скидки постоянного клиента, если она есть).
     let total: Int
     let hasOnRequest: Bool?
     let count: Int?
+    /// Сумма позиций до скидки — только когда есть `discount`.
+    var subtotal: Int?
+    /// «Скидка постоянного клиента −N%» (считает сервер после итогов строк).
+    var discount: PriceDiscount?
 }

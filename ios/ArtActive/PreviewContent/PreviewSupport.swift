@@ -213,6 +213,16 @@ final class PreviewRepositories: CatalogRepository, VenueRepository, ContentRepo
     func unregisterDevice(token: String) async throws {}
     func info() async throws -> InfoPayload { try PreviewFixtures.catalog.info }
 
+    func loyalty() async throws -> Loyalty {
+        let tiers = [(0, 0), (50_000, 2), (150_000, 3), (300_000, 5), (500_000, 7), (1_000_000, 10)]
+            .enumerated().map { LoyaltyTier(level: $0.offset + 1, threshold: $0.element.0, percent: $0.element.1) }
+        return Loyalty(
+            percent: 3, source: .tier, tier: tiers[2], spent: 184_500, completedOrders: 4,
+            nextTier: LoyaltyNextTier(level: 4, percent: 5, threshold: 300_000, remaining: 115_500),
+            tiers: tiers, personal: nil
+        )
+    }
+
     // Orders
     func orders(page: Int) async throws -> Page<Order> {
         let order = try PreviewFixtures.catalog.order
@@ -223,6 +233,56 @@ final class PreviewRepositories: CatalogRepository, VenueRepository, ContentRepo
     func checkout(_ request: CheckoutRequest, idempotencyKey: String) async throws -> Order { try PreviewFixtures.catalog.order }
     func cancel(id: Int) async throws -> Order { try PreviewFixtures.catalog.order }
     func createRequest(_ request: RequestCreate, idempotencyKey: String) async throws -> Order { try PreviewFixtures.catalog.order }
+
+    func composition(orderId: Int) async throws -> OrderComposition {
+        await delay()
+        let furniture = CompositionSection(id: "furniture", title: "Мебель", lines: [
+            CompositionLine(name: "Стол складной Виктория 180 см", art: "07138", qty: 10, unit: "шт", days: 2, price: 924, sum: 9240, note: nil, onRequest: nil),
+            CompositionLine(name: "Стул Кьявари белый", art: "02211", qty: 60, unit: "шт", days: 2, price: 360, sum: 21600, note: "С подушкой", onRequest: nil),
+        ], subtotal: 30840)
+        let staff = CompositionSection(id: "staff", title: "Персонал", lines: [
+            CompositionLine(name: "Официант", art: nil, qty: 4, unit: "чел", days: nil, price: 4500, sum: 18000, note: "6 часов", onRequest: nil),
+        ], subtotal: 18000)
+        return OrderComposition(
+            source: .kp, kpNumber: "КП-2026-0417", kpDate: "2026-10-12", version: 3, updatedAt: Date(), title: nil,
+            sections: [furniture, staff], subtotal: 48840,
+            discounts: [PriceDiscount(kind: .loyalty, title: "Скидка постоянного клиента −3%", percent: 3, amount: 1465)],
+            delivery: 3500, deliveryNote: "Газель 15 м², подъём на этаж", total: 50875, vatNote: "Без НДС (УСН)", hasOnRequest: false
+        )
+    }
+
+    func vehicle(orderId: Int) async throws -> VehicleLocation {
+        VehicleLocation(
+            status: .enRoute, lat: 55.7520, lng: 37.6175, accuracy: 35, heading: 90,
+            updatedAt: Date().addingTimeInterval(-60), eta: Date().addingTimeInterval(18 * 60),
+            source: .driver, vehicle: "Газель · А123ВС 777", driverName: "Сергей"
+        )
+    }
+
+    func submitReview(orderId: Int, _ input: ReviewInput) async throws -> OrderReview {
+        OrderReview(rating: input.rating, text: input.text, createdAt: Date(), updatedAt: nil,
+                    editableUntil: Date().addingTimeInterval(7 * 86_400), canEdit: true)
+    }
+
+    func claims(orderId: Int) async throws -> [OrderClaim] { [] }
+
+    func submitClaim(orderId: Int, _ input: ClaimInput) async throws -> OrderClaim {
+        OrderClaim(
+            id: 1, orderId: orderId, orderNumber: "AA-000001", category: input.category, categoryLabel: input.category.title,
+            description: input.description, contactPreference: input.contactPreference, photos: input.photos,
+            status: .submitted, statusLabel: ClaimStatus.submitted.title, managerComment: nil, chatUrl: nil, chatAppUrl: nil,
+            createdAt: Date(), updatedAt: nil
+        )
+    }
+
+    func documents(orderId: Int) async throws -> [OrderDocument] {
+        [
+            OrderDocument(id: "m-1", title: "Договор аренды № 417", kind: .contract, source: .manager, date: "2026-10-12",
+                          url: "https://www.art-active24.ru/", size: 184_320, mime: "application/pdf"),
+            OrderDocument(id: "vc-act", title: "Акт приёма", kind: .act, source: .vyzovchat, date: "2026-10-20",
+                          url: "https://www.art-active24.ru/", size: nil, mime: "application/pdf"),
+        ]
+    }
 }
 
 extension AppEnvironment {

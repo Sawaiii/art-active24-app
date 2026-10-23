@@ -35,6 +35,11 @@ final class OrderText
         foreach ($order['lines'] ?? [] as $line) {
             $out[] = self::line($line);
         }
+        $discount = $order['discount'] ?? null;
+        if (is_array($discount) && !empty($discount['amount'])) {
+            $out[] = 'Сумма позиций: ' . self::rub((int) ($order['subtotal'] ?? 0));
+            $out[] = $discount['title'] . ': −' . self::rub((int) $discount['amount']);
+        }
         if (!empty($order['lines'])) {
             $out[] = 'Итого (предварительно): ' . self::rub((int) $order['total'])
                 . (!empty($order['hasOnRequest']) ? ' + позиции по запросу' : '');

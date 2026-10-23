@@ -131,6 +131,34 @@ final class OrderRepository
         ];
     }
 
+    /** Момент перехода в «Завершён» (последний в журнале) — от него считаются сроки отзыва и претензии. */
+    public function completedAt(int $orderId): ?\DateTimeImmutable
+    {
+        $at = $this->db->scalar(
+            'SELECT MAX(created_at) FROM app_order_status_log WHERE order_id = ? AND status = ?',
+            [$orderId, OrderStatus::Completed->value],
+        );
+        return $at === null ? null : new \DateTimeImmutable((string) $at, new \DateTimeZone('UTC'));
+    }
+
+    /** @return array{crmDealId: ?string, vyzovchatEventId: ?int} */
+    public function links(int $orderId): array
+    {
+        $row = $this->db->one('SELECT crm_deal_id, vyzovchat_event_id FROM app_orders WHERE id = ?', [$orderId]);
+        return [
+            'crmDealId' => $row['crm_deal_id'] ?? null,
+            'vyzovchatEventId' => isset($row['vyzovchat_event_id']) ? (int) $row['vyzovchat_event_id'] : null,
+        ];
+    }
+
+    public function setLinks(int $orderId, ?string $crmDealId, ?int $vyzovchatEventId): void
+    {
+        $this->db->run(
+            'UPDATE app_orders SET crm_deal_id = ?, vyzovchat_event_id = ?, updated_at = ? WHERE id = ?',
+            [$crmDealId, $vyzovchatEventId, Time::toDb($this->clock->now()), $orderId],
+        );
+    }
+
     /** Символы-шаблоны LIKE в пользовательском запросе ищутся буквально («%» не значит «всё»). */
     private static function escapeLike(string $value): string
     {

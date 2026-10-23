@@ -62,6 +62,8 @@ protocol ProfileRepository: Sendable {
     /// Снять push-токен (до /v1/auth/logout).
     func unregisterDevice(token: String) async throws
     func info() async throws -> InfoPayload
+    /// Скидка постоянного клиента: уровень, прогресс, лестница уровней.
+    func loyalty() async throws -> Loyalty
 }
 
 struct LiveProfileRepository: ProfileRepository {
@@ -98,6 +100,10 @@ struct LiveProfileRepository: ProfileRepository {
     func info() async throws -> InfoPayload {
         try await client.request(.get("/v1/info", cacheable: true))
     }
+
+    func loyalty() async throws -> Loyalty {
+        try await client.request(.get("/v1/me/loyalty", auth: .required))
+    }
 }
 
 // MARK: - Orders
@@ -108,6 +114,15 @@ protocol OrderRepository: Sendable {
     func checkout(_ request: CheckoutRequest, idempotencyKey: String) async throws -> Order
     func cancel(id: Int) async throws -> Order
     func createRequest(_ request: RequestCreate, idempotencyKey: String) async throws -> Order
+    /// Состав заказа по разделам (КП / менеджер / позиции корзины).
+    func composition(orderId: Int) async throws -> OrderComposition
+    /// Где машина (только пока заказ «В пути»; иначе 409 tracking_unavailable).
+    func vehicle(orderId: Int) async throws -> VehicleLocation
+    /// Создать или изменить отзыв (после «Завершён», правка — 7 дней).
+    func submitReview(orderId: Int, _ input: ReviewInput) async throws -> OrderReview
+    func claims(orderId: Int) async throws -> [OrderClaim]
+    func submitClaim(orderId: Int, _ input: ClaimInput) async throws -> OrderClaim
+    func documents(orderId: Int) async throws -> [OrderDocument]
 }
 
 struct LiveOrderRepository: OrderRepository {
@@ -138,5 +153,29 @@ struct LiveOrderRepository: OrderRepository {
         try await client.request(
             try .send(.post, "/v1/requests", body: request, auth: .required, headers: ["Idempotency-Key": idempotencyKey])
         )
+    }
+
+    func composition(orderId: Int) async throws -> OrderComposition {
+        try await client.request(.get("/v1/orders/\(orderId)/composition", auth: .required))
+    }
+
+    func vehicle(orderId: Int) async throws -> VehicleLocation {
+        try await client.request(.get("/v1/orders/\(orderId)/vehicle", auth: .required))
+    }
+
+    func submitReview(orderId: Int, _ input: ReviewInput) async throws -> OrderReview {
+        try await client.request(try .send(.post, "/v1/orders/\(orderId)/review", body: input, auth: .required))
+    }
+
+    func claims(orderId: Int) async throws -> [OrderClaim] {
+        try await client.request(.get("/v1/orders/\(orderId)/claims", auth: .required))
+    }
+
+    func submitClaim(orderId: Int, _ input: ClaimInput) async throws -> OrderClaim {
+        try await client.request(try .send(.post, "/v1/orders/\(orderId)/claims", body: input, auth: .required))
+    }
+
+    func documents(orderId: Int) async throws -> [OrderDocument] {
+        try await client.request(.get("/v1/orders/\(orderId)/documents", auth: .required))
     }
 }

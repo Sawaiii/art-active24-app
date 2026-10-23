@@ -96,6 +96,40 @@ final class OrdersStore {
         return order
     }
 
+    // MARK: - Личный кабинет заказа
+
+    func composition(orderId: Int) async throws -> OrderComposition {
+        try await repository.composition(orderId: orderId)
+    }
+
+    func vehicle(orderId: Int) async throws -> VehicleLocation {
+        try await repository.vehicle(orderId: orderId)
+    }
+
+    func documents(orderId: Int) async throws -> [OrderDocument] {
+        try await repository.documents(orderId: orderId)
+    }
+
+    /// Отзыв; затем карточка заказа перечитывается (review, canReview).
+    func submitReview(orderId: Int, _ input: ReviewInput) async throws -> OrderReview {
+        let review = try await repository.submitReview(orderId: orderId, input)
+        await refreshQuietly(id: orderId)
+        return review
+    }
+
+    /// Претензия; затем карточка заказа перечитывается (claims, canClaim).
+    func submitClaim(orderId: Int, _ input: ClaimInput) async throws -> OrderClaim {
+        let claim = try await repository.submitClaim(orderId: orderId, input)
+        await refreshQuietly(id: orderId)
+        return claim
+    }
+
+    private func refreshQuietly(id: Int) async {
+        guard let order = try? await repository.order(id: id) else { return }
+        upsert(order)
+        markSeen(order)
+    }
+
     func markSeen(_ order: Order) {
         seen[order.id] = order.lastChange
         let raw = Dictionary(uniqueKeysWithValues: seen.map { (String($0.key), $0.value) })

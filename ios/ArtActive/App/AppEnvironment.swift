@@ -15,6 +15,7 @@ final class AppEnvironment {
     let recent: RecentlyViewedStore
     let searchHistory: SearchHistoryStore
     let orders: OrdersStore
+    let loyalty: LoyaltyStore
     let info: InfoStore
     let network: NetworkMonitor
     let push: PushService
@@ -47,6 +48,7 @@ final class AppEnvironment {
         recent = RecentlyViewedStore(store: store)
         searchHistory = SearchHistoryStore(store: store)
         orders = OrdersStore(repository: orderRepository, store: store)
+        loyalty = LoyaltyStore(repository: profileRepository)
         info = InfoStore(repository: profileRepository)
         network = NetworkMonitor()
         push = PushService(repository: profileRepository, isLoggedIn: { auth.isLoggedIn })
@@ -90,6 +92,7 @@ final class AppEnvironment {
         _ = await (infoLoad, quoteLoad)
         if auth.isLoggedIn {
             await orders.load()
+            await loyalty.load()
             await favorites.refreshFromServer()
             await push.requestAuthorizationIfNeeded()
         }
@@ -121,6 +124,7 @@ final class AppEnvironment {
         if auth.isLoggedIn { await auth.signOut() }
         DemoBackend.shared?.reset()
         orders.reset()
+        loyalty.reset()
         favorites.clearLocal()
         cart.handleSignOut(explicit: true)
         recent.clear()
@@ -133,6 +137,7 @@ final class AppEnvironment {
             await self.cart.mergeAfterSignIn()
             await self.favorites.mergeAfterSignIn()
             await self.orders.load()
+            await self.loyalty.load()
             await self.push.requestAuthorizationIfNeeded()
             await self.push.registerIfPossible()
         }
@@ -142,6 +147,7 @@ final class AppEnvironment {
         auth.onSignOut { [weak self] explicit in
             guard let self else { return }
             self.orders.reset()
+            self.loyalty.reset()
             self.cart.handleSignOut(explicit: explicit)
             if explicit { self.favorites.clearLocal() }
             self.push.handleSignOut()

@@ -187,6 +187,11 @@ struct CartView: View {
 
     private var summary: some View {
         VStack(alignment: .leading, spacing: 14) {
+            // Скидка постоянного клиента — серверная, после итогов строк.
+            if let quote = cart.quote, let discount = quote.discount {
+                DiscountSummaryRows(subtotal: quote.subtotal ?? quote.total + discount.amount, discount: discount)
+                    .accessibilityIdentifier("cart.discount")
+            }
             HStack(alignment: .firstTextBaseline) {
                 Text("Итого")
                     .font(BrandFont.golos(17))

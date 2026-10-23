@@ -84,6 +84,16 @@
         }
       }
     },
+    "%lld из 5": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld of 5"
+          }
+        }
+      }
+    },
     "%lld м": {
       "localizations": {
         "en": {
@@ -313,6 +323,16 @@
         }
       }
     },
+    "Акт": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Act"
+          }
+        }
+      }
+    },
     "Акции": {
       "localizations": {
         "en": {
@@ -534,6 +554,26 @@
         }
       }
     },
+    "Ваш уровень": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your level"
+          }
+        }
+      }
+    },
+    "Ваша оценка": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your rating"
+          }
+        }
+      }
+    },
     "Введите код из SMS": {
       "localizations": {
         "en": {
@@ -560,6 +600,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Enter the full number: +7 (999) 999-99-99"
+          }
+        }
+      }
+    },
+    "Версия %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version %lld"
           }
         }
       }
@@ -784,6 +834,16 @@
         }
       }
     },
+    "Выберите, что случилось": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose what happened"
+          }
+        }
+      }
+    },
     "Выгодные предложения": {
       "localizations": {
         "en": {
@@ -800,6 +860,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Call-out fee"
+          }
+        }
+      }
+    },
+    "Вызов Чат": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyzov Chat"
           }
         }
       }
@@ -965,6 +1035,16 @@
         }
       }
     },
+    "До %@ осталось %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%2$@ left to reach %1$@"
+          }
+        }
+      }
+    },
     "до %lld чел.": {
       "localizations": {
         "en": {
@@ -1011,6 +1091,56 @@
           "stringUnit": {
             "state": "translated",
             "value": "Add at least one menu item"
+          }
+        }
+      }
+    },
+    "Договор": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contract"
+          }
+        }
+      }
+    },
+    "Договор, счета и акты появятся здесь после подтверждения заказа.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The contract, invoices and acts will appear here once the order is confirmed."
+          }
+        }
+      }
+    },
+    "Документ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Document"
+          }
+        }
+      }
+    },
+    "Документов пока нет": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No documents yet"
+          }
+        }
+      }
+    },
+    "Документы": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Documents"
           }
         }
       }
@@ -1125,6 +1255,16 @@
         }
       }
     },
+    "Другое": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other"
+          }
+        }
+      }
+    },
     "ед": {
       "localizations": {
         "en": {
@@ -1161,6 +1301,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "more"
+          }
+        }
+      }
+    },
+    "Ещё": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More"
           }
         }
       }
@@ -1346,6 +1496,16 @@
         }
       }
     },
+    "Изменить": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit"
+          }
+        }
+      }
+    },
     "Изменить номер": {
       "localizations": {
         "en": {
@@ -1406,6 +1566,26 @@
         }
       }
     },
+    "Ищем машину…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locating the vehicle…"
+          }
+        }
+      }
+    },
+    "К оплате": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amount due"
+          }
+        }
+      }
+    },
     "Как арендовать": {
       "localizations": {
         "en": {
@@ -1422,6 +1602,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "How it goes"
+          }
+        }
+      }
+    },
+    "Как прошло мероприятие?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How did the event go?"
+          }
+        }
+      }
+    },
+    "Как с вами связаться": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How should we contact you"
+          }
+        }
+      }
+    },
+    "Карта: машина с заказом": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map: vehicle with your order"
           }
         }
       }
@@ -1443,6 +1653,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "The catalog is empty for now"
+          }
+        }
+      }
+    },
+    "Качество": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quality"
           }
         }
       }
@@ -1503,6 +1723,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "This is a preliminary estimate. The cart total is recalculated by the server and confirmed by a manager after your request."
+          }
+        }
+      }
+    },
+    "Когда менеджер примет претензию, здесь появится чат в Вызов Чате — туда удобно прислать фото и видео.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Once the manager accepts the claim, a Vyzov Chat conversation will appear here — you can send photos and videos there."
           }
         }
       }
@@ -1607,12 +1837,32 @@
         }
       }
     },
+    "Коммерческое предложение": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commercial proposal"
+          }
+        }
+      }
+    },
     "Компания": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Company"
+          }
+        }
+      }
+    },
+    "Комплектность": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missing items"
           }
         }
       }
@@ -1688,6 +1938,26 @@
         }
       }
     },
+    "КП %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proposal %@"
+          }
+        }
+      }
+    },
+    "КП %@ от %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Proposal %1$@ of %2$@"
+          }
+        }
+      }
+    },
     "Купить": {
       "localizations": {
         "en": {
@@ -1704,6 +1974,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Location"
+          }
+        }
+      }
+    },
+    "Максимальный уровень": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top level reached"
           }
         }
       }
@@ -1738,6 +2018,56 @@
         }
       }
     },
+    "Машина": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vehicle"
+          }
+        }
+      }
+    },
+    "Машина на месте": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vehicle has arrived"
+          }
+        }
+      }
+    },
+    "Машина с заказом": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vehicle with your order"
+          }
+        }
+      }
+    },
+    "Менеджер": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manager"
+          }
+        }
+      }
+    },
+    "Менеджер назначил вам персональную скидку %@ — она действует вместо уровня.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your manager set a personal discount of %@ — it applies instead of your level."
+          }
+        }
+      }
+    },
     "Менеджер ответит круглосуточно и поможет собрать комплект.": {
       "localizations": {
         "en": {
@@ -1754,6 +2084,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "The manager will be notified about the cancellation."
+          }
+        }
+      }
+    },
+    "Менеджер свяжется с вами в течение рабочего дня. Когда претензию примут, в заказе появится кнопка чата.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A manager will contact you within one business day. Once the claim is accepted, a chat button will appear in the order."
           }
         }
       }
@@ -1868,6 +2208,16 @@
         }
       }
     },
+    "Можно изменить до %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can be edited until %@"
+          }
+        }
+      }
+    },
     "Мои данные": {
       "localizations": {
         "en": {
@@ -1908,6 +2258,26 @@
         }
       }
     },
+    "Мы передали его команде мероприятия.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We've passed it on to the event team."
+          }
+        }
+      }
+    },
+    "Мы пришлём уведомление, а здесь будут все позиции с ценами.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We'll notify you, and all items with prices will appear here."
+          }
+        }
+      }
+    },
     "Навигация по разделам": {
       "localizations": {
         "en": {
@@ -1924,6 +2294,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tap the heart on an item to save it"
+          }
+        }
+      }
+    },
+    "Нажмите, чтобы открыть; удерживайте — чтобы поделиться.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap to open; touch and hold to share."
+          }
+        }
+      }
+    },
+    "Нам жаль, что так вышло. Расскажите, что случилось, — менеджер разберётся и свяжется с вами.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We're sorry this happened. Tell us what went wrong — a manager will look into it and contact you."
+          }
+        }
+      }
+    },
+    "Написать в мессенджер": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message me"
           }
         }
       }
@@ -2028,6 +2428,16 @@
         }
       }
     },
+    "Не удалось получить положение машины. Попробуем ещё раз через несколько секунд.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't get the vehicle's location. We'll try again in a few seconds."
+          }
+        }
+      }
+    },
     "Не удалось прочитать ответ сервера. Обновите приложение или попробуйте позже.": {
       "localizations": {
         "en": {
@@ -2084,6 +2494,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Several days: each day adds 30 percent of the 8-hour price"
+          }
+        }
+      }
+    },
+    "Нет оценки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No rating"
+          }
+        }
+      }
+    },
+    "Нет связи с машиной": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No signal from the vehicle"
           }
         }
       }
@@ -2158,6 +2588,36 @@
         }
       }
     },
+    "Обзор": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview"
+          }
+        }
+      }
+    },
+    "обновлено": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "updated"
+          }
+        }
+      }
+    },
+    "Обновлено": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated"
+          }
+        }
+      }
+    },
     "обязательно": {
       "localizations": {
         "en": {
@@ -2204,6 +2664,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Description"
+          }
+        }
+      }
+    },
+    "Опишите ситуацию подробнее — хотя бы пару предложений": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Please describe the situation in more detail — at least a couple of sentences"
+          }
+        }
+      }
+    },
+    "Опишите, что пошло не так: когда, что именно, кто был на площадке": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Describe what went wrong: when, what exactly, who was on site"
+          }
+        }
+      }
+    },
+    "Опоздание": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delay"
           }
         }
       }
@@ -2278,6 +2768,56 @@
         }
       }
     },
+    "Ответ менеджера": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manager's reply"
+          }
+        }
+      }
+    },
+    "Ответить на почту": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply by email"
+          }
+        }
+      }
+    },
+    "Отзыв": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Review"
+          }
+        }
+      }
+    },
+    "Отзыв о мероприятии": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Event review"
+          }
+        }
+      }
+    },
+    "Отклонена": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rejected"
+          }
+        }
+      }
+    },
     "Откроется страница сайта": {
       "localizations": {
         "en": {
@@ -2288,12 +2828,42 @@
         }
       }
     },
+    "Открыть": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open"
+          }
+        }
+      }
+    },
     "Открыть в Картах": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Open in Maps"
+          }
+        }
+      }
+    },
+    "Открыть Вызов Чат": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Vyzov Chat"
+          }
+        }
+      }
+    },
+    "Открыть документ": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open document"
           }
         }
       }
@@ -2314,6 +2884,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Open product"
+          }
+        }
+      }
+    },
+    "Открыть уровни скидки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open discount levels"
           }
         }
       }
@@ -2408,12 +2988,62 @@
         }
       }
     },
+    "Отправить отзыв": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send review"
+          }
+        }
+      }
+    },
+    "Отправить претензию": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send claim"
+          }
+        }
+      }
+    },
+    "Отправлена": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Submitted"
+          }
+        }
+      }
+    },
     "Оформление": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Checkout"
+          }
+        }
+      }
+    },
+    "Оцените работу команды — это займёт минуту": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rate the team's work — it takes a minute"
+          }
+        }
+      }
+    },
+    "Оценка": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rating"
           }
         }
       }
@@ -2444,6 +3074,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Moved to favorites"
+          }
+        }
+      }
+    },
+    "Персонал": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Staff"
+          }
+        }
+      }
+    },
+    "Персональная скидка": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal discount"
           }
         }
       }
@@ -2528,6 +3178,16 @@
         }
       }
     },
+    "По позициям заявки": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Based on the order items"
+          }
+        }
+      }
+    },
     "По популярности": {
       "localizations": {
         "en": {
@@ -2588,6 +3248,16 @@
         }
       }
     },
+    "Поделиться составом": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share order details"
+          }
+        }
+      }
+    },
     "Подробнее": {
       "localizations": {
         "en": {
@@ -2634,6 +3304,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Call"
+          }
+        }
+      }
+    },
+    "Позиции заказа": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order items"
           }
         }
       }
@@ -2688,6 +3368,16 @@
         }
       }
     },
+    "Покажем машину, как только водитель включит геопозицию": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We'll show the vehicle as soon as the driver turns on location"
+          }
+        }
+      }
+    },
     "Показаны результаты по запросу «%@»": {
       "localizations": {
         "en": {
@@ -2704,6 +3394,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Show all %lld"
+          }
+        }
+      }
+    },
+    "Показать или скрыть позиции раздела": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show or hide the section's items"
+          }
+        }
+      }
+    },
+    "Показать машину": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show vehicle"
           }
         }
       }
@@ -2774,6 +3484,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "After sign-in"
+          }
+        }
+      }
+    },
+    "Поставьте оценку от 1 до 5": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Give a rating from 1 to 5"
           }
         }
       }
@@ -2858,6 +3578,36 @@
         }
       }
     },
+    "Претензия": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claim"
+          }
+        }
+      }
+    },
+    "Претензия отправлена": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claim sent"
+          }
+        }
+      }
+    },
+    "Прибытие ~ %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrival ~ %@"
+          }
+        }
+      }
+    },
     "Применить": {
       "localizations": {
         "en": {
@@ -2874,6 +3624,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Our work"
+          }
+        }
+      }
+    },
+    "Принята": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accepted"
           }
         }
       }
@@ -2939,6 +3699,26 @@
         }
       }
     },
+    "Развёрнуто": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expanded"
+          }
+        }
+      }
+    },
+    "Раздел заказа": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order section"
+          }
+        }
+      }
+    },
     "Разделы": {
       "localizations": {
         "en": {
@@ -2959,12 +3739,42 @@
         }
       }
     },
+    "рассчитает менеджер": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "calculated by the manager"
+          }
+        }
+      }
+    },
+    "Решена": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resolved"
+          }
+        }
+      }
+    },
     "с %lld-го дня — %@": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "from day %lld — %@"
+          }
+        }
+      }
+    },
+    "С первого заказа": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From the first order"
           }
         }
       }
@@ -3025,6 +3835,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Swipe left to delete, right to move to favorites."
+          }
+        }
+      }
+    },
+    "Свёрнуто": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collapsed"
           }
         }
       }
@@ -3105,6 +3925,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Discount"
+          }
+        }
+      }
+    },
+    "Скидка постоянного клиента": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loyal customer discount"
           }
         }
       }
@@ -3209,6 +4039,16 @@
         }
       }
     },
+    "Создана %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Created %@"
+          }
+        }
+      }
+    },
     "Сортировка": {
       "localizations": {
         "en": {
@@ -3239,6 +4079,16 @@
         }
       }
     },
+    "Состав заказа %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order %@ details"
+          }
+        }
+      }
+    },
     "Состав и требования": {
       "localizations": {
         "en": {
@@ -3259,12 +4109,42 @@
         }
       }
     },
+    "Состав от менеджера": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prepared by the manager"
+          }
+        }
+      }
+    },
+    "Состав появится, когда менеджер подготовит предложение": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Order details will appear once the manager prepares a proposal"
+          }
+        }
+      }
+    },
     "Сохранить": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Save"
+          }
+        }
+      }
+    },
+    "Спасибо за отзыв!": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thank you for your review!"
           }
         }
       }
@@ -3295,6 +4175,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rental period"
+          }
+        }
+      }
+    },
+    "Ссылка на документ повреждена": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The document link is broken"
           }
         }
       }
@@ -3349,12 +4239,52 @@
         }
       }
     },
+    "Сумма": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtotal"
+          }
+        }
+      }
+    },
+    "Сумма завершённых заказов: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed orders total: %@"
+          }
+        }
+      }
+    },
+    "Сумма заказов: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orders total: %@"
+          }
+        }
+      }
+    },
     "Сумма позиции слишком большая — уменьшите количество": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The item total is too large — reduce the quantity"
+          }
+        }
+      }
+    },
+    "Счёт": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invoice"
           }
         }
       }
@@ -3489,6 +4419,26 @@
         }
       }
     },
+    "Уровень считается по сумме всех завершённых заказов. Скидка применяется автоматически — в корзине и при оформлении заявки.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your level is based on the total of all completed orders. The discount is applied automatically in the cart and at checkout."
+          }
+        }
+      }
+    },
+    "Уровни": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Levels"
+          }
+        }
+      }
+    },
     "Условия аренды": {
       "localizations": {
         "en": {
@@ -3525,6 +4475,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Photo %lld of %lld"
+          }
+        }
+      }
+    },
+    "Фото можно будет отправить в чат": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can send photos in the chat"
           }
         }
       }
@@ -3679,6 +4639,16 @@
         }
       }
     },
+    "Чат «Жалобы» с менеджером: туда можно прислать фото и видео.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“Complaints” chat with the manager: you can send photos and videos there."
+          }
+        }
+      }
+    },
     "Что было на мероприятии": {
       "localizations": {
         "en": {
@@ -3695,6 +4665,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "What’s included"
+          }
+        }
+      }
+    },
+    "Что понравилось, что можно улучшить?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What did you like, what could be better?"
+          }
+        }
+      }
+    },
+    "Что случилось": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What happened"
+          }
+        }
+      }
+    },
+    "Что-то пошло не так?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something went wrong?"
           }
         }
       }
@@ -3745,6 +4745,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yandex"
+          }
+        }
+      }
+    },
+    "CRM": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CRM"
           }
         }
       }
