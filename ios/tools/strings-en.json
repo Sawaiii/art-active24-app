@@ -335,5 +335,14 @@
   "Заказы, корзина, избранное и вход на этом телефоне будут удалены.": "Orders, cart, favorites and sign-in on this phone will be deleted.",
   "Заявка %@": "Request %@",
   "Сбросить демо-данные": "Reset demo data",
-  "Сбросить демо-данные?": "Reset demo data?"
+  "Сбросить демо-данные?": "Reset demo data?",
+  "Есть изменения: %@": "Changes: %@",
+  "Количество, %@": "Quantity, %@",
+  "Ожидается": "Pending",
+  "Откроется страница сайта": "Opens the website page",
+  "Открыть товар": "Open product",
+  "После входа": "After sign-in",
+  "Пройден": "Completed",
+  "Смотреть видео": "Watch video",
+  "Шаг %lld": "Step %lld"
 }

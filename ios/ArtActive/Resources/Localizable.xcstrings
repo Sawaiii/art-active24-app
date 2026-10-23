@@ -534,16 +534,6 @@
         }
       }
     },
-    "Видео": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Video"
-          }
-        }
-      }
-    },
     "Видео о разделе": {
       "localizations": {
         "en": {
@@ -1055,6 +1045,16 @@
         }
       }
     },
+    "Есть изменения: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changes: %@"
+          }
+        }
+      }
+    },
     "ещё": {
       "localizations": {
         "en": {
@@ -1413,6 +1413,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Number of days"
+          }
+        }
+      }
+    },
+    "Количество, %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quantity, %@"
           }
         }
       }
@@ -1998,6 +2008,16 @@
         }
       }
     },
+    "Ожидается": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pending"
+          }
+        }
+      }
+    },
     "Окончание": {
       "localizations": {
         "en": {
@@ -2098,12 +2118,32 @@
         }
       }
     },
+    "Откроется страница сайта": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the website page"
+          }
+        }
+      }
+    },
     "Открыть в Картах": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "Open in Maps"
+          }
+        }
+      }
+    },
+    "Открыть товар": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open product"
           }
         }
       }
@@ -2548,6 +2588,16 @@
         }
       }
     },
+    "После входа": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After sign-in"
+          }
+        }
+      }
+    },
     "Потяните вниз, чтобы обновить, или свяжитесь с менеджером.": {
       "localizations": {
         "en": {
@@ -2654,6 +2704,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Check the email"
+          }
+        }
+      }
+    },
+    "Пройден": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed"
           }
         }
       }
@@ -2865,6 +2925,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Too many attempts. Please wait a bit."
+          }
+        }
+      }
+    },
+    "Смотреть видео": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watch video"
           }
         }
       }
@@ -3365,6 +3435,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Something went wrong. Please try again."
+          }
+        }
+      }
+    },
+    "Шаг %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Step %lld"
           }
         }
       }
