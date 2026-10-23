@@ -53,6 +53,7 @@ jobs:
       - name: API address from secret
         env:
           API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          API_CONFIG_URL: ${{ secrets.API_CONFIG_URL }}
         run: |
           set -eo pipefail
           if [ -z "$API_BASE_URL" ]; then
@@ -62,6 +63,10 @@ jobs:
             # В xcconfig «//» — начало комментария, поэтому экранируем как /$()/
             ESCAPED=$(printf '%s' "$API_BASE_URL" | sed 's#//#/$()/#g')
             printf 'API_BASE_URL = %s\n' "$ESCAPED" > Config/Secrets.xcconfig
+            if [ -n "$API_CONFIG_URL" ]; then
+              printf 'API_CONFIG_URL = %s\n' "$(printf '%s' "$API_CONFIG_URL" | sed 's#//#/$()/#g')" >> Config/Secrets.xcconfig
+              echo "API_CONFIG_URL задан из секрета (значение скрыто)"
+            fi
             echo "API_BASE_URL задан из секрета (значение скрыто)"
           fi
 

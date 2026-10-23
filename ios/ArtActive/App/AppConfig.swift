@@ -14,7 +14,14 @@ enum AppConfig {
 
     /// Плейсхолдер, если адрес не задан при сборке (запросы завершатся ошибкой сети).
     static let placeholderAPI = URL(string: "https://api.invalid/api/")!
-    static var isAPIConfigured: Bool { apiBaseURL.host != placeholderAPI.host }
+    static var isAPIConfigured: Bool { APIBaseURLStore.shared.isConfigured }
+
+    /// Удалённый конфиг с актуальным адресом API (только тестовые сборки с временным сервером;
+    /// задаётся секретом CI `API_CONFIG_URL`). Пусто — адрес берётся только из сборки.
+    static let apiConfigURL: URL? = {
+        guard let raw = Bundle.main.object(forInfoDictionaryKey: "APIConfigURL") as? String else { return nil }
+        return APIBaseURLStore.validURL(raw)
+    }()
     static let siteURL = URL(string: "https://www.art-active24.ru")!
     static let siteHosts: Set<String> = ["art-active24.ru", "www.art-active24.ru"]
     static let urlScheme = "artactive24"

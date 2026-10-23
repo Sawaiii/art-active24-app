@@ -38,6 +38,8 @@
 	</array>
 	<key>APIBaseURL</key>
 	<string>$(API_BASE_URL)</string>
+	<key>APIConfigURL</key>
+	<string>$(API_CONFIG_URL)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>

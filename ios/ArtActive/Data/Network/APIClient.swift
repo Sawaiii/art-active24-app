@@ -17,7 +17,8 @@ private struct ErrorEnvelope: Decodable {
 
 /// Единый HTTP-клиент: конверт, ошибки, токены с авто-refresh, офлайн-кэш GET.
 final class APIClient: @unchecked Sendable {
-    private let baseURL: URL
+    /// Адрес API читается на каждый запрос: в тестовых сборках он обновляется при запуске.
+    private let baseURL: @Sendable () -> URL
     private let urlSession: URLSession
     private let cache: ResponseCache
     let sessionManager: SessionManager
@@ -27,12 +28,16 @@ final class APIClient: @unchecked Sendable {
     private let unauthorizedHandler = UnauthorizedHandlerBox()
 
     init(
-        baseURL: URL = AppConfig.apiBaseURL,
+        baseURL: URL? = nil,
         sessionManager: SessionManager,
         cache: ResponseCache = ResponseCache(),
         urlSession: URLSession? = nil
     ) {
-        self.baseURL = baseURL
+        if let baseURL {
+            self.baseURL = { baseURL }
+        } else {
+            self.baseURL = { APIBaseURLStore.shared.url }
+        }
         self.sessionManager = sessionManager
         self.cache = cache
         if let urlSession {
@@ -151,7 +156,7 @@ final class APIClient: @unchecked Sendable {
 
     private func makeRequest(_ endpoint: Endpoint) throws -> URLRequest {
         let trimmed = endpoint.path.hasPrefix("/") ? String(endpoint.path.dropFirst()) : endpoint.path
-        let url = baseURL.appendingPathComponent(trimmed)
+        let url = baseURL().appendingPathComponent(trimmed)
         guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             throw APIError.invalidResponse
         }

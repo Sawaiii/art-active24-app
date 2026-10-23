@@ -32,6 +32,7 @@ struct ArtActiveApp: App {
                 }
                 .task {
                     appDelegate.attach(env)
+                    await APIBaseURLStore.shared.refreshFromRemote()
                     await env.bootstrap()
                     if let link = UITestSupport.deepLink {
                         env.deepLinks.handle(link)

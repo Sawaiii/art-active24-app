@@ -85,6 +85,19 @@ final class DataLayerTests: XCTestCase {
         XCTAssertNil(PhoneFormatter.e164("+7 (999) 12"))
     }
 
+    func testRemoteAPIConfigParsesDirectAndGistFormats() {
+        let direct = Data(#"{"apiBaseURL":"https://a.example/"}"#.utf8)
+        XCTAssertEqual(APIBaseURLStore.extractBaseURL(from: direct), "https://a.example/")
+
+        let gist = Data(#"{"files":{"api.json":{"content":"{\"apiBaseURL\": \"https://b.example/\"}"}}}"#.utf8)
+        XCTAssertEqual(APIBaseURLStore.extractBaseURL(from: gist), "https://b.example/")
+
+        XCTAssertNil(APIBaseURLStore.extractBaseURL(from: Data("not json".utf8)))
+        XCTAssertNotNil(APIBaseURLStore.validURL("https://x.example/"))
+        XCTAssertNil(APIBaseURLStore.validURL("http://x.example/"), "только HTTPS")
+        XCTAssertNil(APIBaseURLStore.validURL(""))
+    }
+
     func testEntityDecodingIsSinglePass() {
         XCTAssertEqual(HTMLParser.decodeEntities("&amp;lt;b&amp;gt;"), "&lt;b&gt;", "без двойного декодирования")
         XCTAssertEqual(HTMLParser.decodeEntities("&#171;&#x00BB; 5&nbsp;₽"), "«» 5\u{00A0}₽")
