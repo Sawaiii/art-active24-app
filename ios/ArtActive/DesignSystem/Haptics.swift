@@ -28,11 +28,17 @@ enum Haptics {
         case codeComplete
         /// Long-press на карточке.
         case longPress
+        /// Заставка: штрих буквы «А» лёг на место.
+        case splashStroke
+        /// Заставка: буква собрана — плотная «посадка» с отдачей.
+        case splashLand
     }
 
     private static let selectionGenerator = UISelectionFeedbackGenerator()
     private static let notificationGenerator = UINotificationFeedbackGenerator()
     private static let mediumImpact = UIImpactFeedbackGenerator(style: .medium)
+    private static let softImpact = UIImpactFeedbackGenerator(style: .soft)
+    private static let rigidImpact = UIImpactFeedbackGenerator(style: .rigid)
 
     /// Прогреть движок перед жестом (степпер, свайп, отправка формы) — отклик без задержки.
     static func prepare(_ event: Event) {
@@ -40,6 +46,8 @@ enum Haptics {
         case .selection, .step: selectionGenerator.prepare()
         case .addedToCart, .swipeThreshold: mediumImpact.prepare()
         case .success, .codeComplete, .error: notificationGenerator.prepare()
+        case .splashStroke: softImpact.prepare()
+        case .splashLand: rigidImpact.prepare()
         default: break
         }
     }
@@ -61,6 +69,11 @@ enum Haptics {
             notificationGenerator.notificationOccurred(.error)
         case .longPress:
             UIImpactFeedbackGenerator(style: .soft).impactOccurred()
+        case .splashStroke:
+            softImpact.impactOccurred(intensity: 0.7)
+            softImpact.prepare()
+        case .splashLand:
+            rigidImpact.impactOccurred(intensity: 1.0)
         }
     }
 }

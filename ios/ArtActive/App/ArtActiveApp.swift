@@ -6,6 +6,8 @@ import UserNotifications
 struct ArtActiveApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var env = AppEnvironment.live()
+    /// Фирменная заставка при запуске; в UI-тестах выключена, чтобы не мешать снимкам экранов.
+    @State private var showSplash = UITestSupport.showsSplash
 
     init() {
         Appearance.configure()
@@ -23,6 +25,11 @@ struct ArtActiveApp: App {
                 .environment(env.recent)
                 .environment(env.orders)
                 .environment(env.info)
+                .overlay {
+                    if showSplash {
+                        LaunchSplashView { showSplash = false }
+                    }
+                }
                 .task {
                     appDelegate.attach(env)
                     await env.bootstrap()
@@ -48,7 +55,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
-        if UITestSupport.isActive {
+        if UITestSupport.isActive && !UITestSupport.showsSplash {
             UIView.setAnimationsEnabled(false)
         }
         return true

@@ -50,6 +50,29 @@ extension View {
         #endif
     }
 
+    /// Полоса цвета фона под статус-баром и кнопками навбара на экранах с прокруткой под ними
+    /// (главная, карточка, площадка): при прокрутке текст уходит под неё, а не просвечивает
+    /// под кнопками. В покое под полосой пусто (контент начинается ниже кнопок), поэтому её не видно.
+    /// Кнопки навбара рисуются поверх — модификатор вешается на корень экрана внутри стека.
+    func topScrollFade(_ color: Color) -> some View {
+        overlay(alignment: .top) {
+            LinearGradient(
+                stops: [
+                    .init(color: color, location: 0),
+                    .init(color: color, location: 0.6),
+                    .init(color: color.opacity(0), location: 1),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            // 48 pt ниже безопасной зоны (ряд кнопок) + сама зона статус-бара.
+            .frame(height: 48)
+            .ignoresSafeArea(.container, edges: .top)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+        }
+    }
+
     /// Плотная подложка нижней панели (липкий бар цены, «Отправить заявку»):
     /// контент под ней не просвечивает. Тянется под home indicator.
     func stickyBottomBarBackground() -> some View {

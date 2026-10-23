@@ -19,6 +19,11 @@ enum UITestSupport {
         }
     }
 
+    /// Заставка: в UI-тестах выключена, кроме отдельного сценария `UITEST_SPLASH=1`.
+    static var showsSplash: Bool {
+        !isActive || ProcessInfo.processInfo.environment["UITEST_SPLASH"] == "1"
+    }
+
     static var deepLink: URL? {
         guard isActive, let raw = ProcessInfo.processInfo.environment["UITEST_DEEPLINK"] else { return nil }
         return URL(string: raw)
@@ -26,6 +31,7 @@ enum UITestSupport {
     #else
     static let isActive = false
     static let colorScheme: ColorScheme? = nil
+    static let showsSplash = true
     static let deepLink: URL? = nil
     #endif
 }

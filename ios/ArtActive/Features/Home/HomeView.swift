@@ -20,6 +20,7 @@ struct HomeView: View {
             .padding(.bottom, 24)
         }
         .background(Palette.catalogPage)
+        .topScrollFade(Palette.catalogPage)
         .refreshable {
             Haptics.play(.refresh)
             await viewModel.load()

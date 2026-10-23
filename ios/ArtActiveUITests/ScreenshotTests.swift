@@ -45,6 +45,23 @@ final class ScreenshotTests: XCTestCase {
 
     // MARK: - Главная
 
+    /// Заставка: серия кадров прорисовки буквы «А» (анимации включены).
+    @MainActor
+    func test00_LaunchSplash() {
+        continueAfterFailure = true
+        let app = XCUIApplication()
+        app.launchArguments = ["-UITests", "YES", "-AppleLanguages", "(ru)", "-AppleLocale", "ru_RU"]
+        app.launchEnvironment["UITEST_APPEARANCE"] = "light"
+        app.launchEnvironment["UITEST_SPLASH"] = "1"
+        app.launch()
+        let start = Date()
+        for index in 1...16 {
+            let ms = Int(Date().timeIntervalSince(start) * 1000)
+            snap(String(format: "00-splash-%02d-%04dms", index, ms), settle: 0)
+        }
+        app.terminate()
+    }
+
     @MainActor
     func test01_HomeRussian() {
         let app = launch()

@@ -26,6 +26,7 @@ struct VenueDetailView: View {
             }
         }
         .background(Palette.page)
+        .topScrollFade(Palette.page)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .tabBar)
         .toolbar {

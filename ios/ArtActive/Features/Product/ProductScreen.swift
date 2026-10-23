@@ -26,6 +26,7 @@ struct ProductScreen: View {
             }
         }
         .background(Palette.page)
+        .topScrollFade(Palette.page)
         .softTopScrollEdge()
         .navigationBarTitleDisplayMode(.inline)
         // Как на сайте: на карточке нижнее меню скрыто, внизу — липкий бар цены.
